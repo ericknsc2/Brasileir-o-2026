@@ -11,14 +11,14 @@ st.title("⚽ Brasileirão 2026")
 # --- BUSCA AUTOMÁTICA DE RESULTADOS REAIS ---
 @st.cache_data(ttl=3600)
 def buscar_dados_br_oficial():
-    url = "https://raw.githubusercontent.com/ericknsc2/Brasileiro-o-2026/main/Brasileirao_SQL.csv"
+    # URL apontando para a branch 'principal'
+    url = "https://raw.githubusercontent.com/ericknsc2/Brasileiro-o-2026/principal/Brasileirao_SQL.csv"
     try:
         df = pd.read_csv(url)
         return df
     except Exception as e:
         st.error(f"Erro ao carregar os dados do CSV: {e}")
         return pd.DataFrame()
-
 # Jogos Fixos das Rodadas Restantes
 RODADAS = {
     26: [("Red Bull Bragantino", "Bahia"), ("São Paulo", "Atlético-MG"), ("Fluminense", "Vasco"), ("Coritiba", "Mirassol"), ("Cruzeiro", "Athletico-PR"), ("Remo", "Flamengo"), ("Internacional", "Santos"), ("Botafogo", "Palmeiras"), ("Corinthians", "Chapecoense"), ("Vitória", "Grêmio")],
