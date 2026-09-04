@@ -1,24 +1,24 @@
 import streamlit as st
 import pandas as pd
-import requests
-from bs4 import BeautifulSoup
 
+# Configuração da página
 st.set_page_config(page_title="Brasileirão 2026", layout="wide")
 
 # Título da Aplicação
 st.title("⚽ Brasileirão 2026")
 
-# --- BUSCA AUTOMÁTICA DE RESULTADOS REAIS ---
+# --- 1. BUSCA AUTOMÁTICA DE RESULTADOS REAIS ---
 @st.cache_data(ttl=3600)
 def buscar_dados_br_oficial():
     try:
-        # Lê o arquivo CSV diretamente do diretório local do projeto
+        # Lê o arquivo CSV diretamente do diretório local
         df = pd.read_csv("Brasileirao_SQL.csv")
         return df
     except Exception as e:
         st.error(f"Erro ao carregar os dados do CSV local: {e}")
         return pd.DataFrame()
-# Jogos Fixos das Rodadas Restantes
+
+# --- 2. JOGOS FIXOS DAS RODADAS RESTANTES ---
 RODADAS = {
     26: [("Red Bull Bragantino", "Bahia"), ("São Paulo", "Atlético-MG"), ("Fluminense", "Vasco"), ("Coritiba", "Mirassol"), ("Cruzeiro", "Athletico-PR"), ("Remo", "Flamengo"), ("Internacional", "Santos"), ("Botafogo", "Palmeiras"), ("Corinthians", "Chapecoense"), ("Vitória", "Grêmio")],
     27: [("Coritiba", "Athletico-PR"), ("Atlético-MG", "Fluminense"), ("Grêmio", "Vasco"), ("Chapecoense", "Internacional"), ("Palmeiras", "São Paulo"), ("Botafogo", "Red Bull Bragantino"), ("Santos", "Cruzeiro"), ("Mirassol", "Vitória"), ("Flamengo", "Corinthians"), ("Bahia", "Remo")],
@@ -35,25 +35,10 @@ RODADAS = {
     38: [("Flamengo", "Chapecoense"), ("Vasco", "Vitória"), ("Santos", "Botafogo"), ("Palmeiras", "Coritiba"), ("Red Bull Bragantino", "Fluminense"), ("Cruzeiro", "Bahia"), ("São Paulo", "Athletico-PR"), ("Atlético-MG", "Mirassol"), ("Grêmio", "Remo"), ("Internacional", "Corinthians")]
 }
 
-# Organização visual em Colunas
-# Criação das duas colunas com nomes personalizados
-col_tabela, col_simulador = st.columns([1.2, 1])
+# --- 3. CRIAÇÃO DA ESTRUTURA EM COLUNAS ---
+col_tabela, col_simulador = st.columns([1.3, 1])
 
-# Bloco da tabela
-with col_tabela:
-    st.subheader("Tabela de Classificação")
-    st.dataframe(
-        df_tabela.style.apply(colorir_zonas, axis=0),
-        use_container_width=True,
-        hide_index=True
-    )
-
-# Bloco do simulador de jogos (linha 43)
-with col_simulador:
-    st.subheader("Simulador de Jogos")
-    # ... código das partidas ...
-
-# --- COLUNA DA DIREITA: SIMULADOR ---
+# --- 4. COLUNA DA DIREITA: SIMULADOR DE JOGOS ---
 with col_simulador:
     st.subheader("🎮 Simulador de Jogos")
     num_rodada = st.selectbox("Selecione a Rodada:", list(range(26, 39)))
@@ -78,72 +63,71 @@ with col_simulador:
             
         placares_rodada.append((mandante, gm, gv, visitante))
 
-# --- CÁLCULO E ATUALIZAÇÃO DA TABELA ---
+# --- 5. CÁLCULO E ATUALIZAÇÃO DA TABELA ---
 df_tabela = buscar_dados_br_oficial().copy()
 
-for mandante, gm, gv, visitante in placares_rodada:
-    if mandante in df_tabela['nome_time'].values and visitante in df_tabela['nome_time'].values:
-        idx_m = df_tabela[df_tabela['nome_time'] == mandante].index[0]
-        idx_v = df_tabela[df_tabela['nome_time'] == visitante].index[0]
-        
-        if gm > 0 or gv > 0:
-            df_tabela.at[idx_m, 'jogos'] += 1
-            df_tabela.at[idx_v, 'jogos'] += 1
+if not df_tabela.empty:
+    for mandante, gm, gv, visitante in placares_rodada:
+        if mandante in df_tabela['nome_time'].values and visitante in df_tabela['nome_time'].values:
+            idx_m = df_tabela[df_tabela['nome_time'] == mandante].index[0]
+            idx_v = df_tabela[df_tabela['nome_time'] == visitante].index[0]
             
-            df_tabela.at[idx_m, 'gols_pro'] += gm
-            df_tabela.at[idx_m, 'gols_contra'] += gv
-            df_tabela.at[idx_v, 'gols_pro'] += gv
-            df_tabela.at[idx_v, 'gols_contra'] += gm
-            
-            if gm > gv:
-                df_tabela.at[idx_m, 'pontos'] += 3
-                df_tabela.at[idx_m, 'vitorias'] += 1
-                df_tabela.at[idx_v, 'derrotas'] += 1
-            elif gv > gm:
-                df_tabela.at[idx_v, 'pontos'] += 3
-                df_tabela.at[idx_v, 'vitorias'] += 1
-                df_tabela.at[idx_m, 'derrotas'] += 1
-            else:
-                df_tabela.at[idx_m, 'pontos'] += 1
-                df_tabela.at[idx_v, 'pontos'] += 1
-                df_tabela.at[idx_m, 'empates'] += 1
-                df_tabela.at[idx_v, 'empates'] += 1
+            if gm > 0 or gv > 0:
+                df_tabela.at[idx_m, 'jogos'] += 1
+                df_tabela.at[idx_v, 'jogos'] += 1
+                
+                df_tabela.at[idx_m, 'gols_pro'] += gm
+                df_tabela.at[idx_m, 'gols_contra'] += gv
+                df_tabela.at[idx_v, 'gols_pro'] += gv
+                df_tabela.at[idx_v, 'gols_contra'] += gm
+                
+                if gm > gv:
+                    df_tabela.at[idx_m, 'pontos'] += 3
+                    df_tabela.at[idx_m, 'vitorias'] += 1
+                    df_tabela.at[idx_v, 'derrotas'] += 1
+                elif gv > gm:
+                    df_tabela.at[idx_v, 'pontos'] += 3
+                    df_tabela.at[idx_v, 'vitorias'] += 1
+                    df_tabela.at[idx_m, 'derrotas'] += 1
+                else:
+                    df_tabela.at[idx_m, 'pontos'] += 1
+                    df_tabela.at[idx_v, 'pontos'] += 1
+                    df_tabela.at[idx_m, 'empates'] += 1
+                    df_tabela.at[idx_v, 'empates'] += 1
 
-df_tabela['saldo_gols'] = df_tabela['gols_pro'] - df_tabela['gols_contra']
+    df_tabela['saldo_gols'] = df_tabela['gols_pro'] - df_tabela['gols_contra']
 
-# Ordenar por Pontos > Vitórias > Saldo de Gols > Gols Pró
-df_tabela = df_tabela.sort_values(by=["pontos", "vitorias", "saldo_gols", "gols_pro"], ascending=False).reset_index(drop=True)
-df_tabela.index = df_tabela.index + 1
+    # Ordenar por Pontos > Vitórias > Saldo de Gols > Gols Pró
+    df_tabela = df_tabela.sort_values(by=["pontos", "vitorias", "saldo_gols", "gols_pro"], ascending=False).reset_index(drop=True)
+    df_tabela.index = df_tabela.index + 1
 
-# --- COLUNA DA ESQUERDA: TABELA COMPLETA ---
-with col_tabela:
-    st.subheader("📊 Classificação Atualizada")
-    # Função para definir a cor de fundo de cada linha conforme a posição
+# --- 6. FUNÇÃO DE ESTILIZAÇÃO POR CORES ---
 def colorir_zonas(val):
-    # Dicionário de cores hexadecimais para as zonas
     cores = []
     for i in range(len(val)):
         posicao = i + 1
         if posicao <= 6:
             cores.append('background-color: #d4edda; color: #155724;')  # Verde (Libertadores)
         elif 7 <= posicao <= 12:
-            cores.append('background-color: #fff3cd; color: #856404;')  # Amarelo/Dourado (Sul-Americana)
+            cores.append('background-color: #fff3cd; color: #856404;')  # Amarelo (Sul-Americana)
         elif 17 <= posicao <= 20:
             cores.append('background-color: #f8d7da; color: #721c24;')  # Vermelho (Z-4)
         else:
-            cores.append('')  # Neutro (Zona Intermediária)
+            cores.append('')  # Neutro
     return cores
 
-# Aplica a estilização na tabela e exibe no Streamlit
-# (Certifique-se de substituir 'df_tabela' pelo nome da sua variável da tabela)
-st.dataframe(
-    df_tabela.style.apply(colorir_zonas, axis=0),
-    use_container_width=True,
-    hide_index=True
-)
-st.markdown("""
-**Legenda:** 
-🟢 **1º ao 6º:** CONMEBOL Libertadores | 
-🟡 **7º ao 12º:** CONMEBOL Sul-Americana | 
-🔴 **17º ao 20º:** Zona de Rebaixamento (Z-4)
-""")
+# --- 7. COLUNA DA ESQUERDA: EXIBIÇÃO DA TABELA ---
+with col_tabela:
+    st.subheader("📊 Classificação Atualizada")
+    if not df_tabela.empty:
+        st.dataframe(
+            df_tabela.style.apply(colorir_zonas, axis=0),
+            use_container_width=True,
+            hide_index=False
+        )
+        st.markdown("""
+        **Legenda:** 
+        🟢 **1º ao 6º:** CONMEBOL Libertadores | 
+        🟡 **7º ao 12º:** CONMEBOL Sul-Americana | 
+        🔴 **17º ao 20º:** Zona de Rebaixamento (Z-4)
+        """)
