@@ -106,14 +106,16 @@ def colorir_zonas(val):
     cores = []
     for i in range(len(val)):
         posicao = i + 1
-        if posicao <= 6:
-            cores.append('background-color: #d4edda; color: #155724;')  # Verde (Libertadores)
-        elif 7 <= posicao <= 12:
-            cores.append('background-color: #fff3cd; color: #856404;')  # Amarelo (Sul-Americana)
+        if posicao <= 4:
+            cores.append('background-color: #d4edda; color: #155724;')  # Verde escuro/claro (Fase de Grupos Libertadores)
+        elif posicao == 5:
+            cores.append('background-color: #cce5ff; color: #004085;')  # Azul (Pré-Libertadores)
+        elif 6 <= posicao <= 11:
+            cores.append('background-color: #fff3cd; color: #856404;')  # Amarelo/Dourado (Sul-Americana)
         elif 17 <= posicao <= 20:
-            cores.append('background-color: #f8d7da; color: #721c24;')  # Vermelho (Z-4)
+            cores.append('background-color: #f8d7da; color: #721c24;')  # Vermelho (Z-4 Rebaixamento)
         else:
-            cores.append('')  # Neutro
+            cores.append('')  # Neutro (Zona Intermediária)
     return cores
 
 # --- 7. COLUNA DA ESQUERDA: EXIBIÇÃO DA TABELA ---
@@ -128,7 +130,8 @@ with col_tabela:
         )
         st.markdown("""
         **Legenda:** 
-        🟢 **1º ao 6º:** CONMEBOL Libertadores | 
-        🟡 **7º ao 12º:** CONMEBOL Sul-Americana | 
-        🔴 **17º ao 20º:** Zona de Rebaixamento (Z-4)
+        🟢 **1º ao 4º:** Libertadores (Fase de Grupos) | 
+        🔵 **5º:** Pré-Libertadores | 
+        🟡 **6º ao 11º:** Sul-Americana | 
+        🔴 **17º ao 20º:** Rebaixamento (Z-4)
         """)
