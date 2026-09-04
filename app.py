@@ -9,40 +9,15 @@ st.set_page_config(page_title="Brasileirão 2026", layout="wide")
 st.title("⚽ Brasileirão 2026")
 
 # --- BUSCA AUTOMÁTICA DE RESULTADOS REAIS ---
-@st.cache_data(ttl=3600)  # Atualiza a cada 1 hora
+@st.cache_data(ttl=3600)
 def buscar_dados_br_oficial():
-    """
-    Função de fallback/scraping para obter os dados atualizados da tabela
-    diretamente do ambiente web caso o CSV não esteja atualizado.
-    """
     url = "https://raw.githubusercontent.com/ericknsc2/Brasileiro-o-2026/main/Brasileirao_SQL.csv"
     try:
         df = pd.read_csv(url)
         return df
-    except Exception:
-        # Tabela padrão de contingência
-        return pd.DataFrame([
-            {"nome_time": "Palmeiras", "pontos": 52, "jogos": 25, "vitorias": 15, "empates": 7, "derrotas": 3, "gols_pro": 45, "gols_contra": 21, "saldo_gols": 24},
-            {"nome_time": "Flamengo", "pontos": 51, "jogos": 25, "vitorias": 15, "empates": 6, "derrotas": 4, "gols_pro": 50, "gols_contra": 21, "saldo_gols": 29},
-            {"nome_time": "Athletico-PR", "pontos": 45, "jogos": 25, "vitorias": 13, "empates": 6, "derrotas": 6, "gols_pro": 37, "gols_contra": 25, "saldo_gols": 12},
-            {"nome_time": "Fluminense", "pontos": 42, "jogos": 25, "vitorias": 11, "empates": 9, "derrotas": 5, "gols_pro": 39, "gols_contra": 32, "saldo_gols": 7},
-            {"nome_time": "Bahia", "pontos": 40, "jogos": 25, "vitorias": 10, "empates": 10, "derrotas": 5, "gols_pro": 37, "gols_contra": 30, "saldo_gols": 7},
-            {"nome_time": "Cruzeiro", "pontos": 39, "jogos": 25, "vitorias": 11, "empates": 6, "derrotas": 8, "gols_pro": 35, "gols_contra": 36, "saldo_gols": -1},
-            {"nome_time": "Coritiba", "pontos": 37, "jogos": 25, "vitorias": 10, "empates": 7, "derrotas": 8, "gols_pro": 33, "gols_contra": 33, "saldo_gols": 0},
-            {"nome_time": "Atlético-MG", "pontos": 36, "jogos": 24, "vitorias": 10, "empates": 6, "derrotas": 8, "gols_pro": 32, "gols_contra": 28, "saldo_gols": 4},
-            {"nome_time": "Red Bull Bragantino", "pontos": 35, "jogos": 24, "vitorias": 10, "empates": 5, "derrotas": 9, "gols_pro": 29, "gols_contra": 25, "saldo_gols": 4},
-            {"nome_time": "São Paulo", "pontos": 35, "jogos": 25, "vitorias": 10, "empates": 5, "derrotas": 10, "gols_pro": 31, "gols_contra": 30, "saldo_gols": 1},
-            {"nome_time": "Botafogo", "pontos": 34, "jogos": 25, "vitorias": 9, "empates": 7, "derrotas": 9, "gols_pro": 30, "gols_contra": 31, "saldo_gols": -1},
-            {"nome_time": "Internacional", "pontos": 33, "jogos": 25, "vitorias": 9, "empates": 6, "derrotas": 10, "gols_pro": 29, "gols_contra": 32, "saldo_gols": -3},
-            {"nome_time": "Vasco", "pontos": 32, "jogos": 25, "vitorias": 8, "empates": 8, "derrotas": 9, "gols_pro": 28, "gols_contra": 33, "saldo_gols": -5},
-            {"nome_time": "Santos", "pontos": 31, "jogos": 25, "vitorias": 8, "empates": 7, "derrotas": 10, "gols_pro": 26, "gols_contra": 30, "saldo_gols": -4},
-            {"nome_time": "Grêmio", "pontos": 29, "jogos": 25, "vitorias": 8, "empates": 5, "derrotas": 12, "gols_pro": 25, "gols_contra": 35, "saldo_gols": -10},
-            {"nome_time": "Corinthians", "pontos": 28, "jogos": 25, "vitorias": 7, "empates": 7, "derrotas": 11, "gols_pro": 24, "gols_contra": 33, "saldo_gols": -9},
-            {"nome_time": "Mirassol", "pontos": 26, "jogos": 25, "vitorias": 6, "empates": 8, "derrotas": 11, "gols_pro": 22, "gols_contra": 35, "saldo_gols": -13},
-            {"nome_time": "Vitória", "pontos": 24, "jogos": 25, "vitorias": 6, "empates": 6, "derrotas": 13, "gols_pro": 21, "gols_contra": 38, "saldo_gols": -17},
-            {"nome_time": "Remo", "pontos": 22, "jogos": 25, "vitorias": 5, "empates": 7, "derrotas": 13, "gols_pro": 20, "gols_contra": 40, "saldo_gols": -20},
-            {"nome_time": "Chapecoense", "pontos": 19, "jogos": 25, "vitorias": 4, "empates": 7, "derrotas": 14, "gols_pro": 18, "gols_contra": 42, "saldo_gols": -24}
-        ])
+    except Exception as e:
+        st.error(f"Erro ao carregar os dados do CSV: {e}")
+        return pd.DataFrame()
 
 # Jogos Fixos das Rodadas Restantes
 RODADAS = {
