@@ -103,8 +103,31 @@ df_tabela.index = df_tabela.index + 1
 # --- COLUNA DA ESQUERDA: TABELA COMPLETA ---
 with col_tabela:
     st.subheader("📊 Classificação Atualizada")
-    st.dataframe(
-        df_tabela[["nome_time", "pontos", "jogos", "vitorias", "empates", "derrotas", "gols_pro", "gols_contra", "saldo_gols"]], 
-        height=730, 
-        use_container_width=True
-    )
+    # Função para definir a cor de fundo de cada linha conforme a posição
+def colorir_zonas(val):
+    # Dicionário de cores hexadecimais para as zonas
+    cores = []
+    for i in range(len(val)):
+        posicao = i + 1
+        if posicao <= 6:
+            cores.append('background-color: #d4edda; color: #155724;')  # Verde (Libertadores)
+        elif 7 <= posicao <= 12:
+            cores.append('background-color: #fff3cd; color: #856404;')  # Amarelo/Dourado (Sul-Americana)
+        elif 17 <= posicao <= 20:
+            cores.append('background-color: #f8d7da; color: #721c24;')  # Vermelho (Z-4)
+        else:
+            cores.append('')  # Neutro (Zona Intermediária)
+    return cores
+
+# Aplica a estilização na tabela e exibe no Streamlit
+# (Certifique-se de substituir 'df_tabela' pelo nome da sua variável da tabela)
+st.dataframe(
+    df_tabela.style.apply(colorir_zonas, axis=0),
+    use_container_width=True,
+    hide_index=True
+)st.markdown("""
+**Legenda:** 
+🟢 **1º ao 6º:** CONMEBOL Libertadores | 
+🟡 **7º ao 12º:** CONMEBOL Sul-Americana | 
+🔴 **17º ao 20º:** Zona de Rebaixamento (Z-4)
+""")
