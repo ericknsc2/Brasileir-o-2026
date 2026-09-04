@@ -15,7 +15,7 @@ def buscar_dados_br_oficial():
     Função de fallback/scraping para obter os dados atualizados da tabela
     diretamente do ambiente web caso o CSV não esteja atualizado.
     """
-    url = "https://raw.githubusercontent.com/ericknsc2/Brasileiro-o-2026/main/Brasileirao%20SQL.csv"
+    url = "https://raw.githubusercontent.com/ericknsc2/Brasileiro-o-2026/main/Brasileirao_SQL.csv"
     try:
         df = pd.read_csv(url)
         return df
