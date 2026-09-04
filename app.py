@@ -123,7 +123,8 @@ with col_tabela:
         st.dataframe(
             df_tabela.style.apply(colorir_zonas, axis=0),
             use_container_width=True,
-            hide_index=False
+            hide_index=False,
+            height=800
         )
         st.markdown("""
         **Legenda:** 
