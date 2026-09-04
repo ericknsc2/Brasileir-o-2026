@@ -125,7 +125,8 @@ st.dataframe(
     df_tabela.style.apply(colorir_zonas, axis=0),
     use_container_width=True,
     hide_index=True
-)st.markdown("""
+)
+st.markdown("""
 **Legenda:** 
 🟢 **1º ao 6º:** CONMEBOL Libertadores | 
 🟡 **7º ao 12º:** CONMEBOL Sul-Americana | 
