@@ -11,13 +11,12 @@ st.title("⚽ Brasileirão 2026")
 # --- BUSCA AUTOMÁTICA DE RESULTADOS REAIS ---
 @st.cache_data(ttl=3600)
 def buscar_dados_br_oficial():
-    # URL apontando para a branch 'principal'
-    url = "https://raw.githubusercontent.com/ericknsc2/Brasileiro-o-2026/principal/Brasileirao_SQL.csv"
     try:
-        df = pd.read_csv(url)
+        # Lê o arquivo CSV diretamente do diretório local do projeto
+        df = pd.read_csv("Brasileirao_SQL.csv")
         return df
     except Exception as e:
-        st.error(f"Erro ao carregar os dados do CSV: {e}")
+        st.error(f"Erro ao carregar os dados do CSV local: {e}")
         return pd.DataFrame()
 # Jogos Fixos das Rodadas Restantes
 RODADAS = {
