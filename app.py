@@ -36,8 +36,22 @@ RODADAS = {
 }
 
 # Organização visual em Colunas
-# Dá 60% de largura para a coluna 1 (Tabela) e 40% para a coluna 2 (Jogos)
-col1, col2 = st.columns([1.2, 1])
+# Criação das duas colunas com nomes personalizados
+col_tabela, col_simulador = st.columns([1.2, 1])
+
+# Bloco da tabela
+with col_tabela:
+    st.subheader("Tabela de Classificação")
+    st.dataframe(
+        df_tabela.style.apply(colorir_zonas, axis=0),
+        use_container_width=True,
+        hide_index=True
+    )
+
+# Bloco do simulador de jogos (linha 43)
+with col_simulador:
+    st.subheader("Simulador de Jogos")
+    # ... código das partidas ...
 
 # --- COLUNA DA DIREITA: SIMULADOR ---
 with col_simulador:
