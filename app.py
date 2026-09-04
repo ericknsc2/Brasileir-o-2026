@@ -36,7 +36,8 @@ RODADAS = {
 }
 
 # Organização visual em Colunas
-col_tabela, col_simulador = st.columns([1.3, 1])
+# Dá 60% de largura para a coluna 1 (Tabela) e 40% para a coluna 2 (Jogos)
+col1, col2 = st.columns([1.2, 1])
 
 # --- COLUNA DA DIREITA: SIMULADOR ---
 with col_simulador:
