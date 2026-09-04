@@ -5,13 +5,12 @@ import pandas as pd
 st.set_page_config(page_title="Brasileirão 2026", layout="wide")
 
 # Título da Aplicação
-st.title("⚽ Brasileirão 2026")
+st.title("⚽ Brasileirão 2026 - Simulador e Tabela")
 
 # --- 1. BUSCA AUTOMÁTICA DE RESULTADOS REAIS ---
 @st.cache_data(ttl=3600)
 def buscar_dados_br_oficial():
     try:
-        # Lê o arquivo CSV diretamente do diretório local
         df = pd.read_csv("Brasileirao_SQL.csv")
         return df
     except Exception as e:
@@ -35,14 +34,32 @@ RODADAS = {
     38: [("Flamengo", "Chapecoense"), ("Vasco", "Vitória"), ("Santos", "Botafogo"), ("Palmeiras", "Coritiba"), ("Red Bull Bragantino", "Fluminense"), ("Cruzeiro", "Bahia"), ("São Paulo", "Athletico-PR"), ("Atlético-MG", "Mirassol"), ("Grêmio", "Remo"), ("Internacional", "Corinthians")]
 }
 
-# --- 3. CRIAÇÃO DA ESTRUTURA EM COLUNAS ---
+# --- 3. SELEÇÃO DO TIME DO CORAÇÃO ---
+df_base = buscar_dados_br_oficial()
+lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist()) if not df_base.empty else ["Nenhum"]
+time_favorito = st.selectbox("⭐ Selecione seu time para destacar na tabela:", lista_times)
+
+# --- 4. CRIAÇÃO DA ESTRUTURA EM COLUNAS ---
 col_tabela, col_simulador = st.columns([1.3, 1])
 
-# --- 4. COLUNA DA DIREITA: SIMULADOR DE JOGOS ---
+# --- 5. COLUNA DA DIREITA: SIMULADOR DE JOGOS ---
 with col_simulador:
     st.subheader("🎮 Simulador de Jogos")
-    num_rodada = st.selectbox("Selecione a Rodada:", list(range(26, 39)))
     
+    col_rodada, col_botao = st.columns([2, 1])
+    with col_rodada:
+        num_rodada = st.selectbox("Selecione a Rodada:", list(range(26, 39)))
+    with col_botao:
+        st.write("") # Espaçamento
+        st.write("")
+        if st.button("🧹 Limpar Placares", use_container_width=True):
+            for i in range(10):
+                if f"r{num_rodada}_m_{i}" in st.session_state:
+                    st.session_state[f"r{num_rodada}_m_{i}"] = 0
+                if f"r{num_rodada}_v_{i}" in st.session_state:
+                    st.session_state[f"r{num_rodada}_v_{i}"] = 0
+            st.rerun()
+
     st.write(f"**Confrontos da {num_rodada}ª Rodada:**")
     jogos = RODADAS[num_rodada]
     
@@ -63,8 +80,8 @@ with col_simulador:
             
         placares_rodada.append((mandante, gm, gv, visitante))
 
-# --- 5. CÁLCULO E ATUALIZAÇÃO DA TABELA ---
-df_tabela = buscar_dados_br_oficial().copy()
+# --- 6. CÁLCULO E ATUALIZAÇÃO DA TABELA ---
+df_tabela = df_base.copy()
 
 if not df_tabela.empty:
     for mandante, gm, gv, visitante in placares_rodada:
@@ -96,34 +113,56 @@ if not df_tabela.empty:
                     df_tabela.at[idx_v, 'empates'] += 1
 
     df_tabela['saldo_gols'] = df_tabela['gols_pro'] - df_tabela['gols_contra']
+    
+    # Cálculo de Aproveitamento %
+    df_tabela['aproveitamento'] = (df_tabela['pontos'] / (df_tabela['jogos'] * 3) * 100).round(1)
 
     # Ordenar por Pontos > Vitórias > Saldo de Gols > Gols Pró
     df_tabela = df_tabela.sort_values(by=["pontos", "vitorias", "saldo_gols", "gols_pro"], ascending=False).reset_index(drop=True)
     df_tabela.index = df_tabela.index + 1
 
-# --- 6. FUNÇÃO DE ESTILIZAÇÃO POR CORES ---
+# --- 7. FUNÇÃO DE ESTILIZAÇÃO POR CORES E DESTAQUE ---
 def colorir_zonas(val):
     cores = []
     for i in range(len(val)):
         posicao = i + 1
+        nome_time = df_tabela.iloc[i]['nome_time']
+        
+        # Destaque especial para o time do coração
+        if time_favorito != "Nenhum" and nome_time == time_favorito:
+            cores.append('background-color: #ffe8a1; color: #000000; font-weight: bold;')
+            continue
+
+        # Cores normais das zonas
         if posicao <= 4:
-            cores.append('background-color: #d4edda; color: #155724;')  # Verde escuro/claro (Fase de Grupos Libertadores)
+            cores.append('background-color: #d4edda; color: #155724;')  # Verde (Libertadores)
         elif posicao == 5:
             cores.append('background-color: #cce5ff; color: #004085;')  # Azul (Pré-Libertadores)
         elif 6 <= posicao <= 11:
-            cores.append('background-color: #fff3cd; color: #856404;')  # Amarelo/Dourado (Sul-Americana)
+            cores.append('background-color: #fff3cd; color: #856404;')  # Amarelo (Sul-Americana)
         elif 17 <= posicao <= 20:
-            cores.append('background-color: #f8d7da; color: #721c24;')  # Vermelho (Z-4 Rebaixamento)
+            cores.append('background-color: #f8d7da; color: #721c24;')  # Vermelho (Z-4)
         else:
-            cores.append('')  # Neutro (Zona Intermediária)
+            cores.append('')  # Neutro
     return cores
 
-# --- 7. COLUNA DA ESQUERDA: EXIBIÇÃO DA TABELA ---
+# --- 8. COLUNA DA ESQUERDA: CARDS E EXIBIÇÃO DA TABELA ---
 with col_tabela:
     st.subheader("📊 Classificação Atualizada")
+    
     if not df_tabela.empty:
+        # Cards Rápidos de Informação
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("🏆 Líder", f"{df_tabela.iloc[0]['nome_time']}", f"{df_tabela.iloc[0]['pontos']} pts")
+        m2.metric("🛡️ Corte G-4", f"{df_tabela.iloc[3]['nome_time']}", f"{df_tabela.iloc[3]['pontos']} pts")
+        m3.metric("🟡 Corte Sul-Am.", f"{df_tabela.iloc[10]['nome_time']}", f"{df_tabela.iloc[10]['pontos']} pts")
+        m4.metric("⚠️ Z-4 (17º)", f"{df_tabela.iloc[16]['nome_time']}", f"{df_tabela.iloc[16]['pontos']} pts")
+        
+        st.write("")
+        
+        # Tabela com Estilos
         st.dataframe(
-            df_tabela.style.apply(colorir_zonas, axis=0),
+            df_tabela.style.apply(colorir_zonas, axis=0).format({"aproveitamento": "{:.1f}%"}),
             use_container_width=True,
             hide_index=False,
             height=800
