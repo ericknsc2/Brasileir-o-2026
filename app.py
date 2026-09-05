@@ -3,30 +3,38 @@ import pandas as pd
 import requests
 from datetime import datetime
 
-# Configuração da página - Wide e sem menu lateral
+# Configuração da página - Layout Wide
 st.set_page_config(page_title="Brasileirão 2026", layout="wide", initial_sidebar_state="collapsed")
 
-# --- CSS RESPONSIVO & ELEVAÇÃO DO LAYOUT ---
+# --- CSS RESPONSIVO HÍBRIDO DEFINITIVO ---
 st.markdown("""
 <style>
-    /* Subir o layout e tirar o espaço em branco exagerado no topo */
+    /* Subir todo o conteúdo da página para aproveitar o topo */
     .block-container {
         padding-top: 0.8rem !important;
         padding-bottom: 0rem !important;
     }
-    
-    /* Regras para PC (Telas maiores que 768px): Esconde o container mobile */
+
+    /* DESKTOP (Telas maiores que 768px):
+       Oculta o cabeçalho das abas e posiciona o conteúdo em 2 colunas lado a lado */
     @media (min-width: 769px) {
-        .mobile-container {
+        div[data-testid="stTabs"] > div:first-child {
             display: none !important;
+        }
+        div[data-testid="stTabs"] {
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 24px !important;
+        }
+        div[data-testid="stTabContent"] {
+            width: 50% !important;
+            display: block !important;
         }
     }
-    
-    /* Regras para Celular (Telas até 768px): Esconde o container desktop */
+
+    /* MOBILE (Telas até 768px):
+       Mantém as 2 abas nativas no topo e ajusta as margens internas */
     @media (max-width: 768px) {
-        .desktop-container {
-            display: none !important;
-        }
         .block-container {
             padding-left: 0.5rem !important;
             padding-right: 0.5rem !important;
@@ -118,7 +126,7 @@ with c2:
     lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist()) if not df_base.empty else ["Nenhum"]
     time_favorito = st.selectbox("⭐ Time do Coração:", lista_times)
 
-# --- CÁLCULO DA TABELA DE CLASSIFICAÇÃO ---
+# --- CÁLCULO ÚNICO DA TABELA DE CLASSIFICAÇÃO ---
 df_tabela = df_base.copy()
 jogos_atuais = CONFRONTOS_PADRAO.get(num_rodada, [])
 
@@ -170,14 +178,19 @@ def colorir_zonas(val):
             cores.append('')
     return cores
 
-# --- BLOCOS REUTILIZÁVEIS ---
-def renderizar_tabela(cols_exibir):
+# --- ESTRUTURA ÚNICA DE ABAS (AJUSTADA PELO CSS) ---
+tab_tabela, tab_simulador = st.tabs(["📊 Classificação", "🎮 Simulador"])
+
+# 1. PAINEL DE CLASSIFICAÇÃO
+with tab_tabela:
     st.subheader("📊 Classificação em Tempo Real")
     if not df_tabela.empty:
         m1, m2 = st.columns(2)
         m1.metric("🏆 Líder", f"{df_tabela.iloc[0]['nome_time']}", f"{df_tabela.iloc[0]['pontos']} pts")
         m2.metric("🛡️ Corte G-4", f"{df_tabela.iloc[3]['nome_time']}", f"{df_tabela.iloc[3]['pontos']} pts")
         st.write("")
+        
+        cols_exibir = ['nome_time', 'pontos', 'jogos', 'vitorias', 'empates', 'derrotas', 'gols_pro', 'gols_contra', 'saldo_gols', 'aproveitamento']
         st.dataframe(
             df_tabela[cols_exibir].style.apply(colorir_zonas, axis=0).format({"aproveitamento": "{:.1f}%"}),
             use_container_width=True,
@@ -186,15 +199,16 @@ def renderizar_tabela(cols_exibir):
         )
         st.caption("🟢 G-4 | 🔵 Pré-Libertadores | 🟡 Sul-Americana | 🔴 Z-4")
 
-def renderizar_simulador(key_prefix):
+# 2. PAINEL DO SIMULADOR DE JOGOS
+with tab_simulador:
     st.subheader(f"🎮 Jogos da {num_rodada}ª Rodada")
     
-    if st.button("🧹 Limpar Meus Palpites", key=f"btn_limpar_{key_prefix}"):
+    if st.button("🧹 Limpar Meus Palpites"):
         for i in range(10):
-            if f"{key_prefix}_r{num_rodada}_m_{i}" in st.session_state:
-                st.session_state[f"{key_prefix}_r{num_rodada}_m_{i}"] = 0
-            if f"{key_prefix}_r{num_rodada}_v_{i}" in st.session_state:
-                st.session_state[f"{key_prefix}_r{num_rodada}_v_{i}"] = 0
+            if f"r{num_rodada}_m_{i}" in st.session_state:
+                st.session_state[f"r{num_rodada}_m_{i}"] = 0
+            if f"r{num_rodada}_v_{i}" in st.session_state:
+                st.session_state[f"r{num_rodada}_v_{i}"] = 0
         st.rerun()
 
     jogos = CONFRONTOS_PADRAO.get(num_rodada, [])
@@ -223,39 +237,17 @@ def renderizar_simulador(key_prefix):
             st.markdown(f"<div class='time-nome-m'>{mandante}</div>", unsafe_allow_html=True)
         with col_pm:
             st.number_input(
-                "", min_value=0, value=val_m, key=f"{key_prefix}_r{num_rodada}_m_{idx}", 
+                "", min_value=0, value=val_m, key=f"r{num_rodada}_m_{idx}", 
                 label_visibility="collapsed", disabled=jogo_bloqueado
             )
         with col_x:
             st.write("🔒" if jogo_bloqueado else "x")
         with col_pv:
             st.number_input(
-                "", min_value=0, value=val_v, key=f"{key_prefix}_r{num_rodada}_v_{idx}", 
+                "", min_value=0, value=val_v, key=f"r{num_rodada}_v_{idx}", 
                 label_visibility="collapsed", disabled=jogo_bloqueado
             )
         with col_v:
             st.markdown(f"<div class='time-nome-v'>{visitante}</div>", unsafe_allow_html=True)
             
         st.divider()
-
-# ==============================================================================
-# 3. RENDERIZAÇÃO SEPARADA (DESKTOP EM COLUNAS / MOBILE EM ABAS)
-# ==============================================================================
-
-# A) VISUAL PARA DESKTOP (PC) - 2 Colunas lado a lado
-st.markdown("<div class='desktop-container'>", unsafe_allow_html=True)
-col_pc_tabela, col_pc_simulador = st.columns([1.3, 1])
-with col_pc_tabela:
-    renderizar_tabela(['nome_time', 'pontos', 'jogos', 'vitorias', 'empates', 'derrotas', 'gols_pro', 'gols_contra', 'saldo_gols', 'aproveitamento'])
-with col_pc_simulador:
-    renderizar_simulador("pc")
-st.markdown("</div>", unsafe_allow_html=True)
-
-# B) VISUAL PARA MOBILE (CELULAR) - 2 Abas no topo
-st.markdown("<div class='mobile-container'>", unsafe_allow_html=True)
-tab_mob_tabela, tab_mob_simulador = st.tabs(["📊 Classificação", "🎮 Simulador"])
-with tab_mob_tabela:
-    renderizar_tabela(['nome_time', 'pontos', 'jogos', 'vitorias', 'saldo_gols', 'aproveitamento'])
-with tab_mob_simulador:
-    renderizar_simulador("mob")
-st.markdown("</div>", unsafe_allow_html=True)
