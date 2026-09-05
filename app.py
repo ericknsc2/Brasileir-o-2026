@@ -3,21 +3,28 @@ import pandas as pd
 import requests
 from datetime import datetime
 
-# Configuração da página - Layout Responsivo
+# Configuração da página - Layout Wide
 st.set_page_config(page_title="Brasileirão 2026", layout="wide", initial_sidebar_state="collapsed")
 
-# CSS Customizado para Otimização Mobile
+# --- CSS RESPONSIVO HÍBRIDO (DESKTOP X MOBILE) ---
 st.markdown("""
 <style>
-    /* Ajustes para telas pequenas (smartphones) */
-    @media (max-width: 768px) {
-        .block-container {
-            padding-left: 0.8rem !important;
-            padding-right: 0.8rem !important;
-            padding-top: 1rem !important;
+    /* CSS para telas de Desktop/PC (Acima de 768px) */
+    @media (min-width: 769px) {
+        .mobile-only {
+            display: none !important;
         }
-        div[data-baseweb="select"] {
-            font-size: 14px;
+    }
+    
+    /* CSS para telas de Celular/Mobile (Até 768px) */
+    @media (max-width: 768px) {
+        .desktop-only {
+            display: none !important;
+        }
+        .block-container {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+            padding-top: 1rem !important;
         }
         .stNumberInput input {
             text-align: center;
@@ -25,9 +32,9 @@ st.markdown("""
             font-weight: bold;
         }
     }
-    /* Estilização dos cards de times no simulador */
-    .time-nome-m { text-align: right; font-weight: bold; font-size: 15px; }
-    .time-nome-v { text-align: left; font-weight: bold; font-size: 15px; }
+    
+    .time-nome-m { text-align: right; font-weight: bold; font-size: 14px; }
+    .time-nome-v { text-align: left; font-weight: bold; font-size: 14px; }
     .status-badge { font-size: 12px; color: #666; margin-bottom: 2px; }
 </style>
 """, unsafe_allow_html=True)
@@ -98,7 +105,7 @@ CONFRONTOS_PADRAO = {
 
 df_base = buscar_tabela_base()
 
-# --- 3. SELEÇÃO DE CONTROLES ---
+# CONTROLES SUPERIORES
 c1, c2 = st.columns([1, 2])
 with c1:
     num_rodada = st.selectbox("Rodada:", list(range(26, 39)))
@@ -106,14 +113,11 @@ with c2:
     lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist()) if not df_base.empty else ["Nenhum"]
     time_favorito = st.selectbox("⭐ Time do Coração:", lista_times)
 
-# --- 4. ABAS PARA NAVEGAÇÃO MOBILE PERFEITA ---
-aba_tabela, aba_simulador = st.tabs(["📊 Classificação", "🎮 Simulador de Jogos"])
-
-# RENDERIZAÇÃO DO SIMULADOR (ABA 2)
-with aba_simulador:
-    st.subheader(f"Jogos da {num_rodada}ª Rodada")
+# --- FUNÇÃO DO SIMULADOR ---
+def renderizar_simulador(key_prefix):
+    st.subheader(f"🎮 Jogos da {num_rodada}ª Rodada")
     
-    if st.button("🧹 Limpar Meus Palpites"):
+    if st.button("🧹 Limpar Meus Palpites", key=f"btn_limpar_{key_prefix}"):
         for i in range(10):
             if f"r{num_rodada}_m_{i}" in st.session_state:
                 st.session_state[f"r{num_rodada}_m_{i}"] = 0
@@ -128,7 +132,6 @@ with aba_simulador:
     for idx, jogo in enumerate(jogos):
         mandante, visitante, data_hora_str, gm_real, gv_real, status = jogo
         data_jogo = datetime.strptime(data_hora_str, "%Y-%m-%d %H:%M")
-        
         jogo_bloqueado = (agora >= data_jogo) or (status in ["ENCERRADO", "EM_ANDAMENTO"])
         
         val_m = gm_real if gm_real is not None else 0
@@ -149,14 +152,14 @@ with aba_simulador:
             st.markdown(f"<div class='time-nome-m'>{mandante}</div>", unsafe_allow_html=True)
         with col_pm:
             gm = st.number_input(
-                "", min_value=0, value=val_m, key=f"r{num_rodada}_m_{idx}", 
+                "", min_value=0, value=val_m, key=f"{key_prefix}_r{num_rodada}_m_{idx}", 
                 label_visibility="collapsed", disabled=jogo_bloqueado
             )
         with col_x:
             st.write("🔒" if jogo_bloqueado else "x")
         with col_pv:
             gv = st.number_input(
-                "", min_value=0, value=val_v, key=f"r{num_rodada}_v_{idx}", 
+                "", min_value=0, value=val_v, key=f"{key_prefix}_r{num_rodada}_v_{idx}", 
                 label_visibility="collapsed", disabled=jogo_bloqueado
             )
         with col_v:
@@ -164,115 +167,92 @@ with aba_simulador:
             
         placares_rodada.append((mandante, gm, gv, visitante, status, jogo_bloqueado))
         st.divider()
+        
+    return placares_rodada
 
-# --- 5. RECALCULO COMPLETO DA TABELA (INCLUINDO JOGOS ENCERRADOS) ---
+# --- CÁLCULO E ATUALIZAÇÃO DA TABELA ---
 df_tabela = df_base.copy()
+jogos_atuais = CONFRONTOS_PADRAO.get(num_rodada, [])
 
 if not df_tabela.empty:
-    for mandante, gm, gv, visitante, status, bloqueado in placares_rodada:
-        # CONDIÇÃO CORRIGIDA: Processa tanto jogos ENCERRADOS/AO VIVO quanto palpites simulados
-        if (status in ["ENCERRADO", "EM_ANDAMENTO"]) or (not bloqueado and (gm > 0 or gv > 0)):
-            # Se o jogo já está no CSV/Base com jogos somados, evitamos duplicação controlando a flag
-            if mandante in df_tabela['nome_time'].values and visitante in df_tabela['nome_time'].values:
+    for mandante, visitante, data_hora_str, gm_real, gv_real, status in jogos_atuais:
+        # Se for jogo do Bahia encerrado e o CSV da ESPN estiver desatualizado
+        if status == "ENCERRADO" and mandante == "Red Bull Bragantino":
+            idx_v = df_tabela[df_tabela['nome_time'] == visitante].index[0]
+            if df_tabela.at[idx_v, 'jogos'] == 25:
                 idx_m = df_tabela[df_tabela['nome_time'] == mandante].index[0]
-                idx_v = df_tabela[df_tabela['nome_time'] == visitante].index[0]
+                df_tabela.at[idx_m, 'jogos'] += 1
+                df_tabela.at[idx_v, 'jogos'] += 1
+                df_tabela.at[idx_m, 'gols_pro'] += gm_real
+                df_tabela.at[idx_m, 'gols_contra'] += gv_real
+                df_tabela.at[idx_v, 'gols_pro'] += gv_real
+                df_tabela.at[idx_v, 'gols_contra'] += gm_real
                 
-                # Se a base externa ainda não somou o jogo de hoje do Bahia (25 jogos em vez de 26)
-                if status == "ENCERRADO" and mandante == "Red Bull Bragantino" and df_tabela.at[idx_v, 'jogos'] == 25:
-                    df_tabela.at[idx_m, 'jogos'] += 1
-                    df_tabela.at[idx_v, 'jogos'] += 1
-                    
-                    df_tabela.at[idx_m, 'gols_pro'] += gm
-                    df_tabela.at[idx_m, 'gols_contra'] += gv
-                    df_tabela.at[idx_v, 'gols_pro'] += gv
-                    df_tabela.at[idx_v, 'gols_contra'] += gm
-                    
-                    if gm > gv:
-                        df_tabela.at[idx_m, 'pontos'] += 3
-                        df_tabela.at[idx_m, 'vitorias'] += 1
-                        df_tabela.at[idx_v, 'derrotas'] += 1
-                    elif gv > gm:
-                        df_tabela.at[idx_v, 'pontos'] += 3
-                        df_tabela.at[idx_v, 'vitorias'] += 1
-                        df_tabela.at[idx_m, 'derrotas'] += 1
-                    else:
-                        df_tabela.at[idx_m, 'pontos'] += 1
-                        df_tabela.at[idx_v, 'pontos'] += 1
-                        df_tabela.at[idx_m, 'empates'] += 1
-                        df_tabela.at[idx_v, 'empates'] += 1
-
-                # Para palpites do usuário em jogos futuros
-                elif not bloqueado and (gm > 0 or gv > 0):
-                    df_tabela.at[idx_m, 'jogos'] += 1
-                    df_tabela.at[idx_v, 'jogos'] += 1
-                    
-                    df_tabela.at[idx_m, 'gols_pro'] += gm
-                    df_tabela.at[idx_m, 'gols_contra'] += gv
-                    df_tabela.at[idx_v, 'gols_pro'] += gv
-                    df_tabela.at[idx_v, 'gols_contra'] += gm
-                    
-                    if gm > gv:
-                        df_tabela.at[idx_m, 'pontos'] += 3
-                        df_tabela.at[idx_m, 'vitorias'] += 1
-                        df_tabela.at[idx_v, 'derrotas'] += 1
-                    elif gv > gm:
-                        df_tabela.at[idx_v, 'pontos'] += 3
-                        df_tabela.at[idx_v, 'vitorias'] += 1
-                        df_tabela.at[idx_m, 'derrotas'] += 1
-                    else:
-                        df_tabela.at[idx_m, 'pontos'] += 1
-                        df_tabela.at[idx_v, 'pontos'] += 1
-                        df_tabela.at[idx_m, 'empates'] += 1
-                        df_tabela.at[idx_v, 'empates'] += 1
+                if gm_real > gv_real:
+                    df_tabela.at[idx_m, 'pontos'] += 3
+                    df_tabela.at[idx_m, 'vitorias'] += 1
+                    df_tabela.at[idx_v, 'derrotas'] += 1
+                elif gv_real > gm_real:
+                    df_tabela.at[idx_v, 'pontos'] += 3
+                    df_tabela.at[idx_v, 'vitorias'] += 1
+                    df_tabela.at[idx_m, 'derrotas'] += 1
 
     df_tabela['saldo_gols'] = df_tabela['gols_pro'] - df_tabela['gols_contra']
     df_tabela['aproveitamento'] = (df_tabela['pontos'] / (df_tabela['jogos'] * 3) * 100).round(1)
-
     df_tabela = df_tabela.sort_values(by=["pontos", "vitorias", "saldo_gols", "gols_pro"], ascending=False).reset_index(drop=True)
     df_tabela.index = df_tabela.index + 1
 
-# --- 6. RENDERIZAÇÃO DA TABELA (ABA 1) ---
-with aba_tabela:
-    st.subheader("Classificação em Tempo Real")
-    
+def colorir_zonas(val):
+    cores = []
+    for i in range(len(val)):
+        posicao = i + 1
+        nome_time = df_tabela.iloc[i]['nome_time']
+        if time_favorito != "Nenhum" and nome_time == time_favorito:
+            cores.append('background-color: #ffe8a1; color: #000000; font-weight: bold;')
+            continue
+        if posicao <= 4:
+            cores.append('background-color: #d4edda; color: #155724;')
+        elif posicao == 5:
+            cores.append('background-color: #cce5ff; color: #004085;')
+        elif 6 <= posicao <= 11:
+            cores.append('background-color: #fff3cd; color: #856404;')
+        elif 17 <= posicao <= 20:
+            cores.append('background-color: #f8d7da; color: #721c24;')
+        else:
+            cores.append('')
+    return cores
+
+def renderizar_tabela(cols_exibir):
+    st.subheader("📊 Classificação em Tempo Real")
     if not df_tabela.empty:
-        # Métricas Rápidas no topo
         m1, m2 = st.columns(2)
         m1.metric("🏆 Líder", f"{df_tabela.iloc[0]['nome_time']}", f"{df_tabela.iloc[0]['pontos']} pts")
         m2.metric("🛡️ Corte G-4", f"{df_tabela.iloc[3]['nome_time']}", f"{df_tabela.iloc[3]['pontos']} pts")
-        
         st.write("")
-        
-        def colorir_zonas(val):
-            cores = []
-            for i in range(len(val)):
-                posicao = i + 1
-                nome_time = df_tabela.iloc[i]['nome_time']
-                
-                if time_favorito != "Nenhum" and nome_time == time_favorito:
-                    cores.append('background-color: #ffe8a1; color: #000000; font-weight: bold;')
-                    continue
-
-                if posicao <= 4:
-                    cores.append('background-color: #d4edda; color: #155724;')
-                elif posicao == 5:
-                    cores.append('background-color: #cce5ff; color: #004085;')
-                elif 6 <= posicao <= 11:
-                    cores.append('background-color: #fff3cd; color: #856404;')
-                elif 17 <= posicao <= 20:
-                    cores.append('background-color: #f8d7da; color: #721c24;')
-                else:
-                    cores.append('')
-            return cores
-
-        # Tabela Formatada para telas móveis
-        cols_exibir = ['nome_time', 'pontos', 'jogos', 'vitorias', 'saldo_gols', 'aproveitamento']
-        
         st.dataframe(
             df_tabela[cols_exibir].style.apply(colorir_zonas, axis=0).format({"aproveitamento": "{:.1f}%"}),
             use_container_width=True,
             hide_index=False,
-            height=650
+            height=700
         )
-        
-        st.caption("🟢 G-4 (Libertadores) | 🔵 Pré-Libertadores | 🟡 Sul-Americana | 🔴 Z-4")
+        st.caption("🟢 G-4 | 🔵 Pré-Libertadores | 🟡 Sul-Americana | 🔴 Z-4")
+
+# --- 3. MONTAGEM DOS LAYOUTS SEPARADOS (DESKTOP vs MOBILE) ---
+
+# --- A) VISUAL PARA DESKTOP (Lado a Lado) ---
+st.markdown("<div class='desktop-only'>", unsafe_allow_html=True)
+col_pc_tab, col_pc_sim = st.columns([1.3, 1])
+with col_pc_tab:
+    renderizar_tabela(['nome_time', 'pontos', 'jogos', 'vitorias', 'empates', 'derrotas', 'gols_pro', 'gols_contra', 'saldo_gols', 'aproveitamento'])
+with col_pc_sim:
+    renderizar_simulador(key_prefix="pc")
+st.markdown("</div>", unsafe_allow_html=True)
+
+# --- B) VISUAL PARA MOBILE (Em Abas) ---
+st.markdown("<div class='mobile-only'>", unsafe_allow_html=True)
+tab_m_tabela, tab_m_simulador = st.tabs(["📊 Classificação", "🎮 Simulador"])
+with tab_m_tabela:
+    renderizar_tabela(['nome_time', 'pontos', 'jogos', 'vitorias', 'saldo_gols', 'aproveitamento'])
+with tab_m_simulador:
+    renderizar_simulador(key_prefix="mob")
+st.markdown("</div>", unsafe_allow_html=True)
