@@ -6,7 +6,7 @@ from datetime import datetime
 # Configuração da página - Layout Wide
 st.set_page_config(page_title="Brasileirão 2026", layout="wide", initial_sidebar_state="collapsed")
 
-# --- CSS RESPONSIVO HÍBRIDO DEFINITIVO ---
+# --- CSS RESPONSIVO HÍBRIDO ---
 st.markdown("""
 <style>
     /* Subir todo o conteúdo da página para aproveitar o topo */
@@ -126,7 +126,7 @@ with c2:
     lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist()) if not df_base.empty else ["Nenhum"]
     time_favorito = st.selectbox("⭐ Time do Coração:", lista_times)
 
-# --- CÁLCULO ÚNICO DA TABELA DE CLASSIFICAÇÃO ---
+# --- CÁLCULO DA TABELA DE CLASSIFICAÇÃO ---
 df_tabela = df_base.copy()
 jogos_atuais = CONFRONTOS_PADRAO.get(num_rodada, [])
 
@@ -178,7 +178,7 @@ def colorir_zonas(val):
             cores.append('')
     return cores
 
-# --- ESTRUTURA ÚNICA DE ABAS (AJUSTADA PELO CSS) ---
+# --- ESTRUTURA DE ABAS ---
 tab_tabela, tab_simulador = st.tabs(["📊 Classificação", "🎮 Simulador"])
 
 # 1. PAINEL DE CLASSIFICAÇÃO
@@ -195,7 +195,7 @@ with tab_tabela:
             df_tabela[cols_exibir].style.apply(colorir_zonas, axis=0).format({"aproveitamento": "{:.1f}%"}),
             use_container_width=True,
             hide_index=False,
-            height=880
+            height=740  # <--- AJUSTADO PARA CORTAR A SOBRA EM BRANCO
         )
         st.caption("🟢 G-4 | 🔵 Pré-Libertadores | 🟡 Sul-Americana | 🔴 Z-4")
 
