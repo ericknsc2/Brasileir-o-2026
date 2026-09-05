@@ -1,141 +1,154 @@
 import streamlit as st
 import pandas as pd
 import requests
-from datetime import datetime
 
 # Configuração da página
-st.set_page_config(page_title="Brasileirão 2026", layout="wide")
+st.set_page_config(page_title="Brasileirão 2026 - GE Ao Vivo", layout="wide")
 
-# Título da Aplicação
-st.title("⚽ Brasileirão 2026 - Tabela & Simulador ao Vivo")
+st.title("⚽ Brasileirão 2026 - Tabela & Simulador GE Ao Vivo")
 
-# --- 1. BUSCA DE DADOS E CONFRONTOS VIA GE (GLOBO ESPORTE) ---
-@st.cache_data(ttl=120)  # Atualiza os dados do ge a cada 2 minutos (120 segundos)
-def buscar_dados_ge():
+# --- 1. CAPTURA DE DADOS DA API OFICIAL DO GE ---
+@st.cache_data(ttl=30)  # Atualiza automaticamente a cada 30 segundos
+def buscar_dados_completos_ge(num_rodada):
+    """
+    Busca a tabela de classificação e os jogos da rodada selecionada direto do GE
+    """
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    
+    # URL da API de dados do GE (Campeonato Brasileiro)
+    url_tabela = "https://api.ge.globo.com/futebol/campeonato/brasileiro-serie-a/tabela"
+    url_jogos = f"https://api.ge.globo.com/futebol/campeonato/brasileiro-serie-a/rodada/{num_rodada}/jogos"
+    
+    df_tabela = pd.DataFrame()
+    jogos_lista = []
+    
     try:
-        # Endpoint público de dados do Brasileirão Série A no GE
-        url_tabela = "https://api.ge.globo.com/futebol/campeonato/brasileiro-serie-a/tabela"
-        headers = {"User-Agent": "Mozilla/5.0"}
-        res = requests.get(url_tabela, headers=headers, timeout=5)
-        
-        if res.status_code == 200:
-            dados = res.json()
+        # 1.1 Tabela de Classificação
+        res_tab = requests.get(url_tabela, headers=headers, timeout=5)
+        if res_tab.status_code == 200:
+            dados_tab = res_tab.json()
             times = []
-            for t in dados.get("classificacao", []):
+            for item in dados_tab.get("classificacao", []):
                 times.append({
-                    'nome_time': t['time']['nome_popular'],
-                    'pontos': t['pontos'],
-                    'jogos': t['jogos'],
-                    'vitorias': t['vitorias'],
-                    'empates': t['empates'],
-                    'derrotas': t['derrotas'],
-                    'gols_pro': t['gols_pro'],
-                    'gols_contra': t['gols_contra'],
-                    'saldo_gols': t['saldo_gols']
+                    'nome_time': item['time']['nome_popular'],
+                    'pontos': item['pontos'],
+                    'jogos': item['jogos'],
+                    'vitorias': item['vitorias'],
+                    'empates': item['empates'],
+                    'derrotas': item['derrotas'],
+                    'gols_pro': item['gols_pro'],
+                    'gols_contra': item['gols_contra'],
+                    'saldo_gols': item['saldo_gols']
                 })
-            return pd.DataFrame(times)
-        else:
-            return pd.read_csv("Brasileirao_SQL.csv")
-    except Exception:
-        # Fallback de segurança para o CSV local caso haja instabilidade de rede
-        try:
-            return pd.read_csv("Brasileirao_SQL.csv")
-        except Exception:
-            return pd.DataFrame()
+            df_tabela = pd.DataFrame(times)
+            
+        # 1.2 Jogos e Placares da Rodada
+        res_jogos = requests.get(url_jogos, headers=headers, timeout=5)
+        if res_jogos.status_code == 200:
+            dados_jogos = res_jogos.json()
+            for j in dados_jogos:
+                mandante = j['equipes']['mandante']['nome_popular']
+                visitante = j['equipes']['visitante']['nome_popular']
+                placar_m = j.get('placar_oficial_mandante')
+                placar_v = j.get('placar_oficial_visitante')
+                status = j.get('status') # 'ENCERRADO', 'EM_ANDAMENTO', 'AGENDADO'
+                
+                data_str = j.get('data_realizacao_iso', '') # Data/Hora ISO
+                hora_formatada = j.get('hora_realizacao', '')
+                estadio = j.get('sede', {}).get('nome_popular', '')
+                
+                jogos_lista.append({
+                    'mandante': mandante,
+                    'visitante': visitante,
+                    'placar_m': placar_m,
+                    'placar_v': placar_v,
+                    'status': status,
+                    'hora': hora_formatada,
+                    'estadio': estadio
+                })
+    except Exception as e:
+        # Fallback local de segurança se houver oscilação de conexão
+        if df_tabela.empty:
+            try:
+                df_tabela = pd.read_csv("Brasileirao_SQL.csv")
+            except Exception:
+                pass
 
-# Estrutura com confrontos e horários oficiais (Servirá para checagem e travamento)
-RODADAS = {
-    26: [
-        ("Red Bull Bragantino", "Bahia", "2026-09-05 16:00"),
-        ("São Paulo", "Atlético-MG", "2026-09-05 18:30"),
-        ("Fluminense", "Vasco", "2026-09-05 21:00"),
-        ("Coritiba", "Mirassol", "2026-09-06 11:00"),
-        ("Cruzeiro", "Athletico-PR", "2026-09-06 16:00"),
-        ("Remo", "Flamengo", "2026-09-06 16:00"),
-        ("Internacional", "Santos", "2026-09-06 16:00"),
-        ("Botafogo", "Palmeiras", "2026-09-06 18:30"),
-        ("Corinthians", "Chapecoense", "2026-09-06 19:30"),
-        ("Vitória", "Grêmio", "2026-09-07 20:00")
-    ],
-    27: [
-        ("Coritiba", "Athletico-PR", "2026-09-11 21:00"),
-        ("Atlético-MG", "Fluminense", "2026-09-12 16:00"),
-        ("Grêmio", "Vasco", "2026-09-12 16:00"),
-        ("Chapecoense", "Internacional", "2026-09-12 17:00"),
-        ("Palmeiras", "São Paulo", "2026-09-12 18:30"),
-        ("Botafogo", "Red Bull Bragantino", "2026-09-12 20:30"),
-        ("Santos", "Cruzeiro", "2026-09-12 21:00"),
-        ("Mirassol", "Vitória", "2026-09-13 16:00"),
-        ("Flamengo", "Corinthians", "2026-09-13 17:30"),
-        ("Bahia", "Remo", "2026-09-14 20:00")
-    ]
-}
+    return df_tabela, jogos_lista
 
-# --- 2. SELEÇÃO DO TIME DO CORAÇÃO ---
-df_base = buscar_dados_ge()
-lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist()) if not df_base.empty else ["Nenhum"]
-time_favorito = st.selectbox("⭐ Selecione seu time para destacar na tabela:", lista_times)
+# --- 2. CONTROLE DA RODADA E SELEÇÃO DE TIME ---
+c_rodada, c_time = st.columns([1, 2])
+with c_rodada:
+    num_rodada = st.number_input("Selecione a Rodada:", min_value=1, max_value=38, value=26)
 
-# Layout principal em 2 Colunas
+df_base, jogos_ge = buscar_dados_completos_ge(num_rodada)
+
+with c_time:
+    lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist()) if not df_base.empty else ["Nenhum"]
+    time_favorito = st.selectbox("⭐ Selecione seu time para destacar na tabela:", lista_times)
+
+# Layout principal
 col_tabela, col_simulador = st.columns([1.3, 1])
 
-# --- 3. COLUNA DA DIREITA: SIMULADOR COM TRAVAMENTO AUTOMÁTICO ---
+# --- 3. SIMULADOR COM DADOS DO GE ---
 with col_simulador:
-    st.subheader("🎮 Simulador de Jogos")
-    
-    col_rodada, col_botao = st.columns([2, 1])
-    with col_rodada:
-        num_rodada = st.selectbox("Selecione a Rodada:", list(RODADAS.keys()))
-    with col_botao:
-        st.write("")
-        st.write("")
-        if st.button("🧹 Limpar Placares", use_container_width=True):
-            for i in range(10):
-                if f"r{num_rodada}_m_{i}" in st.session_state:
-                    st.session_state[f"r{num_rodada}_m_{i}"] = 0
-                if f"r{num_rodada}_v_{i}" in st.session_state:
-                    st.session_state[f"r{num_rodada}_v_{i}"] = 0
-            st.rerun()
-
-    st.write(f"**Confrontos da {num_rodada}ª Rodada:**")
-    jogos = RODADAS.get(num_rodada, [])
+    st.subheader(f"🎮 Jogos da {num_rodada}ª Rodada (GE)")
     
     placares_rodada = []
-    agora = datetime.now()
     
-    for idx, jogo in enumerate(jogos):
-        mandante, visitante, data_hora_str = jogo
-        data_jogo = datetime.strptime(data_hora_str, "%Y-%m-%d %H:%M")
-        
-        # O jogo é bloqueado se o horário atual for maior/igual ao início da partida
-        jogo_bloqueado = agora >= data_jogo
-
-        c1, c2, c3, c4, c5 = st.columns([2.5, 1, 0.4, 1, 2.5])
-        with c1:
-            st.markdown(f"<div style='text-align: right;'><b>{mandante}</b></div>", unsafe_allow_html=True)
-        with c2:
-            gm = st.number_input(
-                "", min_value=0, value=0, key=f"r{num_rodada}_m_{idx}", 
-                label_visibility="collapsed", disabled=jogo_bloqueado
-            )
-        with c3:
-            st.write("🔒" if jogo_bloqueado else "x")
-        with c4:
-            gv = st.number_input(
-                "", min_value=0, value=0, key=f"r{num_rodada}_v_{idx}", 
-                label_visibility="collapsed", disabled=jogo_bloqueado
-            )
-        with c5:
-            st.markdown(f"<b>{visitante}</b>", unsafe_allow_html=True)
+    if jogos_ge:
+        for idx, jogo in enumerate(jogos_ge):
+            mandante = jogo['mandante']
+            visitante = jogo['visitante']
+            status = jogo['status']
+            hora = jogo['hora'] if jogo['hora'] else ""
+            estadio = jogo['estadio'] if jogo['estadio'] else ""
             
-        placares_rodada.append((mandante, gm, gv, visitante, jogo_bloqueado))
+            # Checa se o jogo já começou ou encerrou
+            jogo_bloqueado = status in ['ENCERRADO', 'EM_ANDAMENTO']
+            
+            val_m = jogo['placar_m'] if jogo['placar_m'] is not None else 0
+            val_v = jogo['placar_v'] if jogo['placar_v'] is not None else 0
+            
+            # Badge visual de status
+            if status == 'ENCERRADO':
+                badge = "🔴 FIM"
+            elif status == 'EM_ANDAMENTO':
+                badge = "🟢 AO VIVO"
+            else:
+                badge = f"🕒 {hora}"
 
-# --- 4. CÁLCULO E RECLASSIFICAÇÃO DINÂMICA ---
+            st.caption(f"{estadio} • {badge}")
+            
+            c1, c2, c3, c4, c5 = st.columns([2.5, 1, 0.4, 1, 2.5])
+            with c1:
+                st.markdown(f"<div style='text-align: right;'><b>{mandante}</b></div>", unsafe_allow_html=True)
+            with c2:
+                gm = st.number_input(
+                    "", min_value=0, value=val_m, key=f"r{num_rodada}_m_{idx}", 
+                    label_visibility="collapsed", disabled=jogo_bloqueado
+                )
+            with c3:
+                st.write("🔒" if jogo_bloqueado else "x")
+            with c4:
+                gv = st.number_input(
+                    "", min_value=0, value=val_v, key=f"r{num_rodada}_v_{idx}", 
+                    label_visibility="collapsed", disabled=jogo_bloqueado
+                )
+            with c5:
+                st.markdown(f"<b>{visitante}</b>", unsafe_allow_html=True)
+            
+            placares_rodada.append((mandante, gm, gv, visitante, jogo_bloqueado))
+            st.divider()
+    else:
+        st.info("Carregando confrontos do GE...")
+
+# --- 4. CÁLCULO E ATUALIZAÇÃO DA TABELA ---
 df_tabela = df_base.copy()
 
 if not df_tabela.empty:
     for mandante, gm, gv, visitante, bloqueado in placares_rodada:
-        # Aplica a alteração apenas para jogos futuros simulação do usuário
+        # Aplica palpites do usuário para jogos não iniciados/agendados
         if not bloqueado and (gm > 0 or gv > 0):
             if mandante in df_tabela['nome_time'].values and visitante in df_tabela['nome_time'].values:
                 idx_m = df_tabela[df_tabela['nome_time'] == mandante].index[0]
@@ -166,11 +179,11 @@ if not df_tabela.empty:
     df_tabela['saldo_gols'] = df_tabela['gols_pro'] - df_tabela['gols_contra']
     df_tabela['aproveitamento'] = (df_tabela['pontos'] / (df_tabela['jogos'] * 3) * 100).round(1)
 
-    # Critérios de desempate do Brasileirão
+    # Ordenação oficial do Brasileirão
     df_tabela = df_tabela.sort_values(by=["pontos", "vitorias", "saldo_gols", "gols_pro"], ascending=False).reset_index(drop=True)
     df_tabela.index = df_tabela.index + 1
 
-# --- 5. FUNÇÃO DE ESTILIZAÇÃO VISUAL ---
+# --- 5. COR DAS ZONAS NA TABELA ---
 def colorir_zonas(val):
     cores = []
     for i in range(len(val)):
@@ -193,12 +206,12 @@ def colorir_zonas(val):
             cores.append('')
     return cores
 
-# --- 6. EXIBIÇÃO DA TABELA NA COLUNA DA ESQUERDA ---
+# --- 6. EXIBIÇÃO DA TABELA ---
 with col_tabela:
-    st.subheader("📊 Classificação Atualizada (GE)")
+    st.subheader("📊 Classificação em Tempo Real")
     
     if not df_tabela.empty:
-        # Cards de métricas rápidas
+        # Cards Rápidos
         m1, m2, m3, m4 = st.columns(4)
         m1.metric("🏆 Líder", f"{df_tabela.iloc[0]['nome_time']}", f"{df_tabela.iloc[0]['pontos']} pts")
         m2.metric("🛡️ Corte G-4", f"{df_tabela.iloc[3]['nome_time']}", f"{df_tabela.iloc[3]['pontos']} pts")
@@ -218,5 +231,5 @@ with col_tabela:
         🟢 **1º ao 4º:** Libertadores | 
         🔵 **5º:** Pré-Libertadores | 
         🟡 **6º ao 11º:** Sul-Americana | 
-        🔴 **17º ao 20º:** Rebaixamento (Z-4) | 🔒 **Partida bloqueada**
+        🔴 **17º ao 20º:** Rebaixamento (Z-4) | 🔒 **Ao Vivo / Encerrado**
         """)
