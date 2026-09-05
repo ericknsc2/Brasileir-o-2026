@@ -3,24 +3,27 @@ import pandas as pd
 import requests
 from datetime import datetime
 
-# Configuração da página - Layout Wide
+# Configuração da página
 st.set_page_config(page_title="Brasileirão 2026", layout="wide", initial_sidebar_state="collapsed")
 
-# --- CSS RESPONSIVO HÍBRIDO (DESKTOP X MOBILE) ---
+# --- CSS RESPONSIVO HÍBRIDO DEFINITIVO ---
 st.markdown("""
 <style>
-    /* CSS para telas de Desktop/PC (Acima de 768px) */
+    /* DESKTOP (Telas maiores que 768px): Oculta o cabeçalho das abas e força layout em 2 colunas */
     @media (min-width: 769px) {
-        .mobile-only {
-            display: none !important;
+        div[data-testid="stTabs"] > div:first-child {
+            display: none !important; /* Esconde os botões das Abas no PC */
+        }
+        div[data-testid="stTabContent"] {
+            display: inline-block !important;
+            width: 49% !important;
+            vertical-align: top !important;
+            padding: 0 10px !important;
         }
     }
-    
-    /* CSS para telas de Celular/Mobile (Até 768px) */
+
+    /* MOBILE (Telas até 768px): Mantém abas normais e ajusta espaçamentos */
     @media (max-width: 768px) {
-        .desktop-only {
-            display: none !important;
-        }
         .block-container {
             padding-left: 0.5rem !important;
             padding-right: 0.5rem !important;
@@ -32,7 +35,7 @@ st.markdown("""
             font-weight: bold;
         }
     }
-    
+
     .time-nome-m { text-align: right; font-weight: bold; font-size: 14px; }
     .time-nome-v { text-align: left; font-weight: bold; font-size: 14px; }
     .status-badge { font-size: 12px; color: #666; margin-bottom: 2px; }
@@ -113,89 +116,32 @@ with c2:
     lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist()) if not df_base.empty else ["Nenhum"]
     time_favorito = st.selectbox("⭐ Time do Coração:", lista_times)
 
-# --- FUNÇÃO DO SIMULADOR ---
-def renderizar_simulador(key_prefix):
-    st.subheader(f"🎮 Jogos da {num_rodada}ª Rodada")
-    
-    if st.button("🧹 Limpar Meus Palpites", key=f"btn_limpar_{key_prefix}"):
-        for i in range(10):
-            if f"r{num_rodada}_m_{i}" in st.session_state:
-                st.session_state[f"r{num_rodada}_m_{i}"] = 0
-            if f"r{num_rodada}_v_{i}" in st.session_state:
-                st.session_state[f"r{num_rodada}_v_{i}"] = 0
-        st.rerun()
-
-    jogos = CONFRONTOS_PADRAO.get(num_rodada, [])
-    placares_rodada = []
-    agora = datetime.now()
-    
-    for idx, jogo in enumerate(jogos):
-        mandante, visitante, data_hora_str, gm_real, gv_real, status = jogo
-        data_jogo = datetime.strptime(data_hora_str, "%Y-%m-%d %H:%M")
-        jogo_bloqueado = (agora >= data_jogo) or (status in ["ENCERRADO", "EM_ANDAMENTO"])
-        
-        val_m = gm_real if gm_real is not None else 0
-        val_v = gv_real if gv_real is not None else 0
-        
-        hora_exibicao = data_hora_str.split(" ")[1]
-        if status == "ENCERRADO":
-            badge = "🔴 FIM"
-        elif status == "EM_ANDAMENTO":
-            badge = "🟢 AO VIVO"
-        else:
-            badge = f"🕒 {hora_exibicao}"
-
-        st.markdown(f"<div class='status-badge'>{badge}</div>", unsafe_allow_html=True)
-        
-        col_m, col_pm, col_x, col_pv, col_v = st.columns([2.2, 1.1, 0.4, 1.1, 2.2])
-        with col_m:
-            st.markdown(f"<div class='time-nome-m'>{mandante}</div>", unsafe_allow_html=True)
-        with col_pm:
-            gm = st.number_input(
-                "", min_value=0, value=val_m, key=f"{key_prefix}_r{num_rodada}_m_{idx}", 
-                label_visibility="collapsed", disabled=jogo_bloqueado
-            )
-        with col_x:
-            st.write("🔒" if jogo_bloqueado else "x")
-        with col_pv:
-            gv = st.number_input(
-                "", min_value=0, value=val_v, key=f"{key_prefix}_r{num_rodada}_v_{idx}", 
-                label_visibility="collapsed", disabled=jogo_bloqueado
-            )
-        with col_v:
-            st.markdown(f"<div class='time-nome-v'>{visitante}</div>", unsafe_allow_html=True)
-            
-        placares_rodada.append((mandante, gm, gv, visitante, status, jogo_bloqueado))
-        st.divider()
-        
-    return placares_rodada
-
-# --- CÁLCULO E ATUALIZAÇÃO DA TABELA ---
+# --- CÁLCULO DA TABELA DE CLASSIFICAÇÃO ---
 df_tabela = df_base.copy()
 jogos_atuais = CONFRONTOS_PADRAO.get(num_rodada, [])
 
 if not df_tabela.empty:
     for mandante, visitante, data_hora_str, gm_real, gv_real, status in jogos_atuais:
-        # Se for jogo do Bahia encerrado e o CSV da ESPN estiver desatualizado
-        if status == "ENCERRADO" and mandante == "Red Bull Bragantino":
-            idx_v = df_tabela[df_tabela['nome_time'] == visitante].index[0]
-            if df_tabela.at[idx_v, 'jogos'] == 25:
-                idx_m = df_tabela[df_tabela['nome_time'] == mandante].index[0]
-                df_tabela.at[idx_m, 'jogos'] += 1
-                df_tabela.at[idx_v, 'jogos'] += 1
-                df_tabela.at[idx_m, 'gols_pro'] += gm_real
-                df_tabela.at[idx_m, 'gols_contra'] += gv_real
-                df_tabela.at[idx_v, 'gols_pro'] += gv_real
-                df_tabela.at[idx_v, 'gols_contra'] += gm_real
-                
-                if gm_real > gv_real:
-                    df_tabela.at[idx_m, 'pontos'] += 3
-                    df_tabela.at[idx_m, 'vitorias'] += 1
-                    df_tabela.at[idx_v, 'derrotas'] += 1
-                elif gv_real > gm_real:
-                    df_tabela.at[idx_v, 'pontos'] += 3
-                    df_tabela.at[idx_v, 'vitorias'] += 1
-                    df_tabela.at[idx_m, 'derrotas'] += 1
+        if status == "ENCERRADO" and mandante == "Red Bull Bragantino" and visitante == "Bahia":
+            if "Bahia" in df_tabela['nome_time'].values:
+                idx_v = df_tabela[df_tabela['nome_time'] == "Bahia"].index[0]
+                if df_tabela.at[idx_v, 'jogos'] == 25:
+                    idx_m = df_tabela[df_tabela['nome_time'] == mandante].index[0]
+                    df_tabela.at[idx_m, 'jogos'] += 1
+                    df_tabela.at[idx_v, 'jogos'] += 1
+                    df_tabela.at[idx_m, 'gols_pro'] += gm_real
+                    df_tabela.at[idx_m, 'gols_contra'] += gv_real
+                    df_tabela.at[idx_v, 'gols_pro'] += gv_real
+                    df_tabela.at[idx_v, 'gols_contra'] += gm_real
+                    
+                    if gm_real > gv_real:
+                        df_tabela.at[idx_m, 'pontos'] += 3
+                        df_tabela.at[idx_m, 'vitorias'] += 1
+                        df_tabela.at[idx_v, 'derrotas'] += 1
+                    elif gv_real > gm_real:
+                        df_tabela.at[idx_v, 'pontos'] += 3
+                        df_tabela.at[idx_v, 'vitorias'] += 1
+                        df_tabela.at[idx_m, 'derrotas'] += 1
 
     df_tabela['saldo_gols'] = df_tabela['gols_pro'] - df_tabela['gols_contra']
     df_tabela['aproveitamento'] = (df_tabela['pontos'] / (df_tabela['jogos'] * 3) * 100).round(1)
@@ -222,13 +168,18 @@ def colorir_zonas(val):
             cores.append('')
     return cores
 
-def renderizar_tabela(cols_exibir):
+# --- ESTRUTURA COM ABAS (ADAPTÁVEL VIA CSS) ---
+tab_tabela, tab_simulador = st.tabs(["📊 Classificação", "🎮 Simulador"])
+
+with tab_tabela:
     st.subheader("📊 Classificação em Tempo Real")
     if not df_tabela.empty:
         m1, m2 = st.columns(2)
         m1.metric("🏆 Líder", f"{df_tabela.iloc[0]['nome_time']}", f"{df_tabela.iloc[0]['pontos']} pts")
         m2.metric("🛡️ Corte G-4", f"{df_tabela.iloc[3]['nome_time']}", f"{df_tabela.iloc[3]['pontos']} pts")
         st.write("")
+        
+        cols_exibir = ['nome_time', 'pontos', 'jogos', 'vitorias', 'empates', 'derrotas', 'gols_pro', 'gols_contra', 'saldo_gols', 'aproveitamento']
         st.dataframe(
             df_tabela[cols_exibir].style.apply(colorir_zonas, axis=0).format({"aproveitamento": "{:.1f}%"}),
             use_container_width=True,
@@ -237,22 +188,54 @@ def renderizar_tabela(cols_exibir):
         )
         st.caption("🟢 G-4 | 🔵 Pré-Libertadores | 🟡 Sul-Americana | 🔴 Z-4")
 
-# --- 3. MONTAGEM DOS LAYOUTS SEPARADOS (DESKTOP vs MOBILE) ---
+with tab_simulador:
+    st.subheader(f"🎮 Jogos da {num_rodada}ª Rodada")
+    
+    if st.button("🧹 Limpar Meus Palpites"):
+        for i in range(10):
+            if f"r{num_rodada}_m_{i}" in st.session_state:
+                st.session_state[f"r{num_rodada}_m_{i}"] = 0
+            if f"r{num_rodada}_v_{i}" in st.session_state:
+                st.session_state[f"r{num_rodada}_v_{i}"] = 0
+        st.rerun()
 
-# --- A) VISUAL PARA DESKTOP (Lado a Lado) ---
-st.markdown("<div class='desktop-only'>", unsafe_allow_html=True)
-col_pc_tab, col_pc_sim = st.columns([1.3, 1])
-with col_pc_tab:
-    renderizar_tabela(['nome_time', 'pontos', 'jogos', 'vitorias', 'empates', 'derrotas', 'gols_pro', 'gols_contra', 'saldo_gols', 'aproveitamento'])
-with col_pc_sim:
-    renderizar_simulador(key_prefix="pc")
-st.markdown("</div>", unsafe_allow_html=True)
+    jogos = CONFRONTOS_PADRAO.get(num_rodada, [])
+    agora = datetime.now()
+    
+    for idx, jogo in enumerate(jogos):
+        mandante, visitante, data_hora_str, gm_real, gv_real, status = jogo
+        data_jogo = datetime.strptime(data_hora_str, "%Y-%m-%d %H:%M")
+        jogo_bloqueado = (agora >= data_jogo) or (status in ["ENCERRADO", "EM_ANDAMENTO"])
+        
+        val_m = gm_real if gm_real is not None else 0
+        val_v = gv_real if gv_real is not None else 0
+        
+        hora_exibicao = data_hora_str.split(" ")[1]
+        if status == "ENCERRADO":
+            badge = "🔴 FIM"
+        elif status == "EM_ANDAMENTO":
+            badge = "🟢 AO VIVO"
+        else:
+            badge = f"🕒 {hora_exibicao}"
 
-# --- B) VISUAL PARA MOBILE (Em Abas) ---
-st.markdown("<div class='mobile-only'>", unsafe_allow_html=True)
-tab_m_tabela, tab_m_simulador = st.tabs(["📊 Classificação", "🎮 Simulador"])
-with tab_m_tabela:
-    renderizar_tabela(['nome_time', 'pontos', 'jogos', 'vitorias', 'saldo_gols', 'aproveitamento'])
-with tab_m_simulador:
-    renderizar_simulador(key_prefix="mob")
-st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='status-badge'>{badge}</div>", unsafe_allow_html=True)
+        
+        col_m, col_pm, col_x, col_pv, col_v = st.columns([2.2, 1.1, 0.4, 1.1, 2.2])
+        with col_m:
+            st.markdown(f"<div class='time-nome-m'>{mandante}</div>", unsafe_allow_html=True)
+        with col_pm:
+            gm = st.number_input(
+                "", min_value=0, value=val_m, key=f"r{num_rodada}_m_{idx}", 
+                label_visibility="collapsed", disabled=jogo_bloqueado
+            )
+        with col_x:
+            st.write("🔒" if jogo_bloqueado else "x")
+        with col_pv:
+            gv = st.number_input(
+                "", min_value=0, value=val_v, key=f"r{num_rodada}_v_{idx}", 
+                label_visibility="collapsed", disabled=jogo_bloqueado
+            )
+        with col_v:
+            st.markdown(f"<div class='time-nome-v'>{visitante}</div>", unsafe_allow_html=True)
+            
+        st.divider()
