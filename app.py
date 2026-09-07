@@ -12,11 +12,11 @@ except ImportError:
 # Configuração da página - Layout Wide
 st.set_page_config(page_title="Brasileirão 2026", layout="wide", initial_sidebar_state="collapsed")
 
-# --- CSS AJUSTADO ---
+# --- CSS RESPONSIVO HÍBRIDO (PC: LADO A LADO | MOBILE: 2 ABAS SEPARADAS) ---
 st.markdown("""
 <style>
     .block-container {
-        padding-top: 1rem !important;
+        padding-top: 0.8rem !important;
         padding-bottom: 0rem !important;
     }
     
@@ -29,6 +29,37 @@ st.markdown("""
     .time-nome-m { text-align: right; font-weight: bold; font-size: 13px; }
     .time-nome-v { text-align: left; font-weight: bold; font-size: 13px; }
     .status-badge { font-size: 11px; color: #555; margin-bottom: 2px; font-weight: 600; text-align: center; }
+
+    /* --- REGRA PARA DESKTOP / PC (Largura acima de 768px) --- */
+    @media (min-width: 769px) {
+        /* Oculta o cabeçalho das abas */
+        div[data-testid="stTabs"] > div:first-child {
+            display: none !important;
+        }
+        /* Transforma o container das abas em uma linha paralela (Flexbox) */
+        div[data-testid="stTabs"] {
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 20px !important;
+        }
+        /* Define a largura das duas colunas no PC: Tabela (56%) e Simulador (44%) */
+        div[data-testid="stTabContent"]:nth-child(1) {
+            width: 56% !important;
+            display: block !important;
+        }
+        div[data-testid="stTabContent"]:nth-child(2) {
+            width: 44% !important;
+            display: block !important;
+        }
+    }
+
+    /* --- REGRA PARA CELULAR / MOBILE (Largura até 768px) --- */
+    @media (max-width: 768px) {
+        .block-container {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -127,7 +158,7 @@ if placar_live:
 
 rodada_ativa = 28 if rodada_27_encerrada else 27
 
-# CONTROLES SUPERIORES (BARRA DE FILTRO)
+# CONTROLES SUPERIORES
 c_ctrl1, c_ctrl2 = st.columns([1, 2])
 with c_ctrl1:
     num_rodada = st.selectbox("Rodada Exibida:", list(CALENDARIO_RODADAS.keys()), index=list(CALENDARIO_RODADAS.keys()).index(rodada_ativa))
@@ -207,13 +238,11 @@ def colorir_zonas(val):
             cores.append('')
     return cores
 
-st.divider()
+# --- 4. ESTRUTURA DE ABAS COM CSS HÍBRIDO ---
+tab_tabela, tab_simulador = st.tabs(["📊 Classificação", "🎮 Jogos & Simulador"])
 
-# --- 4. LAYOUT PARALELO (TABELA À ESQUERDA | PLACARES E SIMULADOR À DIREITA) ---
-col_tabela, col_jogos = st.columns([1.2, 1])
-
-# COLUNA ESQUERDA: CLASSIFICAÇÃO
-with col_tabela:
+# ABA 1: CLASSIFICAÇÃO
+with tab_tabela:
     st.subheader("📊 Classificação em Tempo Real")
     if not df_simulado.empty:
         m1, m2 = st.columns(2)
@@ -225,12 +254,12 @@ with col_tabela:
             df_simulado[cols_exibir].style.apply(colorir_zonas, axis=0).format({"aproveitamento": "{:.1f}%"}),
             use_container_width=True,
             hide_index=False,
-            height=820  # Aumentado para 820px para cobrir os 20 times sem rolagem interna
+            height=820
         )
         st.caption("🟢 G-4 | 🔵 Pré-Libertadores | 🟡 Sul-Americana | 🔴 Z-4")
 
-# COLUNA DIREITA: JOGOS & PLACARES AO VIVO / SIMULADOR
-with col_jogos:
+# ABA 2: JOGOS & PLACARES AO VIVO / SIMULADOR
+with tab_simulador:
     st.subheader(f"🎮 Jogos & Simulador - {num_rodada}ª Rodada")
     
     if st.button("🧹 Limpar Meus Palpites"):
