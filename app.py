@@ -118,7 +118,7 @@ CALENDARIO_RODADAS = {
 
 placar_live = buscar_jogos_espn()
 
-# Avanço automático de rodada caso todos da 27 encerrem
+# Avanço automático de rodada caso todos os jogos da 27 encerrem
 rodada_27_encerrada = False
 if placar_live:
     encerrados = sum(1 for m, v, _ in CALENDARIO_RODADAS[27] if f"{m}x{v}" in placar_live and placar_live[f"{m}x{v}"]['state'] == 'post')
@@ -225,7 +225,7 @@ with col_tabela:
             df_simulado[cols_exibir].style.apply(colorir_zonas, axis=0).format({"aproveitamento": "{:.1f}%"}),
             use_container_width=True,
             hide_index=False,
-            height=720
+            height=820  # Aumentado para 820px para cobrir os 20 times sem rolagem interna
         )
         st.caption("🟢 G-4 | 🔵 Pré-Libertadores | 🟡 Sul-Americana | 🔴 Z-4")
 
