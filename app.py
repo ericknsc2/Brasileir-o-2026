@@ -5,16 +5,14 @@ import requests
 # Configuração da página - Layout Wide
 st.set_page_config(page_title="Brasileirão 2026", layout="wide", initial_sidebar_state="collapsed")
 
-# --- CSS PARA ELEVAR O CABEÇALHO E OTIMIZAR ESPAÇAMENTOS ---
+# --- CSS PARA ESPAÇAMENTOS E BOTÕES ---
 st.markdown("""
 <style>
-    /* Elevação do layout para otimizar espaço no topo */
     .block-container {
         padding-top: 0.3rem !important;
         padding-bottom: 0rem !important;
     }
     
-    /* Redução de margem do título principal */
     h1 {
         padding-top: 0rem !important;
         margin-top: -0.5rem !important;
@@ -42,6 +40,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("⚽ Brasileirão 2026")
+
+# --- Inicialização da Session State para Palpites Confirmados ---
+if "palpites_confirmados" not in st.session_state:
+    st.session_state.palpites_confirmados = {}
 
 # --- 1. DADOS DA TABELA BASE OFICIAL (CONSOLIDADA NA 26ª RODADA) ---
 @st.cache_data(ttl=1)
@@ -72,7 +74,7 @@ def carregar_tabela_oficial():
     df['saldo_gols'] = df['gols_pro'] - df['gols_contra']
     return df
 
-# --- 2. CONSULTA API PUBLICA DA ESPN (AO VIVO) ---
+# --- 2. CONSULTA API PÚBLICA DA ESPN (AO VIVO) ---
 def buscar_jogos_espn():
     url = "https://site.api.espn.com/apis/site/v2/sports/soccer/bra.1/scoreboard"
     try:
@@ -136,22 +138,22 @@ with c_ctrl2:
     lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist())
     time_favorito = st.selectbox("⭐ Destaque o Time do Coração:", lista_times)
 
-# --- 3. RECALCULO REATIVO DA TABELA BASEADO NOS PALPITES DO SIMULADOR OU JOGOS REALIZADOS ---
+# --- 3. CÁLCULO REATIVO DA TABELA APENAS COM PALPITES CONFIRMADOS ---
 df_simulado = df_base.copy()
 confrontos = CALENDARIO_RODADAS.get(num_rodada, [])
 
 for idx, (mandante, visitante, _) in enumerate(confrontos):
-    key_m = f"sim_r{num_rodada}_m_{idx}"
-    key_v = f"sim_r{num_rodada}_v_{idx}"
     chave_live = f"{mandante}x{visitante}"
+    chave_sim = f"sim_r{num_rodada}_{idx}"
     
+    # 1. Se o jogo está AO VIVO ou ENCERRADO na API da ESPN
     if chave_live in placar_live and placar_live[chave_live]['state'] in ['in', 'post']:
         gm = placar_live[chave_live]['gm']
         gv = placar_live[chave_live]['gv']
         jogou = True
-    elif key_m in st.session_state and key_v in st.session_state:
-        gm = st.session_state[key_m]
-        gv = st.session_state[key_v]
+    # 2. Se o palpite foi CONFIRMADO pelo botão "Calcular"
+    elif chave_sim in st.session_state.palpites_confirmados:
+        gm, gv = st.session_state.palpites_confirmados[chave_sim]
         jogou = True
     else:
         jogou = False
@@ -206,7 +208,7 @@ def colorir_zonas(val):
             cores.append('')
     return cores
 
-# --- 4. NAVEGAÇÃO POR ABAS FIXAS (3 ABAS NATIVAS) ---
+# --- 4. ABAS NATIVAS DE NAVEGAÇÃO ---
 tab_tabela, tab_simulador, tab_aovivo = st.tabs(["📊 Classificação", "🎮 Simulador", "🔴 Ao Vivo"])
 
 # ABA 1: CLASSIFICAÇÃO COMPLETA
@@ -225,38 +227,65 @@ with tab_tabela:
         )
         st.caption("🟢 G-4 | 🔵 Pré-Libertadores | 🟡 Sul-Americana | 🔴 Z-4")
 
-# ABA 2: SIMULADOR DE PALPITES (INTERATIVO)
+# ABA 2: SIMULADOR DE PALPITES COM BOTÃO DE CÁLCULO
 with tab_simulador:
     st.subheader(f"🎮 Palpites para a {num_rodada}ª Rodada")
     
-    if st.button("🧹 Limpar Meus Palpites"):
-        for idx in range(len(confrontos)):
-            k_m = f"sim_r{num_rodada}_m_{idx}"
-            k_v = f"sim_r{num_rodada}_v_{idx}"
-            if k_m in st.session_state:
-                del st.session_state[k_m]
-            if k_v in st.session_state:
-                del st.session_state[k_v]
-        st.rerun()
+    col_btn1, col_btn2 = st.columns(2)
+    with col_btn1:
+        if st.button("🧮 Calcular Todos os Palpites"):
+            for idx in range(len(confrontos)):
+                key_m = f"input_r{num_rodada}_m_{idx}"
+                key_v = f"input_r{num_rodada}_v_{idx}"
+                if key_m in st.session_state and key_v in st.session_state:
+                    gm = st.session_state[key_m]
+                    gv = st.session_state[key_v]
+                    if gm is not None and gv is not None:
+                        st.session_state.palpites_confirmados[f"sim_r{num_rodada}_{idx}"] = (gm, gv)
+            st.rerun()
+            
+    with col_btn2:
+        if st.button("🧹 Limpar Meus Palpites"):
+            st.session_state.palpites_confirmados.clear()
+            for idx in range(len(confrontos)):
+                st.session_state[f"input_r{num_rodada}_m_{idx}"] = None
+                st.session_state[f"input_r{num_rodada}_v_{idx}"] = None
+            st.rerun()
+
+    st.write("")
 
     for idx, (mandante, visitante, data_hora_str) in enumerate(confrontos):
+        chave_sim = f"sim_r{num_rodada}_{idx}"
         st.markdown(f"<div class='status-badge'>📅 {data_hora_str}</div>", unsafe_allow_html=True)
         
-        c_m, c_pm, c_x, c_pv, c_v = st.columns([2.2, 1.1, 0.3, 1.1, 2.2])
+        c_m, c_pm, c_x, c_pv, c_v, c_btn = st.columns([2.0, 0.9, 0.2, 0.9, 2.0, 1.2])
+        
         with c_m:
             st.markdown(f"<div class='time-nome-m'>{mandante}</div>", unsafe_allow_html=True)
         with c_pm:
-            st.number_input("", min_value=0, value=0, key=f"sim_r{num_rodada}_m_{idx}", label_visibility="collapsed")
+            gm_val = st.number_input(
+                "", min_value=0, key=f"input_r{num_rodada}_m_{idx}", 
+                label_visibility="collapsed", value=None, placeholder="-"
+            )
         with c_x:
             st.write("x")
         with c_pv:
-            st.number_input("", min_value=0, value=0, key=f"sim_r{num_rodada}_v_{idx}", label_visibility="collapsed")
+            gv_val = st.number_input(
+                "", min_value=0, key=f"input_r{num_rodada}_v_{idx}", 
+                label_visibility="collapsed", value=None, placeholder="-"
+            )
         with c_v:
             st.markdown(f"<div class='time-nome-v'>{visitante}</div>", unsafe_allow_html=True)
+        with c_btn:
+            # Botão individual para calcular apenas esta partida
+            if st.button("🧮 Calcular", key=f"btn_calc_{idx}"):
+                if gm_val is not None and gv_val is not None:
+                    st.session_state.palpites_confirmados[chave_sim] = (gm_val, gv_val)
+                    st.rerun()
             
         st.divider()
 
-# ABA 3: PAINEL AO VIVO (COM BOTÃO DE ATUALIZAÇÃO MANUALE SEM PULOS)
+# ABA 3: PAINEL AO VIVO
 with tab_aovivo:
     c_tit, c_btn = st.columns([2, 1])
     with c_tit:
