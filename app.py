@@ -2,17 +2,10 @@ import streamlit as st
 import pandas as pd
 import requests
 
-# Atualização em tempo real a cada 2 segundos
-try:
-    from streamlit_autorefresh import st_autorefresh
-    st_autorefresh(interval=2000, key="autoupdate_brasileirao")
-except ImportError:
-    pass
-
 # Configuração da página - Layout Wide
 st.set_page_config(page_title="Brasileirão 2026", layout="wide", initial_sidebar_state="collapsed")
 
-# --- CSS PARA SUBIR O CABEÇALHO E AJUSTAR ESPAÇAMENTOS ---
+# --- CSS PARA ELEVAR O CABEÇALHO E OTIMIZAR ESPAÇAMENTOS ---
 st.markdown("""
 <style>
     /* Elevação do layout para otimizar espaço no topo */
@@ -51,7 +44,7 @@ st.markdown("""
 st.title("⚽ Brasileirão 2026")
 
 # --- 1. DADOS DA TABELA BASE OFICIAL (CONSOLIDADA NA 26ª RODADA) ---
-@st.cache_data(ttl=5)
+@st.cache_data(ttl=1)
 def carregar_tabela_oficial():
     dados_tabela = [
         {"nome_time": "Flamengo", "pontos": 54, "jogos": 26, "vitorias": 16, "empates": 6, "derrotas": 4, "gols_pro": 51, "gols_contra": 21},
@@ -263,10 +256,15 @@ with tab_simulador:
             
         st.divider()
 
-# ABA 3: PAINEL AO VIVO (API ESPN EM TEMPO REAL)
+# ABA 3: PAINEL AO VIVO (COM BOTÃO DE ATUALIZAÇÃO MANUALE SEM PULOS)
 with tab_aovivo:
-    st.subheader(f"🔴 Central Ao Vivo - {num_rodada}ª Rodada")
-    st.caption("Atualizado automaticamente a cada 2 segundos")
+    c_tit, c_btn = st.columns([2, 1])
+    with c_tit:
+        st.subheader(f"🔴 Central Ao Vivo - {num_rodada}ª Rodada")
+    with c_btn:
+        if st.button("🔄 Atualizar Placar Ao Vivo"):
+            st.cache_data.clear()
+            st.rerun()
 
     for idx, (mandante, visitante, data_hora_str) in enumerate(confrontos):
         chave_live = f"{mandante}x{visitante}"
