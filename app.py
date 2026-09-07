@@ -12,14 +12,23 @@ except ImportError:
 # Configuração da página - Layout Wide
 st.set_page_config(page_title="Brasileirão 2026", layout="wide", initial_sidebar_state="collapsed")
 
-# --- CSS DEFINITIVO E LIMPO ---
+# --- CSS PARA SUBIR O CABEÇALHO E AJUSTAR ESPAÇAMENTOS ---
 st.markdown("""
 <style>
+    /* Elevação do layout para otimizar espaço no topo */
     .block-container {
-        padding-top: 1rem !important;
+        padding-top: 0.3rem !important;
         padding-bottom: 0rem !important;
     }
     
+    /* Redução de margem do título principal */
+    h1 {
+        padding-top: 0rem !important;
+        margin-top: -0.5rem !important;
+        margin-bottom: 0.5rem !important;
+        font-size: 1.8rem !important;
+    }
+
     .stNumberInput input {
         text-align: center;
         font-size: 15px !important;
@@ -30,11 +39,10 @@ st.markdown("""
     .time-nome-v { text-align: left; font-weight: bold; font-size: 13px; }
     .status-badge { font-size: 11px; color: #555; margin-bottom: 2px; font-weight: 600; text-align: center; }
 
-    /* Estilização para o celular */
     @media (max-width: 768px) {
         .block-container {
-            padding-left: 0.5rem !important;
-            padding-right: 0.5rem !important;
+            padding-left: 0.4rem !important;
+            padding-right: 0.4rem !important;
         }
     }
 </style>
@@ -42,7 +50,7 @@ st.markdown("""
 
 st.title("⚽ Brasileirão 2026")
 
-# --- 1. DADOS DE TABELA BASE OFICIAL ---
+# --- 1. DADOS DA TABELA BASE OFICIAL (CONSOLIDADA NA 26ª RODADA) ---
 @st.cache_data(ttl=5)
 def carregar_tabela_oficial():
     dados_tabela = [
@@ -71,7 +79,7 @@ def carregar_tabela_oficial():
     df['saldo_gols'] = df['gols_pro'] - df['gols_contra']
     return df
 
-# --- 2. BUSCA PLACARES AO VIVO EM TEMPO REAL (ESPN) ---
+# --- 2. CONSULTA API PUBLICA DA ESPN (AO VIVO) ---
 def buscar_jogos_espn():
     url = "https://site.api.espn.com/apis/site/v2/sports/soccer/bra.1/scoreboard"
     try:
@@ -133,9 +141,9 @@ with c_ctrl1:
 with c_ctrl2:
     df_base = carregar_tabela_oficial()
     lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist())
-    time_favorito = st.selectbox("⭐ Time do Coração:", lista_times)
+    time_favorito = st.selectbox("⭐ Destaque o Time do Coração:", lista_times)
 
-# --- 3. RECÁLCULO DA TABELA COM OS PALPITES E JOGOS AO VIVO ---
+# --- 3. RECALCULO REATIVO DA TABELA BASEADO NOS PALPITES DO SIMULADOR OU JOGOS REALIZADOS ---
 df_simulado = df_base.copy()
 confrontos = CALENDARIO_RODADAS.get(num_rodada, [])
 
@@ -205,9 +213,11 @@ def colorir_zonas(val):
             cores.append('')
     return cores
 
-# --- FUNÇÃO QUE RENDERIZA A TABELA DE CLASSIFICAÇÃO ---
-def renderizar_tabela():
-    st.subheader("📊 Classificação em Tempo Real")
+# --- 4. NAVEGAÇÃO POR ABAS FIXAS (3 ABAS NATIVAS) ---
+tab_tabela, tab_simulador, tab_aovivo = st.tabs(["📊 Classificação", "🎮 Simulador", "🔴 Ao Vivo"])
+
+# ABA 1: CLASSIFICAÇÃO COMPLETA
+with tab_tabela:
     if not df_simulado.empty:
         m1, m2 = st.columns(2)
         m1.metric("🏆 Líder", f"{df_simulado.iloc[0]['nome_time']}", f"{df_simulado.iloc[0]['pontos']} pts")
@@ -222,9 +232,9 @@ def renderizar_tabela():
         )
         st.caption("🟢 G-4 | 🔵 Pré-Libertadores | 🟡 Sul-Americana | 🔴 Z-4")
 
-# --- FUNÇÃO QUE RENDERIZA OS PLACARES E O SIMULADOR ---
-def renderizar_simulador():
-    st.subheader(f"🎮 Jogos & Simulador - {num_rodada}ª Rodada")
+# ABA 2: SIMULADOR DE PALPITES (INTERATIVO)
+with tab_simulador:
+    st.subheader(f"🎮 Palpites para a {num_rodada}ª Rodada")
     
     if st.button("🧹 Limpar Meus Palpites"):
         for idx in range(len(confrontos)):
@@ -237,59 +247,61 @@ def renderizar_simulador():
         st.rerun()
 
     for idx, (mandante, visitante, data_hora_str) in enumerate(confrontos):
+        st.markdown(f"<div class='status-badge'>📅 {data_hora_str}</div>", unsafe_allow_html=True)
+        
+        c_m, c_pm, c_x, c_pv, c_v = st.columns([2.2, 1.1, 0.3, 1.1, 2.2])
+        with c_m:
+            st.markdown(f"<div class='time-nome-m'>{mandante}</div>", unsafe_allow_html=True)
+        with c_pm:
+            st.number_input("", min_value=0, value=0, key=f"sim_r{num_rodada}_m_{idx}", label_visibility="collapsed")
+        with c_x:
+            st.write("x")
+        with c_pv:
+            st.number_input("", min_value=0, value=0, key=f"sim_r{num_rodada}_v_{idx}", label_visibility="collapsed")
+        with c_v:
+            st.markdown(f"<div class='time-nome-v'>{visitante}</div>", unsafe_allow_html=True)
+            
+        st.divider()
+
+# ABA 3: PAINEL AO VIVO (API ESPN EM TEMPO REAL)
+with tab_aovivo:
+    st.subheader(f"🔴 Central Ao Vivo - {num_rodada}ª Rodada")
+    st.caption("Atualizado automaticamente a cada 2 segundos")
+
+    for idx, (mandante, visitante, data_hora_str) in enumerate(confrontos):
         chave_live = f"{mandante}x{visitante}"
         
         if chave_live in placar_live:
             st_info = placar_live[chave_live]
             if st_info['state'] == 'in':
                 badge = f"🟢 AO VIVO ({st_info['detail']})"
-                bloqueado = True
-                val_m = st_info['gm']
-                val_v = st_info['gv']
+                p_m = st_info['gm']
+                p_v = st_info['gv']
             elif st_info['state'] == 'post':
                 badge = "🔴 FIM DE JOGO"
-                bloqueado = True
-                val_m = st_info['gm']
-                val_v = st_info['gv']
+                p_m = st_info['gm']
+                p_v = st_info['gv']
             else:
-                badge = f"📅 {data_hora_str}"
-                bloqueado = False
-                val_m = 0
-                val_v = 0
+                badge = f"🕒 AGENDADO - {data_hora_str}"
+                p_m = "-"
+                p_v = "-"
         else:
-            badge = f"📅 {data_hora_str}"
-            bloqueado = False
-            val_m = 0
-            val_v = 0
+            badge = f"🕒 AGENDADO - {data_hora_str}"
+            p_m = "-"
+            p_v = "-"
 
         st.markdown(f"<div class='status-badge'>{badge}</div>", unsafe_allow_html=True)
         
-        c_m, c_pm, c_x, c_pv, c_v = st.columns([2.2, 1.1, 0.3, 1.1, 2.2])
+        c_m, c_pm, c_x, c_pv, c_v = st.columns([2.2, 1.0, 0.4, 1.0, 2.2])
         with c_m:
             st.markdown(f"<div class='time-nome-m'>{mandante}</div>", unsafe_allow_html=True)
         with c_pm:
-            st.number_input(
-                "", min_value=0, value=val_m, key=f"sim_r{num_rodada}_m_{idx}", 
-                label_visibility="collapsed", disabled=bloqueado
-            )
+            st.markdown(f"<h3 style='text-align: center; margin: 0;'>{p_m}</h3>", unsafe_allow_html=True)
         with c_x:
-            st.write("🔒" if bloqueado else "x")
+            st.markdown("<div style='text-align: center; font-weight: bold;'>x</div>", unsafe_allow_html=True)
         with c_pv:
-            st.number_input(
-                "", min_value=0, value=val_v, key=f"sim_r{num_rodada}_v_{idx}", 
-                label_visibility="collapsed", disabled=bloqueado
-            )
+            st.markdown(f"<h3 style='text-align: center; margin: 0;'>{p_v}</h3>", unsafe_allow_html=True)
         with c_v:
             st.markdown(f"<div class='time-nome-v'>{visitante}</div>", unsafe_allow_html=True)
             
         st.divider()
-
-# --- 4. EXIBIÇÃO NO NAVEGADOR ---
-# Utiliza diretamente duas colunas do Streamlit no PC
-col_tabela, col_jogos = st.columns([1.2, 1])
-
-with col_tabela:
-    renderizar_tabela()
-
-with col_jogos:
-    renderizar_simulador()
