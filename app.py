@@ -54,89 +54,128 @@ st.markdown("""
 
 st.title("⚽ Brasileirão 2026")
 
-# --- OBTENÇÃO DA API KEY VIA SECRETS ---
-API_KEY = st.secrets.get("FOOTBALL_API_KEY", "")
-HEADERS = {'X-Auth-Token': API_KEY} if API_KEY else {}
-
-# --- 1. BUSCA DA TABELA E JOGOS VIA API (FOOTBALL-DATA.ORG) ---
+# --- 1. BUSCA DA TABELA BASE OFICIAL ---
 @st.cache_data(ttl=60)
-def carregar_dados_api(rodada_sel):
-    if not API_KEY:
-        st.warning("⚠️ Adicione a chave 'FOOTBALL_API_KEY' nos Secrets do Streamlit para ativar a API ao vivo.")
-        return pd.DataFrame(), []
-
-    url_tabela = "https://api.football-data.org/v4/competitions/BSA/standings"
-    url_jogos = f"https://api.football-data.org/v4/competitions/BSA/matches?matchday={rodada_sel}"
-    
-    df_tabela = pd.DataFrame()
-    jogos_lista = []
+def buscar_tabela_base():
+    url = "https://www.espn.com.br/futebol/liga/_/nome/bra.1/tabela"
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    try:
+        res = requests.get(url, headers=headers, timeout=5)
+        if res.status_code == 200:
+            tables = pd.read_html(res.text)
+            df_times = tables[0]
+            df_stats = tables[1]
+            df = pd.concat([df_times, df_stats], axis=1)
+            df.columns = ['Time_Raw', 'J', 'V', 'E', 'D', 'GP', 'GC', 'SG', 'PTS']
+            df['nome_time'] = df['Time_Raw'].str.replace(r'^[0-9]+', '', regex=True).str.strip()
+            
+            return pd.DataFrame({
+                'nome_time': df['nome_time'],
+                'pontos': df['PTS'].astype(int),
+                'jogos': df['J'].astype(int),
+                'vitorias': df['V'].astype(int),
+                'empates': df['E'].astype(int),
+                'derrotas': df['D'].astype(int),
+                'gols_pro': df['GP'].astype(int),
+                'gols_contra': df['GC'].astype(int),
+                'saldo_gols': df['SG'].astype(int)
+            })
+    except Exception:
+        pass
     
     try:
-        # A) Busca Tabela de Classificação
-        res_tab = requests.get(url_tabela, headers=HEADERS, timeout=8)
-        if res_tab.status_code == 200:
-            dados_tab = res_tab.json()
-            times = []
-            for item in dados_tab['standings'][0]['table']:
-                times.append({
-                    'nome_time': item['team']['shortName'],
-                    'pontos': item['points'],
-                    'jogos': item['playedGames'],
-                    'vitorias': item['won'],
-                    'empates': item['draw'],
-                    'derrotas': item['lost'],
-                    'gols_pro': item['goalsFor'],
-                    'gols_contra': item['goalsAgainst'],
-                    'saldo_gols': item['goalDifference']
-                })
-            df_tabela = pd.DataFrame(times)
+        return pd.read_csv("Brasileirao_SQL.csv")
+    except Exception:
+        return pd.DataFrame()
 
-        # B) Busca Jogos da Rodada Selecionada
-        res_jogos = requests.get(url_jogos, headers=HEADERS, timeout=8)
-        if res_jogos.status_code == 200:
-            dados_jogos = res_jogos.json()
-            for match in dados_jogos.get('matches', []):
-                mandante = match['homeTeam']['shortName']
-                visitante = match['awayTeam']['shortName']
-                gm = match['score']['fullTime']['home']
-                gv = match['score']['fullTime']['away']
-                status = match['status'] # FINISHED, IN_PLAY, PAUSED, TIMED
-                data_iso = match['utcDate']
-                
-                # Formatador de Horário
-                try:
-                    dt = datetime.fromisoformat(data_iso.replace('Z', '+00:00'))
-                    hora_str = dt.strftime("%H:%M")
-                except Exception:
-                    hora_str = "--:--"
+# --- 2. CONFRONTOS DAS RODADAS ---
+CONFRONTOS_PADRAO = {
+    26: [
+        ("Red Bull Bragantino", "Bahia", "2026-09-05 16:00", 2, 3, "ENCERRADO"),
+        ("São Paulo", "Atlético-MG", "2026-09-05 18:30", 0, 0, "EM_ANDAMENTO"),
+        ("Fluminense", "Vasco", "2026-09-05 21:00", None, None, "AGENDADO"),
+        ("Coritiba", "Mirassol", "2026-09-06 11:00", None, None, "AGENDADO"),
+        ("Cruzeiro", "Athletico-PR", "2026-09-06 16:00", None, None, "AGENDADO"),
+        ("Remo", "Flamengo", "2026-09-06 16:00", None, None, "AGENDADO"),
+        ("Internacional", "Santos", "2026-09-06 16:00", None, None, "AGENDADO"),
+        ("Botafogo", "Palmeiras", "2026-09-06 18:30", None, None, "AGENDADO"),
+        ("Corinthians", "Chapecoense", "2026-09-06 19:30", None, None, "AGENDADO"),
+        ("Vitória", "Grêmio", "2026-09-07 20:00", None, None, "AGENDADO")
+    ],
+    27: [
+        ("Coritiba", "Athletico-PR", "2026-09-11 21:00", None, None, "AGENDADO"),
+        ("Atlético-MG", "Fluminense", "2026-09-12 16:00", None, None, "AGENDADO"),
+        ("Grêmio", "Vasco", "2026-09-12 16:00", None, None, "AGENDADO"),
+        ("Chapecoense", "Internacional", "2026-09-12 17:00", None, None, "AGENDADO"),
+        ("Palmeiras", "São Paulo", "2026-09-12 18:30", None, None, "AGENDADO"),
+        ("Botafogo", "Red Bull Bragantino", "2026-09-12 20:30", None, None, "AGENDADO"),
+        ("Santos", "Cruzeiro", "2026-09-12 21:00", None, None, "AGENDADO"),
+        ("Mirassol", "Vitória", "2026-09-13 16:00", None, None, "AGENDADO"),
+        ("Flamengo", "Corinthians", "2026-09-13 17:30", None, None, "AGENDADO"),
+        ("Bahia", "Remo", "2026-09-14 20:00", None, None, "AGENDADO")
+    ]
+}
 
-                jogos_lista.append({
-                    'mandante': mandante,
-                    'visitante': visitante,
-                    'gm': gm if gm is not None else 0,
-                    'gv': gv if gv is not None else 0,
-                    'status': status,
-                    'hora': hora_str
-                })
+df_base = buscar_tabela_base()
 
-    except Exception as e:
-        st.error(f"Erro na conexão com a API: {e}")
-
-    return df_tabela, jogos_lista
-
-# --- CONTROLES SUPERIORES ---
+# CONTROLES SUPERIORES
 c1, c2 = st.columns([1, 2])
 with c1:
-    num_rodada = st.selectbox("Rodada:", list(range(1, 39)), index=25) # Padrão na 26ª rodada
-
-df_base, jogos_api = carregar_dados_api(num_rodada)
-
+    num_rodada = st.selectbox("Rodada:", list(range(26, 39)))
 with c2:
     lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist()) if not df_base.empty else ["Nenhum"]
     time_favorito = st.selectbox("⭐ Time do Coração:", lista_times)
 
-# --- RECALCULO E ESTILIZAÇÃO DA TABELA ---
+# --- 3. RECALCULO REATIVO DA TABELA COM OS PALPITES ---
 df_tabela = df_base.copy()
+jogos_atuais = CONFRONTOS_PADRAO.get(num_rodada, [])
+
+if not df_tabela.empty:
+    for idx, jogo in enumerate(jogos_atuais):
+        mandante, visitante, data_hora_str, gm_real, gv_real, status = jogo
+        
+        key_m = f"r{num_rodada}_m_{idx}"
+        key_v = f"r{num_rodada}_v_{idx}"
+        
+        # Pega resultado real se encerrado/ao vivo, ou o palpite digitado no simulador
+        if status in ["ENCERRADO", "EM_ANDAMENTO"]:
+            gm = gm_real if gm_real is not None else 0
+            gv = gv_real if gv_real is not None else 0
+            computar = True
+        else:
+            gm = st.session_state.get(key_m, 0)
+            gv = st.session_state.get(key_v, 0)
+            computar = (key_m in st.session_state and key_v in st.session_state)
+
+        if computar and (mandante in df_tabela['nome_time'].values) and (visitante in df_tabela['nome_time'].values):
+            idx_m = df_tabela[df_tabela['nome_time'] == mandante].index[0]
+            idx_v = df_tabela[df_tabela['nome_time'] == visitante].index[0]
+            
+            df_tabela.at[idx_m, 'jogos'] += 1
+            df_tabela.at[idx_v, 'jogos'] += 1
+            df_tabela.at[idx_m, 'gols_pro'] += gm
+            df_tabela.at[idx_m, 'gols_contra'] += gv
+            df_tabela.at[idx_v, 'gols_pro'] += gv
+            df_tabela.at[idx_v, 'gols_contra'] += gm
+            
+            if gm > gv:
+                df_tabela.at[idx_m, 'pontos'] += 3
+                df_tabela.at[idx_m, 'vitorias'] += 1
+                df_tabela.at[idx_v, 'derrotas'] += 1
+            elif gv > gm:
+                df_tabela.at[idx_v, 'pontos'] += 3
+                df_tabela.at[idx_v, 'vitorias'] += 1
+                df_tabela.at[idx_m, 'derrotas'] += 1
+            else:
+                df_tabela.at[idx_m, 'pontos'] += 1
+                df_tabela.at[idx_v, 'pontos'] += 1
+                df_tabela.at[idx_m, 'empates'] += 1
+                df_tabela.at[idx_v, 'empates'] += 1
+
+    df_tabela['saldo_gols'] = df_tabela['gols_pro'] - df_tabela['gols_contra']
+    df_tabela['aproveitamento'] = (df_tabela['pontos'] / (df_tabela['jogos'] * 3) * 100).round(1)
+    df_tabela = df_tabela.sort_values(by=["pontos", "vitorias", "saldo_gols", "gols_pro"], ascending=False).reset_index(drop=True)
+    df_tabela.index = df_tabela.index + 1
 
 def colorir_zonas(val):
     cores = []
@@ -158,22 +197,19 @@ def colorir_zonas(val):
             cores.append('')
     return cores
 
-# --- ESTRUTURA HÍBRIDA DE ABAS ---
+# --- ESTRUTURA DE ABAS ---
 tab_tabela, tab_simulador = st.tabs(["📊 Classificação", "🎮 Simulador"])
 
 # 1. PAINEL DE CLASSIFICAÇÃO
 with tab_tabela:
-    st.subheader("📊 Classificação em Tempo Real (Oficial)")
+    st.subheader("📊 Classificação em Tempo Real")
     if not df_tabela.empty:
         m1, m2 = st.columns(2)
         m1.metric("🏆 Líder", f"{df_tabela.iloc[0]['nome_time']}", f"{df_tabela.iloc[0]['pontos']} pts")
         m2.metric("🛡️ Corte G-4", f"{df_tabela.iloc[3]['nome_time']}", f"{df_tabela.iloc[3]['pontos']} pts")
         st.write("")
         
-        # Adiciona a coluna de aproveitamento
-        df_tabela['aproveitamento'] = (df_tabela['pontos'] / (df_tabela['jogos'] * 3) * 100).round(1)
         cols_exibir = ['nome_time', 'pontos', 'jogos', 'vitorias', 'empates', 'derrotas', 'gols_pro', 'gols_contra', 'saldo_gols', 'aproveitamento']
-
         st.dataframe(
             df_tabela[cols_exibir].style.apply(colorir_zonas, axis=0).format({"aproveitamento": "{:.1f}%"}),
             use_container_width=True,
@@ -187,53 +223,48 @@ with tab_simulador:
     st.subheader(f"🎮 Jogos da {num_rodada}ª Rodada")
     
     if st.button("🧹 Limpar Meus Palpites"):
-        for i in range(len(jogos_api)):
+        for i in range(10):
             if f"r{num_rodada}_m_{i}" in st.session_state:
-                st.session_state[f"r{num_rodada}_m_{i}"] = 0
+                del st.session_state[f"r{num_rodada}_m_{i}"]
             if f"r{num_rodada}_v_{i}" in st.session_state:
-                st.session_state[f"r{num_rodada}_v_{i}"] = 0
+                del st.session_state[f"r{num_rodada}_v_{i}"]
         st.rerun()
 
-    if jogos_api:
-        for idx, jogo in enumerate(jogos_api):
-            mandante = jogo['mandante']
-            visitante = jogo['visitante']
-            status = jogo['status']
-            hora = jogo['hora']
-            
-            # Bloqueia caso o jogo já tenha terminado ou esteja ao vivo
-            jogo_bloqueado = status in ["FINISHED", "IN_PLAY", "PAUSED"]
-            
-            val_m = jogo['gm'] if jogo_bloqueado else 0
-            val_v = jogo['gv'] if jogo_bloqueado else 0
-            
-            if status == "FINISHED":
-                badge = "🔴 FIM"
-            elif status in ["IN_PLAY", "PAUSED"]:
-                badge = "🟢 AO VIVO"
-            else:
-                badge = f"🕒 {hora}"
+    jogos = CONFRONTOS_PADRAO.get(num_rodada, [])
+    
+    for idx, jogo in enumerate(jogos):
+        mandante, visitante, data_hora_str, gm_real, gv_real, status = jogo
+        jogo_bloqueado = status in ["ENCERRADO", "EM_ANDAMENTO"]
+        
+        val_m = gm_real if gm_real is not None else 0
+        val_v = gv_real if gv_real is not None else 0
+        
+        hora_exibicao = data_hora_str.split(" ")[1]
+        if status == "ENCERRADO":
+            badge = "🔴 FIM"
+        elif status == "EM_ANDAMENTO":
+            badge = "🟢 AO VIVO"
+        else:
+            badge = f"🕒 {hora_exibicao}"
 
-            st.markdown(f"<div class='status-badge'>{badge}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='status-badge'>{badge}</div>", unsafe_allow_html=True)
+        
+        col_m, col_pm, col_x, col_pv, col_v = st.columns([2.2, 1.1, 0.4, 1.1, 2.2])
+        with col_m:
+            st.markdown(f"<div class='time-nome-m'>{mandante}</div>", unsafe_allow_html=True)
+        with col_pm:
+            st.number_input(
+                "", min_value=0, value=val_m, key=f"r{num_rodada}_m_{idx}", 
+                label_visibility="collapsed", disabled=jogo_bloqueado
+            )
+        with col_x:
+            st.write("🔒" if jogo_bloqueado else "x")
+        with col_pv:
+            st.number_input(
+                "", min_value=0, value=val_v, key=f"r{num_rodada}_v_{idx}", 
+                label_visibility="collapsed", disabled=jogo_bloqueado
+            )
+        with col_v:
+            st.markdown(f"<div class='time-nome-v'>{visitante}</div>", unsafe_allow_html=True)
             
-            col_m, col_pm, col_x, col_pv, col_v = st.columns([2.2, 1.1, 0.4, 1.1, 2.2])
-            with col_m:
-                st.markdown(f"<div class='time-nome-m'>{mandante}</div>", unsafe_allow_html=True)
-            with col_pm:
-                st.number_input(
-                    "", min_value=0, value=val_m, key=f"r{num_rodada}_m_{idx}", 
-                    label_visibility="collapsed", disabled=jogo_bloqueado
-                )
-            with col_x:
-                st.write("🔒" if jogo_bloqueado else "x")
-            with col_pv:
-                st.number_input(
-                    "", min_value=0, value=val_v, key=f"r{num_rodada}_v_{idx}", 
-                    label_visibility="collapsed", disabled=jogo_bloqueado
-                )
-            with col_v:
-                st.markdown(f"<div class='time-nome-v'>{visitante}</div>", unsafe_allow_html=True)
-                
-            st.divider()
-    else:
-        st.info("Nenhum confronto encontrado para esta rodada ou aguardando conexão com a API.")
+        st.divider()
