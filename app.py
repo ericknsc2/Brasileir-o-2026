@@ -1,12 +1,10 @@
 import streamlit as st
 import pandas as pd
 import requests
-from datetime import datetime
 
-# Tenta importar o st_autorefresh para atualização em tempo real (2 segundos)
+# Atualização em tempo real a cada 2 segundos se o pacote estiver instalado
 try:
     from streamlit_autorefresh import st_autorefresh
-    # Atualiza a página a cada 2000 ms (2 segundos)
     st_autorefresh(interval=2000, key="autoupdate_brasileirao")
 except ImportError:
     pass
@@ -14,17 +12,15 @@ except ImportError:
 # Configuração da página - Layout Wide
 st.set_page_config(page_title="Brasileirão 2026", layout="wide", initial_sidebar_state="collapsed")
 
-# --- CSS RESPONSIVO HÍBRIDO E OTIMIZAÇÃO DE ESPAÇO ---
+# --- CSS RESPONSIVO & LARGURAS OTIMIZADAS ---
 st.markdown("""
 <style>
-    /* Subir todo o conteúdo da página para aproveitar o topo */
     .block-container {
         padding-top: 0.8rem !important;
         padding-bottom: 0rem !important;
     }
 
-    /* DESKTOP (Telas maiores que 768px):
-       Oculta o cabeçalho das abas e posiciona Tabela e Simulador em 2 colunas lado a lado */
+    /* DESKTOP: Tabela mais compacta à esquerda (55%) e Placares/Simulador à direita (45%) */
     @media (min-width: 769px) {
         div[data-testid="stTabs"] > div:first-child {
             display: none !important;
@@ -32,16 +28,19 @@ st.markdown("""
         div[data-testid="stTabs"] {
             display: flex !important;
             flex-direction: row !important;
-            gap: 24px !important;
+            gap: 16px !important;
         }
-        div[data-testid="stTabContent"] {
-            width: 50% !important;
+        div[data-testid="stTabContent"]:nth-child(1) {
+            width: 55% !important;
+            display: block !important;
+        }
+        div[data-testid="stTabContent"]:nth-child(2) {
+            width: 45% !important;
             display: block !important;
         }
     }
 
-    /* MOBILE (Telas até 768px):
-       Mantém as 2 abas nativas no topo e ajusta as margens internas */
+    /* MOBILE: Mantém 2 abas superiores */
     @media (max-width: 768px) {
         .block-container {
             padding-left: 0.5rem !important;
@@ -54,16 +53,16 @@ st.markdown("""
         }
     }
 
-    .time-nome-m { text-align: right; font-weight: bold; font-size: 14px; }
-    .time-nome-v { text-align: left; font-weight: bold; font-size: 14px; }
-    .status-badge { font-size: 12px; color: #666; margin-bottom: 2px; }
+    .time-nome-m { text-align: right; font-weight: bold; font-size: 13px; }
+    .time-nome-v { text-align: left; font-weight: bold; font-size: 13px; }
+    .status-badge { font-size: 11px; color: #555; margin-bottom: 2px; font-weight: 600; }
 </style>
 """, unsafe_allow_html=True)
 
 st.title("⚽ Brasileirão 2026")
 
-# --- 1. TABELA BASE OFICIAL CONSOLIDADA (PÓS 26ª RODADA) ---
-@st.cache_data(ttl=10)
+# --- 1. DADOS DE TABELA BASE OFICIAL ---
+@st.cache_data(ttl=5)
 def carregar_tabela_oficial():
     dados_tabela = [
         {"nome_time": "Flamengo", "pontos": 54, "jogos": 26, "vitorias": 16, "empates": 6, "derrotas": 4, "gols_pro": 51, "gols_contra": 21},
@@ -91,120 +90,134 @@ def carregar_tabela_oficial():
     df['saldo_gols'] = df['gols_pro'] - df['gols_contra']
     return df
 
-# --- 2. CONSULTA DE PLACARES AO VIVO EM TEMPO REAL (API PÚBLICA ESPN) ---
-def buscar_jogos_ao_vivo():
+# --- 2. BUSCA PLACARES AO VIVO EM TEMPO REAL ---
+def buscar_jogos_espn():
     url = "https://site.api.espn.com/apis/site/v2/sports/soccer/bra.1/scoreboard"
     try:
         res = requests.get(url, timeout=2)
         if res.status_code == 200:
             dados = res.json()
             eventos = dados.get('events', [])
-            jogos_ao_vivo = {}
+            jogos = {}
             for ev in eventos:
                 comp = ev['competitions'][0]
                 m_nome = comp['competitors'][0]['team']['shortDisplayName']
                 v_nome = comp['competitors'][1]['team']['shortDisplayName']
                 m_score = int(comp['competitors'][0]['score'])
                 v_score = int(comp['competitors'][1]['score'])
-                status_state = ev['status']['type']['state'] # 'in', 'post', 'pre'
-                status_detail = ev['status']['type']['shortDetail']
+                state = ev['status']['type']['state']
+                detail = ev['status']['type']['shortDetail']
                 
-                chave = f"{m_nome}x{v_nome}"
-                jogos_ao_vivo[chave] = {
-                    'gm': m_score,
-                    'gv': v_score,
-                    'state': status_state,
-                    'detail': status_detail
+                jogos[f"{m_nome}x{v_nome}"] = {
+                    'gm': m_score, 'gv': v_score, 'state': state, 'detail': detail
                 }
-            return jogos_ao_vivo
+            return jogos
     except Exception:
         pass
     return {}
 
-# --- CONFRONTOS OFICIAIS DA 27ª RODADA ---
-CONFRONTOS_27 = [
-    ("Coritiba", "Athletico-PR", "Sexta, 11/09 - 21:00"),
-    ("Atlético-MG", "Fluminense", "Sábado, 12/09 - 16:00"),
-    ("Grêmio", "Vasco", "Sábado, 12/09 - 16:00"),
-    ("Chapecoense", "Internacional", "Sábado, 12/09 - 17:00"),
-    ("Palmeiras", "São Paulo", "Sábado, 12/09 - 18:30"),
-    ("Botafogo", "Red Bull Bragantino", "Sábado, 12/09 - 20:30"),
-    ("Santos", "Cruzeiro", "Sábado, 12/09 - 21:00"),
-    ("Mirassol", "Vitória", "Domingo, 13/09 - 16:00"),
-    ("Flamengo", "Corinthians", "Domingo, 13/09 - 17:30"),
-    ("Bahia", "Remo", "Segunda, 14/09 - 20:00")
-]
+# --- BANCO DE RODADAS FUTURAS ---
+CALENDARIO_RODADAS = {
+    27: [
+        ("Coritiba", "Athletico-PR", "Sexta, 11/09 - 21:00"),
+        ("Atlético-MG", "Fluminense", "Sábado, 12/09 - 16:00"),
+        ("Grêmio", "Vasco", "Sábado, 12/09 - 16:00"),
+        ("Chapecoense", "Internacional", "Sábado, 12/09 - 17:00"),
+        ("Palmeiras", "São Paulo", "Sábado, 12/09 - 18:30"),
+        ("Botafogo", "Red Bull Bragantino", "Sábado, 12/09 - 20:30"),
+        ("Santos", "Cruzeiro", "Sábado, 12/09 - 21:00"),
+        ("Mirassol", "Vitória", "Domingo, 13/09 - 16:00"),
+        ("Flamengo", "Corinthians", "Domingo, 13/09 - 17:30"),
+        ("Bahia", "Remo", "Segunda, 14/09 - 20:00")
+    ],
+    28: [
+        ("Atlético-MG", "Chapecoense", "Sábado, 19/09 - 16:00"),
+        ("Mirassol", "Botafogo", "Sábado, 19/09 - 17:00"),
+        ("Remo", "Santos", "Sábado, 19/09 - 18:30"),
+        ("Vasco", "Coritiba", "Sábado, 19/09 - 20:30"),
+        ("São Paulo", "Internacional", "Sábado, 19/09 - 21:00"),
+        ("Grêmio", "Palmeiras", "Domingo, 20/09 - 11:00"),
+        ("Vitória", "Cruzeiro", "Domingo, 20/09 - 16:00"),
+        ("Corinthians", "Fluminense", "Domingo, 20/09 - 16:00"),
+        ("Red Bull Bragantino", "Flamengo", "Domingo, 20/09 - 18:30"),
+        ("Athletico-PR", "Bahia", "Segunda, 21/09 - 20:00")
+    ]
+}
 
-df_base = carregar_tabela_oficial()
-placar_live = buscar_jogos_ao_vivo()
+placar_live = buscar_jogos_espn()
+
+# --- LÓGICA DE AVANÇO AUTOMÁTICO DE RODADA ---
+# Verifica se todos os jogos da rodada 27 foram marcados como finalizados na API
+rodada_27_encerrada = False
+if placar_live:
+    encerrados = 0
+    jogos_27 = CALENDARIO_RODADAS[27]
+    for m, v, _ in jogos_27:
+        key = f"{m}x{v}"
+        if key in placar_live and placar_live[key]['state'] == 'post':
+            encerrados += 1
+    if encerrados == len(jogos_27):
+        rodada_27_encerrada = True
+
+rodada_ativa = 28 if rodada_27_encerrada else 27
 
 # CONTROLES SUPERIORES
 c1, c2 = st.columns([1, 2])
 with c1:
-    num_rodada = st.selectbox("Rodada:", [27], index=0)
+    num_rodada = st.selectbox("Rodada Ativa:", list(CALENDARIO_RODADAS.keys()), index=list(CALENDARIO_RODADAS.keys()).index(rodada_ativa))
 with c2:
-    lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist()) if not df_base.empty else ["Nenhum"]
+    df_base = carregar_tabela_oficial()
+    lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist())
     time_favorito = st.selectbox("⭐ Time do Coração:", lista_times)
 
-# --- 3. RECALCULO REATIVO DA TABELA COM OS PALPITES E DADOS AO VIVO ---
-df_tabela = df_base.copy()
+# --- 3. RECALCULO DE SIMULAÇÃO (ISOLADO PARA A RODADA ATIVA) ---
+df_simulado = df_base.copy()
+confrontos = CALENDARIO_RODADAS.get(num_rodada, [])
 
-if not df_tabela.empty:
-    for idx, jogo in enumerate(CONFRONTOS_27):
-        mandante, visitante, data_hora_str = jogo
+for idx, (mandante, visitante, _) in enumerate(confrontos):
+    key_m = f"sim_r{num_rodada}_m_{idx}"
+    key_v = f"sim_r{num_rodada}_v_{idx}"
+    
+    # Preenchimento isolado pelo usuário
+    if key_m in st.session_state and key_v in st.session_state:
+        gm = st.session_state[key_m]
+        gv = st.session_state[key_v]
         
-        key_m = f"r{num_rodada}_m_{idx}"
-        key_v = f"r{num_rodada}_v_{idx}"
-        
-        chave_live = f"{mandante}x{visitante}"
-        
-        # Se o jogo estiver ao vivo na API da ESPN, sobrescreve com o placar oficial em tempo real
-        if chave_live in placar_live and placar_live[chave_live]['state'] in ['in', 'post']:
-            gm = placar_live[chave_live]['gm']
-            gv = placar_live[chave_live]['gv']
-            computar = True
-        elif key_m in st.session_state and key_v in st.session_state:
-            gm = st.session_state[key_m]
-            gv = st.session_state[key_v]
-            computar = True
-        else:
-            computar = False
-
-        if computar and (mandante in df_tabela['nome_time'].values) and (visitante in df_tabela['nome_time'].values):
-            idx_m = df_tabela[df_tabela['nome_time'] == mandante].index[0]
-            idx_v = df_tabela[df_tabela['nome_time'] == visitante].index[0]
+        if mandante in df_simulado['nome_time'].values and visitante in df_simulado['nome_time'].values:
+            idx_m = df_simulado[df_simulado['nome_time'] == mandante].index[0]
+            idx_v = df_simulado[df_simulado['nome_time'] == visitante].index[0]
             
-            df_tabela.at[idx_m, 'jogos'] += 1
-            df_tabela.at[idx_v, 'jogos'] += 1
-            df_tabela.at[idx_m, 'gols_pro'] += gm
-            df_tabela.at[idx_m, 'gols_contra'] += gv
-            df_tabela.at[idx_v, 'gols_pro'] += gv
-            df_tabela.at[idx_v, 'gols_contra'] += gm
+            df_simulado.at[idx_m, 'jogos'] += 1
+            df_simulado.at[idx_v, 'jogos'] += 1
+            df_simulado.at[idx_m, 'gols_pro'] += gm
+            df_simulado.at[idx_m, 'gols_contra'] += gv
+            df_simulado.at[idx_v, 'gols_pro'] += gv
+            df_simulado.at[idx_v, 'gols_contra'] += gm
             
             if gm > gv:
-                df_tabela.at[idx_m, 'pontos'] += 3
-                df_tabela.at[idx_m, 'vitorias'] += 1
-                df_tabela.at[idx_v, 'derrotas'] += 1
+                df_simulado.at[idx_m, 'pontos'] += 3
+                df_simulado.at[idx_m, 'vitorias'] += 1
+                df_simulado.at[idx_v, 'derrotas'] += 1
             elif gv > gm:
-                df_tabela.at[idx_v, 'pontos'] += 3
-                df_tabela.at[idx_v, 'vitorias'] += 1
-                df_tabela.at[idx_m, 'derrotas'] += 1
+                df_simulado.at[idx_v, 'pontos'] += 3
+                df_simulado.at[idx_v, 'vitorias'] += 1
+                df_simulado.at[idx_m, 'derrotas'] += 1
             else:
-                df_tabela.at[idx_m, 'pontos'] += 1
-                df_tabela.at[idx_v, 'pontos'] += 1
-                df_tabela.at[idx_m, 'empates'] += 1
-                df_tabela.at[idx_v, 'empates'] += 1
+                df_simulado.at[idx_m, 'pontos'] += 1
+                df_simulado.at[idx_v, 'pontos'] += 1
+                df_simulado.at[idx_m, 'empates'] += 1
+                df_simulado.at[idx_v, 'empates'] += 1
 
-    df_tabela['saldo_gols'] = df_tabela['gols_pro'] - df_tabela['gols_contra']
-    df_tabela['aproveitamento'] = (df_tabela['pontos'] / (df_tabela['jogos'] * 3) * 100).round(1)
-    df_tabela = df_tabela.sort_values(by=["pontos", "vitorias", "saldo_gols", "gols_pro"], ascending=False).reset_index(drop=True)
-    df_tabela.index = df_tabela.index + 1
+df_simulado['saldo_gols'] = df_simulado['gols_pro'] - df_simulado['gols_contra']
+df_simulado['aproveitamento'] = (df_simulado['pontos'] / (df_simulado['jogos'] * 3) * 100).round(1)
+df_simulado = df_simulado.sort_values(by=["pontos", "vitorias", "saldo_gols", "gols_pro"], ascending=False).reset_index(drop=True)
+df_simulado.index = df_simulado.index + 1
 
 def colorir_zonas(val):
     cores = []
     for i in range(len(val)):
         posicao = i + 1
-        nome_time = df_tabela.iloc[i]['nome_time']
+        nome_time = df_simulado.iloc[i]['nome_time']
         if time_favorito != "Nenhum" and nome_time == time_favorito:
             cores.append('background-color: #ffe8a1; color: #000000; font-weight: bold;')
             continue
@@ -220,85 +233,84 @@ def colorir_zonas(val):
             cores.append('')
     return cores
 
-# --- ESTRUTURA DE ABAS ---
-tab_tabela, tab_simulador = st.tabs(["📊 Classificação", "🎮 Simulador"])
+# --- LAYOUT DE ABAS RESPONSIVAS ---
+tab_tabela, tab_simulador = st.tabs(["📊 Classificação", "🎮 Jogos & Simulador"])
 
-# 1. PAINEL DE CLASSIFICAÇÃO
+# 1. CLASSIFICAÇÃO (ESPREMIDA À ESQUERDA)
 with tab_tabela:
-    st.subheader("📊 Classificação em Tempo Real")
-    if not df_tabela.empty:
+    st.subheader("📊 Classificação do Campeonato")
+    if not df_simulado.empty:
         m1, m2 = st.columns(2)
-        m1.metric("🏆 Líder", f"{df_tabela.iloc[0]['nome_time']}", f"{df_tabela.iloc[0]['pontos']} pts")
-        m2.metric("🛡️ Corte G-4", f"{df_tabela.iloc[3]['nome_time']}", f"{df_tabela.iloc[3]['pontos']} pts")
+        m1.metric("🏆 Líder", f"{df_simulado.iloc[0]['nome_time']}", f"{df_simulado.iloc[0]['pontos']} pts")
+        m2.metric("🛡️ G-4", f"{df_simulado.iloc[3]['nome_time']}", f"{df_simulado.iloc[3]['pontos']} pts")
         st.write("")
         
         cols_exibir = ['nome_time', 'pontos', 'jogos', 'vitorias', 'empates', 'derrotas', 'gols_pro', 'gols_contra', 'saldo_gols', 'aproveitamento']
         st.dataframe(
-            df_tabela[cols_exibir].style.apply(colorir_zonas, axis=0).format({"aproveitamento": "{:.1f}%"}),
+            df_simulado[cols_exibir].style.apply(colorir_zonas, axis=0).format({"aproveitamento": "{:.1f}%"}),
             use_container_width=True,
             hide_index=False,
             height=740
         )
         st.caption("🟢 G-4 | 🔵 Pré-Libertadores | 🟡 Sul-Americana | 🔴 Z-4")
 
-# 2. PAINEL DO SIMULADOR DE JOGOS
+# 2. PLACARES AO VIVO & SIMULADOR (À DIREITA)
 with tab_simulador:
-    st.subheader(f"🎮 Jogos da {num_rodada}ª Rodada")
+    st.subheader(f"🎮 Placares & Simulação - {num_rodada}ª Rodada")
     
     if st.button("🧹 Limpar Meus Palpites"):
-        for idx in range(len(CONFRONTOS_27)):
-            k_m = f"r{num_rodada}_m_{idx}"
-            k_v = f"r{num_rodada}_v_{idx}"
+        for idx in range(len(confrontos)):
+            k_m = f"sim_r{num_rodada}_m_{idx}"
+            k_v = f"sim_r{num_rodada}_v_{idx}"
             if k_m in st.session_state:
                 del st.session_state[k_m]
             if k_v in st.session_state:
                 del st.session_state[k_v]
         st.rerun()
 
-    for idx, jogo in enumerate(CONFRONTOS_27):
-        mandante, visitante, data_hora_str = jogo
+    for idx, (mandante, visitante, data_hora_str) in enumerate(confrontos):
         chave_live = f"{mandante}x{visitante}"
         
-        # Configuração de status ao vivo
+        # Checa status ao vivo oficial
         if chave_live in placar_live:
             st_info = placar_live[chave_live]
             if st_info['state'] == 'in':
                 badge = f"🟢 AO VIVO ({st_info['detail']})"
-                jogo_bloqueado = True
+                bloqueado = True
                 val_m = st_info['gm']
                 val_v = st_info['gv']
             elif st_info['state'] == 'post':
-                badge = "🔴 FIM"
-                jogo_bloqueado = True
+                badge = "🔴 FIM DE JOGO"
+                bloqueado = True
                 val_m = st_info['gm']
                 val_v = st_info['gv']
             else:
                 badge = f"📅 {data_hora_str}"
-                jogo_bloqueado = False
+                bloqueado = False
                 val_m = 0
                 val_v = 0
         else:
             badge = f"📅 {data_hora_str}"
-            jogo_bloqueado = False
+            bloqueado = False
             val_m = 0
             val_v = 0
 
         st.markdown(f"<div class='status-badge'>{badge}</div>", unsafe_allow_html=True)
         
-        col_m, col_pm, col_x, col_pv, col_v = st.columns([2.2, 1.1, 0.4, 1.1, 2.2])
+        col_m, col_pm, col_x, col_pv, col_v = st.columns([2.2, 1.1, 0.3, 1.1, 2.2])
         with col_m:
             st.markdown(f"<div class='time-nome-m'>{mandante}</div>", unsafe_allow_html=True)
         with col_pm:
             st.number_input(
-                "", min_value=0, value=val_m, key=f"r{num_rodada}_m_{idx}", 
-                label_visibility="collapsed", disabled=jogo_bloqueado
+                "", min_value=0, value=val_m, key=f"sim_r{num_rodada}_m_{idx}", 
+                label_visibility="collapsed", disabled=bloqueado
             )
         with col_x:
-            st.write("🔒" if jogo_bloqueado else "x")
+            st.write("🔒" if bloqueado else "x")
         with col_pv:
             st.number_input(
-                "", min_value=0, value=val_v, key=f"r{num_rodada}_v_{idx}", 
-                label_visibility="collapsed", disabled=jogo_bloqueado
+                "", min_value=0, value=val_v, key=f"sim_r{num_rodada}_v_{idx}", 
+                label_visibility="collapsed", disabled=bloqueado
             )
         with col_v:
             st.markdown(f"<div class='time-nome-v'>{visitante}</div>", unsafe_allow_html=True)
