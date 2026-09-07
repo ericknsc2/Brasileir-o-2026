@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import requests
-from datetime import datetime
 
 # Configuração da página - Layout Wide
 st.set_page_config(page_title="Brasileirão 2026", layout="wide", initial_sidebar_state="collapsed")
@@ -9,14 +8,13 @@ st.set_page_config(page_title="Brasileirão 2026", layout="wide", initial_sideba
 # --- CSS RESPONSIVO HÍBRIDO ---
 st.markdown("""
 <style>
-    /* Subir todo o conteúdo da página para aproveitar o topo */
+    /* Elevação e otimização de espaço superior */
     .block-container {
         padding-top: 0.8rem !important;
         padding-bottom: 0rem !important;
     }
 
-    /* DESKTOP (Telas maiores que 768px):
-       Oculta o cabeçalho das abas e posiciona o conteúdo em 2 colunas lado a lado */
+    /* DESKTOP (Telas maiores que 768px): esconde abas e posiciona em 2 colunas */
     @media (min-width: 769px) {
         div[data-testid="stTabs"] > div:first-child {
             display: none !important;
@@ -32,8 +30,7 @@ st.markdown("""
         }
     }
 
-    /* MOBILE (Telas até 768px):
-       Mantém as 2 abas nativas no topo e ajusta as margens internas */
+    /* MOBILE (Telas até 768px): mantém 2 abas e reduz margens */
     @media (max-width: 768px) {
         .block-container {
             padding-left: 0.5rem !important;
@@ -88,19 +85,20 @@ def buscar_tabela_base():
     except Exception:
         return pd.DataFrame()
 
-# --- 2. CONFRONTOS DAS RODADAS ---
+# --- 2. REGISTRO DE CONFRONTOS ---
+# Rodada 26 consolidada e encerrada; Rodada 27 aberta para simulação
 CONFRONTOS_PADRAO = {
     26: [
         ("Red Bull Bragantino", "Bahia", "2026-09-05 16:00", 2, 3, "ENCERRADO"),
-        ("São Paulo", "Atlético-MG", "2026-09-05 18:30", 0, 0, "EM_ANDAMENTO"),
-        ("Fluminense", "Vasco", "2026-09-05 21:00", None, None, "AGENDADO"),
-        ("Coritiba", "Mirassol", "2026-09-06 11:00", None, None, "AGENDADO"),
-        ("Cruzeiro", "Athletico-PR", "2026-09-06 16:00", None, None, "AGENDADO"),
-        ("Remo", "Flamengo", "2026-09-06 16:00", None, None, "AGENDADO"),
-        ("Internacional", "Santos", "2026-09-06 16:00", None, None, "AGENDADO"),
-        ("Botafogo", "Palmeiras", "2026-09-06 18:30", None, None, "AGENDADO"),
-        ("Corinthians", "Chapecoense", "2026-09-06 19:30", None, None, "AGENDADO"),
-        ("Vitória", "Grêmio", "2026-09-07 20:00", None, None, "AGENDADO")
+        ("São Paulo", "Atlético-MG", "2026-09-05 18:30", 2, 0, "ENCERRADO"),
+        ("Fluminense", "Vasco", "2026-09-05 21:00", 1, 0, "ENCERRADO"),
+        ("Coritiba", "Mirassol", "2026-09-06 11:00", 1, 2, "ENCERRADO"),
+        ("Cruzeiro", "Athletico-PR", "2026-09-06 16:00", 3, 1, "ENCERRADO"),
+        ("Remo", "Flamengo", "2026-09-06 16:00", 0, 1, "ENCERRADO"),
+        ("Internacional", "Santos", "2026-09-06 16:00", 2, 3, "ENCERRADO"),
+        ("Botafogo", "Palmeiras", "2026-09-06 18:30", 0, 0, "ENCERRADO"),
+        ("Corinthians", "Chapecoense", "2026-09-06 19:30", 1, 2, "ENCERRADO"),
+        ("Vitória", "Grêmio", "2026-09-07 20:00", 0, 1, "ENCERRADO")
     ],
     27: [
         ("Coritiba", "Athletico-PR", "2026-09-11 21:00", None, None, "AGENDADO"),
@@ -121,12 +119,12 @@ df_base = buscar_tabela_base()
 # CONTROLES SUPERIORES
 c1, c2 = st.columns([1, 2])
 with c1:
-    num_rodada = st.selectbox("Rodada:", list(range(26, 39)))
+    num_rodada = st.selectbox("Rodada:", list(range(26, 39)), index=1) # Padrão na 27ª rodada
 with c2:
     lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist()) if not df_base.empty else ["Nenhum"]
     time_favorito = st.selectbox("⭐ Time do Coração:", lista_times)
 
-# --- 3. RECALCULO REATIVO DA TABELA COM OS PALPITES ---
+# --- 3. RECALCULO REATIVO DA TABELA COM OS PALPITES DA RODADA SELECIONADA ---
 df_tabela = df_base.copy()
 jogos_atuais = CONFRONTOS_PADRAO.get(num_rodada, [])
 
@@ -137,15 +135,19 @@ if not df_tabela.empty:
         key_m = f"r{num_rodada}_m_{idx}"
         key_v = f"r{num_rodada}_v_{idx}"
         
-        # Pega resultado real se encerrado/ao vivo, ou o palpite digitado no simulador
-        if status in ["ENCERRADO", "EM_ANDAMENTO"]:
+        # Se for um jogo já finalizado de rodadas anteriores, aplica o placar oficial
+        if status == "ENCERRADO":
             gm = gm_real if gm_real is not None else 0
             gv = gv_real if gv_real is not None else 0
             computar = True
         else:
-            gm = st.session_state.get(key_m, 0)
-            gv = st.session_state.get(key_v, 0)
-            computar = (key_m in st.session_state and key_v in st.session_state)
+            # Caso contrário, verifica se o usuário inseriu um palpite no formulário do simulador
+            if key_m in st.session_state and key_v in st.session_state:
+                gm = st.session_state[key_m]
+                gv = st.session_state[key_v]
+                computar = True
+            else:
+                computar = False
 
         if computar and (mandante in df_tabela['nome_time'].values) and (visitante in df_tabela['nome_time'].values):
             idx_m = df_tabela[df_tabela['nome_time'] == mandante].index[0]
@@ -223,18 +225,20 @@ with tab_simulador:
     st.subheader(f"🎮 Jogos da {num_rodada}ª Rodada")
     
     if st.button("🧹 Limpar Meus Palpites"):
-        for i in range(10):
-            if f"r{num_rodada}_m_{i}" in st.session_state:
-                del st.session_state[f"r{num_rodada}_m_{i}"]
-            if f"r{num_rodada}_v_{i}" in st.session_state:
-                del st.session_state[f"r{num_rodada}_v_{i}"]
+        for idx in range(10):
+            k_m = f"r{num_rodada}_m_{idx}"
+            k_v = f"r{num_rodada}_v_{idx}"
+            if k_m in st.session_state:
+                del st.session_state[k_m]
+            if k_v in st.session_state:
+                del st.session_state[k_v]
         st.rerun()
 
     jogos = CONFRONTOS_PADRAO.get(num_rodada, [])
     
     for idx, jogo in enumerate(jogos):
         mandante, visitante, data_hora_str, gm_real, gv_real, status = jogo
-        jogo_bloqueado = status in ["ENCERRADO", "EM_ANDAMENTO"]
+        jogo_bloqueado = (status == "ENCERRADO")
         
         val_m = gm_real if gm_real is not None else 0
         val_v = gv_real if gv_real is not None else 0
@@ -242,8 +246,6 @@ with tab_simulador:
         hora_exibicao = data_hora_str.split(" ")[1]
         if status == "ENCERRADO":
             badge = "🔴 FIM"
-        elif status == "EM_ANDAMENTO":
-            badge = "🟢 AO VIVO"
         else:
             badge = f"🕒 {hora_exibicao}"
 
