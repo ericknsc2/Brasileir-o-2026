@@ -51,11 +51,11 @@ st.markdown("""
 
 st.title("⚽ Brasileirão 2026")
 
-# --- 1. BUSCA DA TABELA BASE OFICIAL ---
-@st.cache_data(ttl=60)
+# --- 1. BUSCA DA TABELA BASE OFICIAL EM TEMPO REAL ---
+@st.cache_data(ttl=30) # Atualiza o cache a cada 30 segundos
 def buscar_tabela_base():
     url = "https://www.espn.com.br/futebol/liga/_/nome/bra.1/tabela"
-    headers = {'User-Agent': 'Mozilla/5.0'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
     try:
         res = requests.get(url, headers=headers, timeout=5)
         if res.status_code == 200:
@@ -85,32 +85,29 @@ def buscar_tabela_base():
     except Exception:
         return pd.DataFrame()
 
-# --- 2. REGISTRO DE CONFRONTOS ---
-# Rodada 26 consolidada e encerrada; Rodada 27 aberta para simulação
+# --- 2. REGISTRO DE CONFRONTOS OFICIAIS ---
 CONFRONTOS_PADRAO = {
-    26: [
-        ("Red Bull Bragantino", "Bahia", "2026-09-05 16:00", 2, 3, "ENCERRADO"),
-        ("São Paulo", "Atlético-MG", "2026-09-05 18:30", 2, 0, "ENCERRADO"),
-        ("Fluminense", "Vasco", "2026-09-05 21:00", 1, 0, "ENCERRADO"),
-        ("Coritiba", "Mirassol", "2026-09-06 11:00", 1, 2, "ENCERRADO"),
-        ("Cruzeiro", "Athletico-PR", "2026-09-06 16:00", 3, 1, "ENCERRADO"),
-        ("Remo", "Flamengo", "2026-09-06 16:00", 0, 1, "ENCERRADO"),
-        ("Internacional", "Santos", "2026-09-06 16:00", 2, 3, "ENCERRADO"),
-        ("Botafogo", "Palmeiras", "2026-09-06 18:30", 0, 0, "ENCERRADO"),
-        ("Corinthians", "Chapecoense", "2026-09-06 19:30", 1, 2, "ENCERRADO"),
-        ("Vitória", "Grêmio", "2026-09-07 20:00", 0, 1, "ENCERRADO")
-    ],
     27: [
-        ("Coritiba", "Athletico-PR", "2026-09-11 21:00", None, None, "AGENDADO"),
-        ("Atlético-MG", "Fluminense", "2026-09-12 16:00", None, None, "AGENDADO"),
-        ("Grêmio", "Vasco", "2026-09-12 16:00", None, None, "AGENDADO"),
-        ("Chapecoense", "Internacional", "2026-09-12 17:00", None, None, "AGENDADO"),
-        ("Palmeiras", "São Paulo", "2026-09-12 18:30", None, None, "AGENDADO"),
-        ("Botafogo", "Red Bull Bragantino", "2026-09-12 20:30", None, None, "AGENDADO"),
-        ("Santos", "Cruzeiro", "2026-09-12 21:00", None, None, "AGENDADO"),
-        ("Mirassol", "Vitória", "2026-09-13 16:00", None, None, "AGENDADO"),
-        ("Flamengo", "Corinthians", "2026-09-13 17:30", None, None, "AGENDADO"),
-        ("Bahia", "Remo", "2026-09-14 20:00", None, None, "AGENDADO")
+        ("Coritiba", "Athletico-PR", "Sexta, 11/09 - 21:00", None, None, "AGENDADO"),
+        ("Atlético-MG", "Fluminense", "Sábado, 12/09 - 16:00", None, None, "AGENDADO"),
+        ("Grêmio", "Vasco", "Sábado, 12/09 - 16:00", None, None, "AGENDADO"),
+        ("Chapecoense", "Internacional", "Sábado, 12/09 - 17:00", None, None, "AGENDADO"),
+        ("Palmeiras", "São Paulo", "Sábado, 12/09 - 18:30", None, None, "AGENDADO"),
+        ("Botafogo", "Red Bull Bragantino", "Sábado, 12/09 - 20:30", None, None, "AGENDADO"),
+        ("Santos", "Cruzeiro", "Sábado, 12/09 - 21:00", None, None, "AGENDADO"),
+        ("Mirassol", "Vitória", "Domingo, 13/09 - 16:00", None, None, "AGENDADO"),
+        ("Flamengo", "Corinthians", "Domingo, 13/09 - 17:30", None, None, "AGENDADO"),
+        ("Bahia", "Remo", "Segunda, 14/09 - 20:00", None, None, "AGENDADO")
+    ],
+    28: [
+        ("Atlético-MG", "Chapecoense", "Sábado, 19/09 - 16:00", None, None, "AGENDADO"),
+        ("Mirassol", "Botafogo", "Sábado, 19/09 - 17:00", None, None, "AGENDADO"),
+        ("Remo", "Santos", "Sábado, 19/09 - 18:30", None, None, "AGENDADO"),
+        ("Vasco", "Coritiba", "Sábado, 19/09 - 20:30", None, None, "AGENDADO"),
+        ("São Paulo", "Internacional", "Sábado, 19/09 - 21:00", None, None, "AGENDADO"),
+        ("Grêmio", "Palmeiras", "Domingo, 20/09 - 11:00", None, None, "AGENDADO"),
+        ("Vitória", "Cruzeiro", "Domingo, 20/09 - 16:00", None, None, "AGENDADO"),
+        ("Corinthians", "Fluminense", "Domingo, 20/09 - 16:00", None, None, "AGENDADO")
     ]
 }
 
@@ -119,12 +116,12 @@ df_base = buscar_tabela_base()
 # CONTROLES SUPERIORES
 c1, c2 = st.columns([1, 2])
 with c1:
-    num_rodada = st.selectbox("Rodada:", list(range(26, 39)), index=1) # Padrão na 27ª rodada
+    num_rodada = st.selectbox("Rodada:", list(CONFRONTOS_PADRAO.keys()), index=0)
 with c2:
     lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist()) if not df_base.empty else ["Nenhum"]
     time_favorito = st.selectbox("⭐ Time do Coração:", lista_times)
 
-# --- 3. RECALCULO REATIVO DA TABELA COM OS PALPITES DA RODADA SELECIONADA ---
+# --- 3. RECALCULO REATIVO DA TABELA COM OS PALPITES ---
 df_tabela = df_base.copy()
 jogos_atuais = CONFRONTOS_PADRAO.get(num_rodada, [])
 
@@ -135,44 +132,35 @@ if not df_tabela.empty:
         key_m = f"r{num_rodada}_m_{idx}"
         key_v = f"r{num_rodada}_v_{idx}"
         
-        # Se for um jogo já finalizado de rodadas anteriores, aplica o placar oficial
-        if status == "ENCERRADO":
-            gm = gm_real if gm_real is not None else 0
-            gv = gv_real if gv_real is not None else 0
-            computar = True
-        else:
-            # Caso contrário, verifica se o usuário inseriu um palpite no formulário do simulador
-            if key_m in st.session_state and key_v in st.session_state:
-                gm = st.session_state[key_m]
-                gv = st.session_state[key_v]
-                computar = True
-            else:
-                computar = False
-
-        if computar and (mandante in df_tabela['nome_time'].values) and (visitante in df_tabela['nome_time'].values):
-            idx_m = df_tabela[df_tabela['nome_time'] == mandante].index[0]
-            idx_v = df_tabela[df_tabela['nome_time'] == visitante].index[0]
+        # Pega os valores preenchidos no formulário pelo usuário
+        if key_m in st.session_state and key_v in st.session_state:
+            gm = st.session_state[key_m]
+            gv = st.session_state[key_v]
             
-            df_tabela.at[idx_m, 'jogos'] += 1
-            df_tabela.at[idx_v, 'jogos'] += 1
-            df_tabela.at[idx_m, 'gols_pro'] += gm
-            df_tabela.at[idx_m, 'gols_contra'] += gv
-            df_tabela.at[idx_v, 'gols_pro'] += gv
-            df_tabela.at[idx_v, 'gols_contra'] += gm
-            
-            if gm > gv:
-                df_tabela.at[idx_m, 'pontos'] += 3
-                df_tabela.at[idx_m, 'vitorias'] += 1
-                df_tabela.at[idx_v, 'derrotas'] += 1
-            elif gv > gm:
-                df_tabela.at[idx_v, 'pontos'] += 3
-                df_tabela.at[idx_v, 'vitorias'] += 1
-                df_tabela.at[idx_m, 'derrotas'] += 1
-            else:
-                df_tabela.at[idx_m, 'pontos'] += 1
-                df_tabela.at[idx_v, 'pontos'] += 1
-                df_tabela.at[idx_m, 'empates'] += 1
-                df_tabela.at[idx_v, 'empates'] += 1
+            if mandante in df_tabela['nome_time'].values and visitante in df_tabela['nome_time'].values:
+                idx_m = df_tabela[df_tabela['nome_time'] == mandante].index[0]
+                idx_v = df_tabela[df_tabela['nome_time'] == visitante].index[0]
+                
+                df_tabela.at[idx_m, 'jogos'] += 1
+                df_tabela.at[idx_v, 'jogos'] += 1
+                df_tabela.at[idx_m, 'gols_pro'] += gm
+                df_tabela.at[idx_m, 'gols_contra'] += gv
+                df_tabela.at[idx_v, 'gols_pro'] += gv
+                df_tabela.at[idx_v, 'gols_contra'] += gm
+                
+                if gm > gv:
+                    df_tabela.at[idx_m, 'pontos'] += 3
+                    df_tabela.at[idx_m, 'vitorias'] += 1
+                    df_tabela.at[idx_v, 'derrotas'] += 1
+                elif gv > gm:
+                    df_tabela.at[idx_v, 'pontos'] += 3
+                    df_tabela.at[idx_v, 'vitorias'] += 1
+                    df_tabela.at[idx_m, 'derrotas'] += 1
+                else:
+                    df_tabela.at[idx_m, 'pontos'] += 1
+                    df_tabela.at[idx_v, 'pontos'] += 1
+                    df_tabela.at[idx_m, 'empates'] += 1
+                    df_tabela.at[idx_v, 'empates'] += 1
 
     df_tabela['saldo_gols'] = df_tabela['gols_pro'] - df_tabela['gols_contra']
     df_tabela['aproveitamento'] = (df_tabela['pontos'] / (df_tabela['jogos'] * 3) * 100).round(1)
@@ -238,33 +226,23 @@ with tab_simulador:
     
     for idx, jogo in enumerate(jogos):
         mandante, visitante, data_hora_str, gm_real, gv_real, status = jogo
-        jogo_bloqueado = (status == "ENCERRADO")
         
-        val_m = gm_real if gm_real is not None else 0
-        val_v = gv_real if gv_real is not None else 0
-        
-        hora_exibicao = data_hora_str.split(" ")[1]
-        if status == "ENCERRADO":
-            badge = "🔴 FIM"
-        else:
-            badge = f"🕒 {hora_exibicao}"
-
-        st.markdown(f"<div class='status-badge'>{badge}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='status-badge'>📅 {data_hora_str}</div>", unsafe_allow_html=True)
         
         col_m, col_pm, col_x, col_pv, col_v = st.columns([2.2, 1.1, 0.4, 1.1, 2.2])
         with col_m:
             st.markdown(f"<div class='time-nome-m'>{mandante}</div>", unsafe_allow_html=True)
         with col_pm:
             st.number_input(
-                "", min_value=0, value=val_m, key=f"r{num_rodada}_m_{idx}", 
-                label_visibility="collapsed", disabled=jogo_bloqueado
+                "", min_value=0, value=0, key=f"r{num_rodada}_m_{idx}", 
+                label_visibility="collapsed"
             )
         with col_x:
-            st.write("🔒" if jogo_bloqueado else "x")
+            st.write("x")
         with col_pv:
             st.number_input(
-                "", min_value=0, value=val_v, key=f"r{num_rodada}_v_{idx}", 
-                label_visibility="collapsed", disabled=jogo_bloqueado
+                "", min_value=0, value=0, key=f"r{num_rodada}_v_{idx}", 
+                label_visibility="collapsed"
             )
         with col_v:
             st.markdown(f"<div class='time-nome-v'>{visitante}</div>", unsafe_allow_html=True)
