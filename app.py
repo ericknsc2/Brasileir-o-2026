@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 
-# Atualização em tempo real a cada 2 segundos se o pacote estiver instalado
+# Atualização em tempo real a cada 2 segundos
 try:
     from streamlit_autorefresh import st_autorefresh
     st_autorefresh(interval=2000, key="autoupdate_brasileirao")
@@ -12,11 +12,11 @@ except ImportError:
 # Configuração da página - Layout Wide
 st.set_page_config(page_title="Brasileirão 2026", layout="wide", initial_sidebar_state="collapsed")
 
-# --- CSS RESPONSIVO HÍBRIDO (PC: LADO A LADO | MOBILE: 2 ABAS SEPARADAS) ---
+# --- CSS DEFINITIVO E LIMPO ---
 st.markdown("""
 <style>
     .block-container {
-        padding-top: 0.8rem !important;
+        padding-top: 1rem !important;
         padding-bottom: 0rem !important;
     }
     
@@ -30,30 +30,7 @@ st.markdown("""
     .time-nome-v { text-align: left; font-weight: bold; font-size: 13px; }
     .status-badge { font-size: 11px; color: #555; margin-bottom: 2px; font-weight: 600; text-align: center; }
 
-    /* --- REGRA PARA DESKTOP / PC (Largura acima de 768px) --- */
-    @media (min-width: 769px) {
-        /* Oculta o cabeçalho das abas */
-        div[data-testid="stTabs"] > div:first-child {
-            display: none !important;
-        }
-        /* Transforma o container das abas em uma linha paralela (Flexbox) */
-        div[data-testid="stTabs"] {
-            display: flex !important;
-            flex-direction: row !important;
-            gap: 20px !important;
-        }
-        /* Define a largura das duas colunas no PC: Tabela (56%) e Simulador (44%) */
-        div[data-testid="stTabContent"]:nth-child(1) {
-            width: 56% !important;
-            display: block !important;
-        }
-        div[data-testid="stTabContent"]:nth-child(2) {
-            width: 44% !important;
-            display: block !important;
-        }
-    }
-
-    /* --- REGRA PARA CELULAR / MOBILE (Largura até 768px) --- */
+    /* Estilização para o celular */
     @media (max-width: 768px) {
         .block-container {
             padding-left: 0.5rem !important;
@@ -149,25 +126,16 @@ CALENDARIO_RODADAS = {
 
 placar_live = buscar_jogos_espn()
 
-# Avanço automático de rodada caso todos os jogos da 27 encerrem
-rodada_27_encerrada = False
-if placar_live:
-    encerrados = sum(1 for m, v, _ in CALENDARIO_RODADAS[27] if f"{m}x{v}" in placar_live and placar_live[f"{m}x{v}"]['state'] == 'post')
-    if encerrados == len(CALENDARIO_RODADAS[27]):
-        rodada_27_encerrada = True
-
-rodada_ativa = 28 if rodada_27_encerrada else 27
-
 # CONTROLES SUPERIORES
 c_ctrl1, c_ctrl2 = st.columns([1, 2])
 with c_ctrl1:
-    num_rodada = st.selectbox("Rodada Exibida:", list(CALENDARIO_RODADAS.keys()), index=list(CALENDARIO_RODADAS.keys()).index(rodada_ativa))
+    num_rodada = st.selectbox("Rodada:", list(CALENDARIO_RODADAS.keys()), index=0)
 with c_ctrl2:
     df_base = carregar_tabela_oficial()
     lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist())
-    time_favorito = st.selectbox("⭐ Destaque o Time do Coração:", lista_times)
+    time_favorito = st.selectbox("⭐ Time do Coração:", lista_times)
 
-# --- 3. RECÁLCULO DA TABELA COM OS JOGOS AO VIVO / SIMULADOS ---
+# --- 3. RECÁLCULO DA TABELA COM OS PALPITES E JOGOS AO VIVO ---
 df_simulado = df_base.copy()
 confrontos = CALENDARIO_RODADAS.get(num_rodada, [])
 
@@ -176,7 +144,6 @@ for idx, (mandante, visitante, _) in enumerate(confrontos):
     key_v = f"sim_r{num_rodada}_v_{idx}"
     chave_live = f"{mandante}x{visitante}"
     
-    # Prioridade para dados ao vivo da API
     if chave_live in placar_live and placar_live[chave_live]['state'] in ['in', 'post']:
         gm = placar_live[chave_live]['gm']
         gv = placar_live[chave_live]['gv']
@@ -238,11 +205,8 @@ def colorir_zonas(val):
             cores.append('')
     return cores
 
-# --- 4. ESTRUTURA DE ABAS COM CSS HÍBRIDO ---
-tab_tabela, tab_simulador = st.tabs(["📊 Classificação", "🎮 Jogos & Simulador"])
-
-# ABA 1: CLASSIFICAÇÃO
-with tab_tabela:
+# --- FUNÇÃO QUE RENDERIZA A TABELA DE CLASSIFICAÇÃO ---
+def renderizar_tabela():
     st.subheader("📊 Classificação em Tempo Real")
     if not df_simulado.empty:
         m1, m2 = st.columns(2)
@@ -258,8 +222,8 @@ with tab_tabela:
         )
         st.caption("🟢 G-4 | 🔵 Pré-Libertadores | 🟡 Sul-Americana | 🔴 Z-4")
 
-# ABA 2: JOGOS & PLACARES AO VIVO / SIMULADOR
-with tab_simulador:
+# --- FUNÇÃO QUE RENDERIZA OS PLACARES E O SIMULADOR ---
+def renderizar_simulador():
     st.subheader(f"🎮 Jogos & Simulador - {num_rodada}ª Rodada")
     
     if st.button("🧹 Limpar Meus Palpites"):
@@ -275,7 +239,6 @@ with tab_simulador:
     for idx, (mandante, visitante, data_hora_str) in enumerate(confrontos):
         chave_live = f"{mandante}x{visitante}"
         
-        # Checa status ao vivo oficial na API
         if chave_live in placar_live:
             st_info = placar_live[chave_live]
             if st_info['state'] == 'in':
@@ -320,3 +283,13 @@ with tab_simulador:
             st.markdown(f"<div class='time-nome-v'>{visitante}</div>", unsafe_allow_html=True)
             
         st.divider()
+
+# --- 4. EXIBIÇÃO NO NAVEGADOR ---
+# Utiliza diretamente duas colunas do Streamlit no PC
+col_tabela, col_jogos = st.columns([1.2, 1])
+
+with col_tabela:
+    renderizar_tabela()
+
+with col_jogos:
+    renderizar_simulador()
