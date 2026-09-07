@@ -12,50 +12,23 @@ except ImportError:
 # Configuração da página - Layout Wide
 st.set_page_config(page_title="Brasileirão 2026", layout="wide", initial_sidebar_state="collapsed")
 
-# --- CSS RESPONSIVO & LARGURAS OTIMIZADAS ---
+# --- CSS AJUSTADO ---
 st.markdown("""
 <style>
     .block-container {
-        padding-top: 0.8rem !important;
+        padding-top: 1rem !important;
         padding-bottom: 0rem !important;
     }
-
-    /* DESKTOP: Tabela mais compacta à esquerda (55%) e Placares/Simulador à direita (45%) */
-    @media (min-width: 769px) {
-        div[data-testid="stTabs"] > div:first-child {
-            display: none !important;
-        }
-        div[data-testid="stTabs"] {
-            display: flex !important;
-            flex-direction: row !important;
-            gap: 16px !important;
-        }
-        div[data-testid="stTabContent"]:nth-child(1) {
-            width: 55% !important;
-            display: block !important;
-        }
-        div[data-testid="stTabContent"]:nth-child(2) {
-            width: 45% !important;
-            display: block !important;
-        }
-    }
-
-    /* MOBILE: Mantém 2 abas superiores */
-    @media (max-width: 768px) {
-        .block-container {
-            padding-left: 0.5rem !important;
-            padding-right: 0.5rem !important;
-        }
-        .stNumberInput input {
-            text-align: center;
-            font-size: 16px !important;
-            font-weight: bold;
-        }
+    
+    .stNumberInput input {
+        text-align: center;
+        font-size: 15px !important;
+        font-weight: bold;
     }
 
     .time-nome-m { text-align: right; font-weight: bold; font-size: 13px; }
     .time-nome-v { text-align: left; font-weight: bold; font-size: 13px; }
-    .status-badge { font-size: 11px; color: #555; margin-bottom: 2px; font-weight: 600; }
+    .status-badge { font-size: 11px; color: #555; margin-bottom: 2px; font-weight: 600; text-align: center; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -90,7 +63,7 @@ def carregar_tabela_oficial():
     df['saldo_gols'] = df['gols_pro'] - df['gols_contra']
     return df
 
-# --- 2. BUSCA PLACARES AO VIVO EM TEMPO REAL ---
+# --- 2. BUSCA PLACARES AO VIVO EM TEMPO REAL (ESPN) ---
 def buscar_jogos_espn():
     url = "https://site.api.espn.com/apis/site/v2/sports/soccer/bra.1/scoreboard"
     try:
@@ -116,7 +89,6 @@ def buscar_jogos_espn():
         pass
     return {}
 
-# --- BANCO DE RODADAS FUTURAS ---
 CALENDARIO_RODADAS = {
     27: [
         ("Coritiba", "Athletico-PR", "Sexta, 11/09 - 21:00"),
@@ -146,67 +118,69 @@ CALENDARIO_RODADAS = {
 
 placar_live = buscar_jogos_espn()
 
-# --- LÓGICA DE AVANÇO AUTOMÁTICO DE RODADA ---
-# Verifica se todos os jogos da rodada 27 foram marcados como finalizados na API
+# Avanço automático de rodada caso todos da 27 encerrem
 rodada_27_encerrada = False
 if placar_live:
-    encerrados = 0
-    jogos_27 = CALENDARIO_RODADAS[27]
-    for m, v, _ in jogos_27:
-        key = f"{m}x{v}"
-        if key in placar_live and placar_live[key]['state'] == 'post':
-            encerrados += 1
-    if encerrados == len(jogos_27):
+    encerrados = sum(1 for m, v, _ in CALENDARIO_RODADAS[27] if f"{m}x{v}" in placar_live and placar_live[f"{m}x{v}"]['state'] == 'post')
+    if encerrados == len(CALENDARIO_RODADAS[27]):
         rodada_27_encerrada = True
 
 rodada_ativa = 28 if rodada_27_encerrada else 27
 
-# CONTROLES SUPERIORES
-c1, c2 = st.columns([1, 2])
-with c1:
-    num_rodada = st.selectbox("Rodada Ativa:", list(CALENDARIO_RODADAS.keys()), index=list(CALENDARIO_RODADAS.keys()).index(rodada_ativa))
-with c2:
+# CONTROLES SUPERIORES (BARRA DE FILTRO)
+c_ctrl1, c_ctrl2 = st.columns([1, 2])
+with c_ctrl1:
+    num_rodada = st.selectbox("Rodada Exibida:", list(CALENDARIO_RODADAS.keys()), index=list(CALENDARIO_RODADAS.keys()).index(rodada_ativa))
+with c_ctrl2:
     df_base = carregar_tabela_oficial()
     lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist())
-    time_favorito = st.selectbox("⭐ Time do Coração:", lista_times)
+    time_favorito = st.selectbox("⭐ Destaque o Time do Coração:", lista_times)
 
-# --- 3. RECALCULO DE SIMULAÇÃO (ISOLADO PARA A RODADA ATIVA) ---
+# --- 3. RECÁLCULO DA TABELA COM OS JOGOS AO VIVO / SIMULADOS ---
 df_simulado = df_base.copy()
 confrontos = CALENDARIO_RODADAS.get(num_rodada, [])
 
 for idx, (mandante, visitante, _) in enumerate(confrontos):
     key_m = f"sim_r{num_rodada}_m_{idx}"
     key_v = f"sim_r{num_rodada}_v_{idx}"
+    chave_live = f"{mandante}x{visitante}"
     
-    # Preenchimento isolado pelo usuário
-    if key_m in st.session_state and key_v in st.session_state:
+    # Prioridade para dados ao vivo da API
+    if chave_live in placar_live and placar_live[chave_live]['state'] in ['in', 'post']:
+        gm = placar_live[chave_live]['gm']
+        gv = placar_live[chave_live]['gv']
+        jogou = True
+    elif key_m in st.session_state and key_v in st.session_state:
         gm = st.session_state[key_m]
         gv = st.session_state[key_v]
+        jogou = True
+    else:
+        jogou = False
+
+    if jogou and mandante in df_simulado['nome_time'].values and visitante in df_simulado['nome_time'].values:
+        idx_m = df_simulado[df_simulado['nome_time'] == mandante].index[0]
+        idx_v = df_simulado[df_simulado['nome_time'] == visitante].index[0]
         
-        if mandante in df_simulado['nome_time'].values and visitante in df_simulado['nome_time'].values:
-            idx_m = df_simulado[df_simulado['nome_time'] == mandante].index[0]
-            idx_v = df_simulado[df_simulado['nome_time'] == visitante].index[0]
-            
-            df_simulado.at[idx_m, 'jogos'] += 1
-            df_simulado.at[idx_v, 'jogos'] += 1
-            df_simulado.at[idx_m, 'gols_pro'] += gm
-            df_simulado.at[idx_m, 'gols_contra'] += gv
-            df_simulado.at[idx_v, 'gols_pro'] += gv
-            df_simulado.at[idx_v, 'gols_contra'] += gm
-            
-            if gm > gv:
-                df_simulado.at[idx_m, 'pontos'] += 3
-                df_simulado.at[idx_m, 'vitorias'] += 1
-                df_simulado.at[idx_v, 'derrotas'] += 1
-            elif gv > gm:
-                df_simulado.at[idx_v, 'pontos'] += 3
-                df_simulado.at[idx_v, 'vitorias'] += 1
-                df_simulado.at[idx_m, 'derrotas'] += 1
-            else:
-                df_simulado.at[idx_m, 'pontos'] += 1
-                df_simulado.at[idx_v, 'pontos'] += 1
-                df_simulado.at[idx_m, 'empates'] += 1
-                df_simulado.at[idx_v, 'empates'] += 1
+        df_simulado.at[idx_m, 'jogos'] += 1
+        df_simulado.at[idx_v, 'jogos'] += 1
+        df_simulado.at[idx_m, 'gols_pro'] += gm
+        df_simulado.at[idx_m, 'gols_contra'] += gv
+        df_simulado.at[idx_v, 'gols_pro'] += gv
+        df_simulado.at[idx_v, 'gols_contra'] += gm
+        
+        if gm > gv:
+            df_simulado.at[idx_m, 'pontos'] += 3
+            df_simulado.at[idx_m, 'vitorias'] += 1
+            df_simulado.at[idx_v, 'derrotas'] += 1
+        elif gv > gm:
+            df_simulado.at[idx_v, 'pontos'] += 3
+            df_simulado.at[idx_v, 'vitorias'] += 1
+            df_simulado.at[idx_m, 'derrotas'] += 1
+        else:
+            df_simulado.at[idx_m, 'pontos'] += 1
+            df_simulado.at[idx_v, 'pontos'] += 1
+            df_simulado.at[idx_m, 'empates'] += 1
+            df_simulado.at[idx_v, 'empates'] += 1
 
 df_simulado['saldo_gols'] = df_simulado['gols_pro'] - df_simulado['gols_contra']
 df_simulado['aproveitamento'] = (df_simulado['pontos'] / (df_simulado['jogos'] * 3) * 100).round(1)
@@ -233,30 +207,31 @@ def colorir_zonas(val):
             cores.append('')
     return cores
 
-# --- LAYOUT DE ABAS RESPONSIVAS ---
-tab_tabela, tab_simulador = st.tabs(["📊 Classificação", "🎮 Jogos & Simulador"])
+st.divider()
 
-# 1. CLASSIFICAÇÃO (ESPREMIDA À ESQUERDA)
-with tab_tabela:
-    st.subheader("📊 Classificação do Campeonato")
+# --- 4. LAYOUT PARALELO (TABELA À ESQUERDA | PLACARES E SIMULADOR À DIREITA) ---
+col_tabela, col_jogos = st.columns([1.2, 1])
+
+# COLUNA ESQUERDA: CLASSIFICAÇÃO
+with col_tabela:
+    st.subheader("📊 Classificação em Tempo Real")
     if not df_simulado.empty:
         m1, m2 = st.columns(2)
         m1.metric("🏆 Líder", f"{df_simulado.iloc[0]['nome_time']}", f"{df_simulado.iloc[0]['pontos']} pts")
         m2.metric("🛡️ G-4", f"{df_simulado.iloc[3]['nome_time']}", f"{df_simulado.iloc[3]['pontos']} pts")
-        st.write("")
         
         cols_exibir = ['nome_time', 'pontos', 'jogos', 'vitorias', 'empates', 'derrotas', 'gols_pro', 'gols_contra', 'saldo_gols', 'aproveitamento']
         st.dataframe(
             df_simulado[cols_exibir].style.apply(colorir_zonas, axis=0).format({"aproveitamento": "{:.1f}%"}),
             use_container_width=True,
             hide_index=False,
-            height=740
+            height=720
         )
         st.caption("🟢 G-4 | 🔵 Pré-Libertadores | 🟡 Sul-Americana | 🔴 Z-4")
 
-# 2. PLACARES AO VIVO & SIMULADOR (À DIREITA)
-with tab_simulador:
-    st.subheader(f"🎮 Placares & Simulação - {num_rodada}ª Rodada")
+# COLUNA DIREITA: JOGOS & PLACARES AO VIVO / SIMULADOR
+with col_jogos:
+    st.subheader(f"🎮 Jogos & Simulador - {num_rodada}ª Rodada")
     
     if st.button("🧹 Limpar Meus Palpites"):
         for idx in range(len(confrontos)):
@@ -271,7 +246,7 @@ with tab_simulador:
     for idx, (mandante, visitante, data_hora_str) in enumerate(confrontos):
         chave_live = f"{mandante}x{visitante}"
         
-        # Checa status ao vivo oficial
+        # Checa status ao vivo oficial na API
         if chave_live in placar_live:
             st_info = placar_live[chave_live]
             if st_info['state'] == 'in':
@@ -297,22 +272,22 @@ with tab_simulador:
 
         st.markdown(f"<div class='status-badge'>{badge}</div>", unsafe_allow_html=True)
         
-        col_m, col_pm, col_x, col_pv, col_v = st.columns([2.2, 1.1, 0.3, 1.1, 2.2])
-        with col_m:
+        c_m, c_pm, c_x, c_pv, c_v = st.columns([2.2, 1.1, 0.3, 1.1, 2.2])
+        with c_m:
             st.markdown(f"<div class='time-nome-m'>{mandante}</div>", unsafe_allow_html=True)
-        with col_pm:
+        with c_pm:
             st.number_input(
                 "", min_value=0, value=val_m, key=f"sim_r{num_rodada}_m_{idx}", 
                 label_visibility="collapsed", disabled=bloqueado
             )
-        with col_x:
+        with c_x:
             st.write("🔒" if bloqueado else "x")
-        with col_pv:
+        with c_pv:
             st.number_input(
                 "", min_value=0, value=val_v, key=f"sim_r{num_rodada}_v_{idx}", 
                 label_visibility="collapsed", disabled=bloqueado
             )
-        with col_v:
+        with c_v:
             st.markdown(f"<div class='time-nome-v'>{visitante}</div>", unsafe_allow_html=True)
             
         st.divider()
