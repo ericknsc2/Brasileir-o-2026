@@ -5,7 +5,7 @@ import requests
 # Configuração da página - Layout Wide
 st.set_page_config(page_title="Brasileirão 2026", layout="wide", initial_sidebar_state="collapsed")
 
-# --- CSS PARA ESPAÇAMENTOS E BOTÕES ---
+# --- CSS PARA ELEVAR O CABEÇALHO E OTIMIZAR ESPAÇAMENTOS ---
 st.markdown("""
 <style>
     .block-container {
@@ -45,7 +45,7 @@ st.title("⚽ Brasileirão 2026")
 if "palpites_confirmados" not in st.session_state:
     st.session_state.palpites_confirmados = {}
 
-# --- 1. DADOS DA TABELA BASE OFICIAL (CONSOLIDADA NA 26ª RODADA) ---
+# --- 1. DADOS DA TABELA BASE OFICIAL (ATUALIZADA C/ VITÓRIA 1 X 0 GRÊMIO - 26ª RODADA) ---
 @st.cache_data(ttl=1)
 def carregar_tabela_oficial():
     dados_tabela = [
@@ -59,11 +59,11 @@ def carregar_tabela_oficial():
         {"nome_time": "Atlético-MG", "pontos": 36, "jogos": 25, "vitorias": 10, "empates": 6, "derrotas": 9, "gols_pro": 32, "gols_contra": 30},
         {"nome_time": "Red Bull Bragantino", "pontos": 35, "jogos": 25, "vitorias": 10, "empates": 5, "derrotas": 10, "gols_pro": 31, "gols_contra": 28},
         {"nome_time": "São Paulo", "pontos": 33, "jogos": 25, "vitorias": 9, "empates": 6, "derrotas": 10, "gols_pro": 31, "gols_contra": 28},
+        {"nome_time": "Vitória", "pontos": 32, "jogos": 26, "vitorias": 9, "empates": 5, "derrotas": 12, "gols_pro": 25, "gols_contra": 37},
         {"nome_time": "Corinthians", "pontos": 32, "jogos": 26, "vitorias": 8, "empates": 8, "derrotas": 10, "gols_pro": 27, "gols_contra": 27},
         {"nome_time": "Santos", "pontos": 32, "jogos": 25, "vitorias": 8, "empates": 8, "derrotas": 9, "gols_pro": 37, "gols_contra": 38},
         {"nome_time": "Botafogo", "pontos": 31, "jogos": 25, "vitorias": 8, "empates": 7, "derrotas": 10, "gols_pro": 37, "gols_contra": 40},
-        {"nome_time": "Vitória", "pontos": 29, "jogos": 25, "vitorias": 8, "empates": 5, "derrotas": 12, "gols_pro": 24, "gols_contra": 37},
-        {"nome_time": "Grêmio", "pontos": 28, "jogos": 24, "vitorias": 7, "empates": 7, "derrotas": 10, "gols_pro": 27, "gols_contra": 32},
+        {"nome_time": "Grêmio", "pontos": 28, "jogos": 25, "vitorias": 7, "empates": 7, "derrotas": 11, "gols_pro": 27, "gols_contra": 33},
         {"nome_time": "Mirassol", "pontos": 28, "jogos": 26, "vitorias": 7, "empates": 7, "derrotas": 12, "gols_pro": 29, "gols_contra": 40},
         {"nome_time": "Vasco", "pontos": 25, "jogos": 25, "vitorias": 6, "empates": 7, "derrotas": 12, "gols_pro": 27, "gols_contra": 40},
         {"nome_time": "Internacional", "pontos": 25, "jogos": 26, "vitorias": 5, "empates": 10, "derrotas": 11, "gols_pro": 28, "gols_contra": 34},
@@ -100,6 +100,7 @@ def buscar_jogos_espn():
         pass
     return {}
 
+# --- CALENDÁRIO COM AS RODADAS 27, 28 E 29 ---
 CALENDARIO_RODADAS = {
     27: [
         ("Coritiba", "Athletico-PR", "Sexta, 11/09 - 21:00"),
@@ -124,6 +125,18 @@ CALENDARIO_RODADAS = {
         ("Corinthians", "Fluminense", "Domingo, 20/09 - 16:00"),
         ("Red Bull Bragantino", "Flamengo", "Domingo, 20/09 - 18:30"),
         ("Athletico-PR", "Bahia", "Segunda, 21/09 - 20:00")
+    ],
+    29: [
+        ("Fluminense", "Coritiba", "Quarta, 07/10 - 19:00"),
+        ("Vasco", "Botafogo", "Quarta, 07/10 - 19:30"),
+        ("Santos", "Flamengo", "Quarta, 07/10 - 20:00"),
+        ("Cruzeiro", "São Paulo", "Quarta, 07/10 - 21:30"),
+        ("Internacional", "Corinthians", "Quarta, 07/10 - 21:30"),
+        ("Athletico-PR", "Atlético-MG", "Quinta, 08/10 - 19:00"),
+        ("Palmeiras", "Bahia", "Quinta, 08/10 - 19:30"),
+        ("Red Bull Bragantino", "Mirassol", "Quinta, 08/10 - 20:00"),
+        ("Remo", "Grêmio", "Quinta, 08/10 - 21:00"),
+        ("Vitória", "Chapecoense", "Quinta, 08/10 - 21:30")
     ]
 }
 
@@ -277,7 +290,6 @@ with tab_simulador:
         with c_v:
             st.markdown(f"<div class='time-nome-v'>{visitante}</div>", unsafe_allow_html=True)
         with c_btn:
-            # Botão individual para calcular apenas esta partida
             if st.button("🧮 Calcular", key=f"btn_calc_{idx}"):
                 if gm_val is not None and gv_val is not None:
                     st.session_state.palpites_confirmados[chave_sim] = (gm_val, gv_val)
