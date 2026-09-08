@@ -100,7 +100,7 @@ def buscar_jogos_espn():
         pass
     return {}
 
-# --- CALENDÁRIO COM AS RODADAS 27, 28 E 29 ---
+# --- CALENDÁRIO COMPLETO DA RODADA 27 ATÉ A 38 ---
 CALENDARIO_RODADAS = {
     27: [
         ("Coritiba", "Athletico-PR", "Sexta, 11/09 - 21:00"),
@@ -137,6 +137,114 @@ CALENDARIO_RODADAS = {
         ("Red Bull Bragantino", "Mirassol", "Quinta, 08/10 - 20:00"),
         ("Remo", "Grêmio", "Quinta, 08/10 - 21:00"),
         ("Vitória", "Chapecoense", "Quinta, 08/10 - 21:30")
+    ],
+    30: [
+        ("Flamengo", "Palmeiras", "Sábado, 17/10 - 16:00"),
+        ("São Paulo", "Athletico-PR", "Sábado, 17/10 - 18:30"),
+        ("Corinthians", "Vitória", "Sábado, 17/10 - 20:30"),
+        ("Botafogo", "Santos", "Domingo, 18/10 - 16:00"),
+        ("Atlético-MG", "Cruzeiro", "Domingo, 18/10 - 16:00"),
+        ("Fluminense", "Vasco", "Domingo, 18/10 - 18:30"),
+        ("Bahia", "Red Bull Bragantino", "Domingo, 18/10 - 18:30"),
+        ("Grêmio", "Internacional", "Domingo, 18/10 - 20:00"),
+        ("Coritiba", "Remo", "Segunda, 19/10 - 20:00"),
+        ("Chapecoense", "Mirassol", "Segunda, 19/10 - 20:00")
+    ],
+    31: [
+        ("Palmeiras", "Fluminense", "Quarta, 21/10 - 19:00"),
+        ("Cruzeiro", "Flamengo", "Quarta, 21/10 - 19:30"),
+        ("Vasco", "Atlético-MG", "Quarta, 21/10 - 20:00"),
+        ("Internacional", "Botafogo", "Quarta, 21/10 - 21:30"),
+        ("Athletico-PR", "Corinthians", "Quarta, 21/10 - 21:30"),
+        ("Santos", "Bahia", "Quinta, 22/10 - 19:00"),
+        ("Red Bull Bragantino", "São Paulo", "Quinta, 22/10 - 19:30"),
+        ("Vitória", "Grêmio", "Quinta, 22/10 - 20:00"),
+        ("Mirassol", "Coritiba", "Quinta, 22/10 - 21:00"),
+        ("Remo", "Chapecoense", "Quinta, 22/10 - 21:30")
+    ],
+    32: [
+        ("Flamengo", "Athletico-PR", "Sábado, 24/10 - 16:00"),
+        ("Fluminense", "Santos", "Sábado, 24/10 - 18:30"),
+        ("São Paulo", "Vitória", "Sábado, 24/10 - 21:00"),
+        ("Atlético-MG", "Palmeiras", "Domingo, 25/10 - 16:00"),
+        ("Corinthians", "Cruzeiro", "Domingo, 25/10 - 16:00"),
+        ("Bahia", "Vasco", "Domingo, 25/10 - 18:30"),
+        ("Botafogo", "Mirassol", "Domingo, 25/10 - 18:30"),
+        ("Grêmio", "Red Bull Bragantino", "Domingo, 25/10 - 20:00"),
+        ("Coritiba", "Chapecoense", "Segunda, 26/10 - 20:00"),
+        ("Remo", "Internacional", "Segunda, 26/10 - 20:00")
+    ],
+    33: [
+        ("Palmeiras", "Corinthians", "Quarta, 28/10 - 19:30"),
+        ("Cruzeiro", "Fluminense", "Quarta, 28/10 - 19:30"),
+        ("Athletico-PR", "Botafogo", "Quarta, 28/10 - 20:00"),
+        ("Vasco", "Flamengo", "Quarta, 28/10 - 21:30"),
+        ("Internacional", "Atlético-MG", "Quarta, 28/10 - 21:30"),
+        ("Santos", "São Paulo", "Quinta, 29/10 - 19:00"),
+        ("Red Bull Bragantino", "Coritiba", "Quinta, 29/10 - 19:30"),
+        ("Vitória", "Remo", "Quinta, 29/10 - 20:00"),
+        ("Mirassol", "Grêmio", "Quinta, 29/10 - 21:00"),
+        ("Chapecoense", "Bahia", "Quinta, 29/10 - 21:30")
+    ],
+    34: [
+        ("Flamengo", "Santos", "Sábado, 07/11 - 16:00"),
+        ("Fluminense", "Athletico-PR", "Sábado, 07/11 - 18:30"),
+        ("Botafogo", "Palmeiras", "Sábado, 07/11 - 21:00"),
+        ("Atlético-MG", "Vitória", "Domingo, 08/11 - 16:00"),
+        ("Corinthians", "Red Bull Bragantino", "Domingo, 08/11 - 16:00"),
+        ("São Paulo", "Vasco", "Domingo, 08/11 - 18:30"),
+        ("Bahia", "Cruzeiro", "Domingo, 08/11 - 18:30"),
+        ("Grêmio", "Chapecoense", "Domingo, 08/11 - 20:00"),
+        ("Coritiba", "Internacional", "Segunda, 09/11 - 20:00"),
+        ("Remo", "Mirassol", "Segunda, 09/11 - 20:00")
+    ],
+    35: [
+        ("Palmeiras", "Grêmio", "Quarta, 18/11 - 19:30"),
+        ("Cruzeiro", "Botafogo", "Quarta, 18/11 - 19:30"),
+        ("Athletico-PR", "Remo", "Quarta, 18/11 - 20:00"),
+        ("Vasco", "Corinthians", "Quarta, 18/11 - 21:30"),
+        ("Internacional", "Fluminense", "Quarta, 18/11 - 21:30"),
+        ("Santos", "Atlético-MG", "Quinta, 19/11 - 19:00"),
+        ("Red Bull Bragantino", "Bahia", "Quinta, 19/11 - 19:30"),
+        ("Vitória", "Flamengo", "Quinta, 19/11 - 20:00"),
+        ("Mirassol", "São Paulo", "Quinta, 19/11 - 21:00"),
+        ("Chapecoense", "Coritiba", "Quinta, 19/11 - 21:30")
+    ],
+    36: [
+        ("Flamengo", "Fluminense", "Sábado, 21/11 - 16:00"),
+        ("São Paulo", "Palmeiras", "Sábado, 21/11 - 18:30"),
+        ("Corinthians", "Santos", "Sábado, 21/11 - 21:00"),
+        ("Atlético-MG", "Red Bull Bragantino", "Domingo, 22/11 - 16:00"),
+        ("Botafogo", "Grêmio", "Domingo, 22/11 - 16:00"),
+        ("Bahia", "Mirassol", "Domingo, 22/11 - 18:30"),
+        ("Cruzeiro", "Vasco", "Domingo, 22/11 - 18:30"),
+        ("Athletico-PR", "Chapecoense", "Domingo, 22/11 - 20:00"),
+        ("Coritiba", "Vitória", "Segunda, 23/11 - 20:00"),
+        ("Remo", "Internacional", "Segunda, 23/11 - 20:00")
+    ],
+    37: [
+        ("Palmeiras", "Cruzeiro", "Quarta, 25/11 - 19:30"),
+        ("Fluminense", "Bahia", "Quarta, 25/11 - 19:30"),
+        ("Grêmio", "Flamengo", "Quarta, 25/11 - 20:00"),
+        ("Vasco", "Athletico-PR", "Quarta, 25/11 - 21:30"),
+        ("Internacional", "São Paulo", "Quarta, 25/11 - 21:30"),
+        ("Santos", "Coritiba", "Quinta, 26/11 - 19:00"),
+        ("Red Bull Bragantino", "Remo", "Quinta, 26/11 - 19:30"),
+        ("Vitória", "Botafogo", "Quinta, 26/11 - 20:00"),
+        ("Mirassol", "Atlético-MG", "Quinta, 26/11 - 21:00"),
+        ("Chapecoense", "Corinthians", "Quinta, 26/11 - 21:30")
+    ],
+    38: [
+        ("Flamengo", "Mirassol", "Domingo, 29/11 - 16:00"),
+        ("São Paulo", "Fluminense", "Domingo, 29/11 - 16:00"),
+        ("Corinthians", "Grêmio", "Domingo, 29/11 - 16:00"),
+        ("Atlético-MG", "Vasco", "Domingo, 29/11 - 16:00"),
+        ("Botafogo", "Chapecoense", "Domingo, 29/11 - 16:00"),
+        ("Bahia", "Santos", "Domingo, 29/11 - 16:00"),
+        ("Cruzeiro", "Red Bull Bragantino", "Domingo, 29/11 - 16:00"),
+        ("Athletico-PR", "Palmeiras", "Domingo, 29/11 - 16:00"),
+        ("Coritiba", "Internacional", "Domingo, 29/11 - 16:00"),
+        ("Remo", "Vitória", "Domingo, 29/11 - 16:00")
     ]
 }
 
