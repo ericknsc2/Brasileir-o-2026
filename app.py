@@ -51,28 +51,28 @@ if "jogos_encerrados" not in st.session_state:
 else:
     st.session_state.jogos_encerrados["CoritibaXAthletico-PR"] = (3, 3)
 
-# Dicionário de Escudos dos Clubes
+# Dicionário Atualizado de Escudos (Links diretos e estáveis CDN/ESPN)
 ESCUDOS_TIMES = {
-    "Flamengo": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Flamengo_braz_logo.svg",
-    "Palmeiras": "https://upload.wikimedia.org/wikipedia/commons/1/10/Palmeiras_logo.svg",
-    "Athletico-PR": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Athletico_Paranaense_2019.svg",
-    "Fluminense": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Fluminense_fc_logo.svg",
-    "Bahia": "https://upload.wikimedia.org/wikipedia/pt/2/2c/ECBahia.png",
-    "Cruzeiro": "https://upload.wikimedia.org/wikipedia/commons/9/90/Cruzeiro_Esporte_Clube_%28logo%29.svg",
-    "Coritiba": "https://upload.wikimedia.org/wikipedia/commons/b/b0/Coritiba_F%C3%Batbol_Clube.svg",
-    "Atlético-MG": "https://upload.wikimedia.org/wikipedia/commons/2/22/Clube_Atl%C3%A9tico_Mineiro_logo.svg",
-    "Red Bull Bragantino": "https://upload.wikimedia.org/wikipedia/commons/9/9e/Red_Bull_Bragantino_logo.svg",
-    "São Paulo": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Brasao_do_Sao_Paulo_Futebol_Clube.svg",
-    "Vitória": "https://upload.wikimedia.org/wikipedia/pt/7/77/Esporte_Clube_Vit%C3%B3ria_logo.png",
-    "Corinthians": "https://upload.wikimedia.org/wikipedia/pt/b/b4/Corinthians_simbolo.png",
-    "Santos": "https://upload.wikimedia.org/wikipedia/commons/3/35/Santos_logo.svg",
-    "Botafogo": "https://upload.wikimedia.org/wikipedia/commons/5/52/Botafogo_de_Futebol_e_Regatas_logo.svg",
-    "Grêmio": "https://upload.wikimedia.org/wikipedia/commons/3/38/Gremio_logo.svg",
-    "Mirassol": "https://upload.wikimedia.org/wikipedia/pt/b/bd/Mirassol_FC.png",
-    "Vasco": "https://upload.wikimedia.org/wikipedia/pt/a/ac/CRVascodaGama.png",
-    "Internacional": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Escudo_do_Sport_Club_Internacional.svg",
-    "Remo": "https://upload.wikimedia.org/wikipedia/commons/9/95/Clube_do_Remo.svg",
-    "Chapecoense": "https://upload.wikimedia.org/wikipedia/commons/9/98/Chapecoense_logo.svg"
+    "Flamengo": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
+    "Palmeiras": "https://a.espncdn.com/i/teamlogos/soccer/500/2029.png",
+    "Athletico-PR": "https://a.espncdn.com/i/teamlogos/soccer/500/3458.png",
+    "Fluminense": "https://a.espncdn.com/i/teamlogos/soccer/500/820.png",
+    "Bahia": "https://a.espncdn.com/i/teamlogos/soccer/500/3457.png",
+    "Cruzeiro": "https://a.espncdn.com/i/teamlogos/soccer/500/818.png",
+    "Coritiba": "https://a.espncdn.com/i/teamlogos/soccer/500/3460.png",
+    "Atlético-MG": "https://a.espncdn.com/i/teamlogos/soccer/500/3459.png",
+    "Red Bull Bragantino": "https://a.espncdn.com/i/teamlogos/soccer/500/6075.png",
+    "São Paulo": "https://a.espncdn.com/i/teamlogos/soccer/500/2026.png",
+    "Vitória": "https://a.espncdn.com/i/teamlogos/soccer/500/3467.png",
+    "Corinthians": "https://a.espncdn.com/i/teamlogos/soccer/500/874.png",
+    "Santos": "https://a.espncdn.com/i/teamlogos/soccer/500/2674.png",
+    "Botafogo": "https://a.espncdn.com/i/teamlogos/soccer/500/821.png",
+    "Grêmio": "https://a.espncdn.com/i/teamlogos/soccer/500/6271.png",
+    "Mirassol": "https://a.espncdn.com/i/teamlogos/soccer/500/9891.png",
+    "Vasco": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png",
+    "Internacional": "https://a.espncdn.com/i/teamlogos/soccer/500/1936.png",
+    "Remo": "https://a.espncdn.com/i/teamlogos/soccer/500/3746.png",
+    "Chapecoense": "https://a.espncdn.com/i/teamlogos/soccer/500/12668.png"
 }
 
 MAPEAMENTO_TIMES_ESPN = {
@@ -99,7 +99,7 @@ def normalizar_nome(nome):
 
 def obter_escudo(nome):
     nome_padrao = normalizar_nome(nome)
-    return ESCUDOS_TIMES.get(nome_padrao, "https://upload.wikimedia.org/wikipedia/commons/5/5f/Red_Ball.svg")
+    return ESCUDOS_TIMES.get(nome_padrao, "https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo.png")
 
 # --- DADOS DA TABELA BASE OFICIAL ---
 @st.cache_data(ttl=1)
@@ -297,12 +297,12 @@ with tab_tabela:
         m1.metric("🏆 Líder", f"{df_simulado.iloc[0]['nome_time']}", f"{df_simulado.iloc[0]['pontos']} pts")
         m2.metric("🛡️ G-4", f"{df_simulado.iloc[3]['nome_time']}", f"{df_simulado.iloc[3]['pontos']} pts")
         
-        # Coluna 'var' removida da lista de colunas exibidas
+        # Colunas exibidas (sem a coluna 'var')
         cols_exibir = ['escudo', 'nome_time', 'pontos', 'jogos', 'vitorias', 'empates', 'derrotas', 'gols_pro', 'gols_contra', 'saldo_gols', 'aproveitamento']
         
         df_exibir = df_simulado[cols_exibir].copy()
         
-        # Setas concatenadas diretamente ao lado direito do nome do time
+        # Seta do lado direito do nome do time
         df_exibir['nome_time'] = df_simulado['nome_time'] + " " + df_simulado['var']
         df_exibir.index = df_simulado['pos_atual']
         
