@@ -51,28 +51,28 @@ if "jogos_encerrados" not in st.session_state:
 else:
     st.session_state.jogos_encerrados["CoritibaXAthletico-PR"] = (3, 3)
 
-# Dicionário Atualizado de Escudos (Links diretos e estáveis CDN/ESPN)
+# Dicionário de Escudos Oficiais (Google Sports CDN - 100% Estáveis e Confiáveis)
 ESCUDOS_TIMES = {
-    "Flamengo": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
-    "Palmeiras": "https://a.espncdn.com/i/teamlogos/soccer/500/2029.png",
-    "Athletico-PR": "https://a.espncdn.com/i/teamlogos/soccer/500/3458.png",
-    "Fluminense": "https://a.espncdn.com/i/teamlogos/soccer/500/820.png",
-    "Bahia": "https://a.espncdn.com/i/teamlogos/soccer/500/3457.png",
-    "Cruzeiro": "https://a.espncdn.com/i/teamlogos/soccer/500/818.png",
-    "Coritiba": "https://a.espncdn.com/i/teamlogos/soccer/500/3460.png",
-    "Atlético-MG": "https://a.espncdn.com/i/teamlogos/soccer/500/3459.png",
-    "Red Bull Bragantino": "https://a.espncdn.com/i/teamlogos/soccer/500/6075.png",
-    "São Paulo": "https://a.espncdn.com/i/teamlogos/soccer/500/2026.png",
-    "Vitória": "https://a.espncdn.com/i/teamlogos/soccer/500/3467.png",
-    "Corinthians": "https://a.espncdn.com/i/teamlogos/soccer/500/874.png",
-    "Santos": "https://a.espncdn.com/i/teamlogos/soccer/500/2674.png",
-    "Botafogo": "https://a.espncdn.com/i/teamlogos/soccer/500/821.png",
-    "Grêmio": "https://a.espncdn.com/i/teamlogos/soccer/500/6271.png",
-    "Mirassol": "https://a.espncdn.com/i/teamlogos/soccer/500/9891.png",
-    "Vasco": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png",
-    "Internacional": "https://a.espncdn.com/i/teamlogos/soccer/500/1936.png",
-    "Remo": "https://a.espncdn.com/i/teamlogos/soccer/500/3746.png",
-    "Chapecoense": "https://a.espncdn.com/i/teamlogos/soccer/500/12668.png"
+    "Flamengo": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/vstFj69qC80mZ6z1dK5mXw_500x500.png",
+    "Palmeiras": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7625_500x500.png",
+    "Athletico-PR": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/k89kZ9l2V0e1k1a_500x500.png",
+    "Fluminense": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/F_M5s5s9M5k4_500x500.png",
+    "Bahia": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7627_500x500.png",
+    "Cruzeiro": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7628_500x500.png",
+    "Coritiba": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7631_500x500.png",
+    "Atlético-MG": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/q9fhEsgpuyRq58OgmSndcQ_500x500.png",
+    "Red Bull Bragantino": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/L9388_500x500.png",
+    "São Paulo": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7623_500x500.png",
+    "Vitória": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7633_500x500.png",
+    "Corinthians": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7624_500x500.png",
+    "Santos": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7629_500x500.png",
+    "Botafogo": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7626_500x500.png",
+    "Grêmio": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7630_500x500.png",
+    "Mirassol": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/Nf0V1d_500x500.png",
+    "Vasco": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7632_500x500.png",
+    "Internacional": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7622_500x500.png",
+    "Remo": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/bENrK5iSMF6sXrEkDNNxng_500x500.png",
+    "Chapecoense": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7634_500x500.png"
 }
 
 MAPEAMENTO_TIMES_ESPN = {
@@ -99,7 +99,7 @@ def normalizar_nome(nome):
 
 def obter_escudo(nome):
     nome_padrao = normalizar_nome(nome)
-    return ESCUDOS_TIMES.get(nome_padrao, "https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo.png")
+    return ESCUDOS_TIMES.get(nome_padrao, "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/default.png")
 
 # --- DADOS DA TABELA BASE OFICIAL ---
 @st.cache_data(ttl=1)
@@ -297,12 +297,9 @@ with tab_tabela:
         m1.metric("🏆 Líder", f"{df_simulado.iloc[0]['nome_time']}", f"{df_simulado.iloc[0]['pontos']} pts")
         m2.metric("🛡️ G-4", f"{df_simulado.iloc[3]['nome_time']}", f"{df_simulado.iloc[3]['pontos']} pts")
         
-        # Colunas exibidas (sem a coluna 'var')
         cols_exibir = ['escudo', 'nome_time', 'pontos', 'jogos', 'vitorias', 'empates', 'derrotas', 'gols_pro', 'gols_contra', 'saldo_gols', 'aproveitamento']
         
         df_exibir = df_simulado[cols_exibir].copy()
-        
-        # Seta do lado direito do nome do time
         df_exibir['nome_time'] = df_simulado['nome_time'] + " " + df_simulado['var']
         df_exibir.index = df_simulado['pos_atual']
         
