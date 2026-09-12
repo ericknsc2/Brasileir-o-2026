@@ -53,7 +53,9 @@ else:
 
 # ESCUDOS GARANTIDOS (URLs de CDN direta de arquivos estáticos sem hotlinking)
 ESCUDOS_TIMES = {
-    "Flamengo": "https://s.sde.globo.com/media/organizations/2018/04/10/Flamengo.svg",
+    # ESCUDOS GARANTIDOS (13 mantidos do GloboEsporte + 7 atualizados via CDN ESPN)
+ESCUDOS_TIMES = {
+    "Flamengo": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
     "Palmeiras": "https://s.sde.globo.com/media/organizations/2019/07/06/Palmeiras.svg",
     "Athletico-PR": "https://s.sde.globo.com/media/organizations/2019/09/09/Athletico-PR.svg",
     "Fluminense": "https://s.sde.globo.com/media/organizations/2018/03/11/fluminense.svg",
@@ -61,18 +63,19 @@ ESCUDOS_TIMES = {
     "Cruzeiro": "https://s.sde.globo.com/media/organizations/2021/02/13/cruzeiro_2021.svg",
     "Coritiba": "https://s.sde.globo.com/media/organizations/2018/03/11/coritiba.svg",
     "Atlético-MG": "https://s.sde.globo.com/media/organizations/2018/03/10/atletico-mg.svg",
-    "Red Bull Bragantino": "https://s.sde.globo.com/media/organizations/2020/01/01/bragantino.svg",
+    "Red Bull Bragantino": "https://a.espncdn.com/i/teamlogos/soccer/500/6079.png",
     "São Paulo": "https://s.sde.globo.com/media/organizations/2018/03/11/sao-paulo.svg",
-    "Vitória": "https://s.sde.globo.com/media/organizations/2024/04/09/vitoria-2024.svg",
+    "Vitória": "https://a.espncdn.com/i/teamlogos/soccer/500/3456.png",
     "Corinthians": "https://s.sde.globo.com/media/organizations/2019/09/30/Corinthians.svg",
     "Santos": "https://s.sde.globo.com/media/organizations/2018/03/12/santos.svg",
     "Botafogo": "https://s.sde.globo.com/media/organizations/2019/02/04/botafogo-svg.svg",
     "Grêmio": "https://s.sde.globo.com/media/organizations/2018/03/12/gremio.svg",
-    "Mirassol": "https://s.sde.globo.com/media/organizations/2020/01/18/Mirassol.svg",
-    "Vasco": "https://s.sde.globo.com/media/organizations/2021/09/04/Vasco_2021.svg",
+    "Mirassol": "https://a.espncdn.com/i/teamlogos/soccer/500/9883.png",
+    "Vasco": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png",
     "Internacional": "https://s.sde.globo.com/media/organizations/2018/03/11/internacional.svg",
-    "Remo": "https://s.sde.globo.com/media/organizations/2018/03/12/remo.svg",
-    "Chapecoense": "https://s.sde.globo.com/media/organizations/2021/06/21/chapecoense-2021.svg"
+    "Remo": "https://a.espncdn.com/i/teamlogos/soccer/500/9873.png",
+    "Chapecoense": "https://a.espncdn.com/i/teamlogos/soccer/500/10362.png"
+}
 }
 
 MAPEAMENTO_TIMES_ESPN = {
