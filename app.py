@@ -68,7 +68,7 @@ ESCUDOS_TIMES = {
     "Santos": "https://s.sde.globo.com/media/organizations/2018/03/12/santos.svg",
     "Botafogo": "https://s.sde.globo.com/media/organizations/2019/02/04/botafogo-svg.svg",
     "Grêmio": "https://s.sde.globo.com/media/organizations/2018/03/12/gremio.svg",
-    "Mirassol": import streamlit as st
+    "Mirassol":"https://upload.wikimedia.org/wikipedia/commons/8/87/Mirassol_FC_logo.png"
 import pandas as pd
 import requests
 
