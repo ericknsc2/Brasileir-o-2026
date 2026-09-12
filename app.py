@@ -51,7 +51,7 @@ if "jogos_encerrados" not in st.session_state:
 else:
     st.session_state.jogos_encerrados["CoritibaXAthletico-PR"] = (3, 3)
 
-# ESCUDOS COM OPÇÕES ATUALIZADAS (Mirassol e Remo com links alternativos)
+# ESCUDOS COM OPÇÕES ROBUSTAS (Mirassol e Remo ajustados para links diretos de alta compatibilidade)
 ESCUDOS_TIMES = {
     "Flamengo": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
     "Palmeiras": "https://s.sde.globo.com/media/organizations/2019/07/06/Palmeiras.svg",
@@ -68,10 +68,10 @@ ESCUDOS_TIMES = {
     "Santos": "https://s.sde.globo.com/media/organizations/2018/03/12/santos.svg",
     "Botafogo": "https://s.sde.globo.com/media/organizations/2019/02/04/botafogo-svg.svg",
     "Grêmio": "https://s.sde.globo.com/media/organizations/2018/03/12/gremio.svg",
-    "Mirassol": "[https://mirassolfc.com.br/cdn/shop/files/LOGO_MIRASSOL_FLAT.png?v=1771880070](https://mirassolfc.com.br/cdn/shop/files/LOGO_MIRASSOL_FLAT.png?v=1771880070)",
+    "Mirassol": "https://logodetimes.com/wp-content/uploads/mirassol-futebol-clube.png",
     "Vasco": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png",
     "Internacional": "https://s.sde.globo.com/media/organizations/2018/03/11/internacional.svg",
-    "Remo": "[https://logodownload.org/wp-content/uploads/2021/05/remo-logo-4-1.png](https://logodownload.org/wp-content/uploads/2021/05/remo-logo-4-1.png)",
+    "Remo": "https://logodetimes.com/wp-content/uploads/remo-brasao.png",
     "Chapecoense": "https://s.sde.globo.com/media/organizations/2018/03/11/chapecoense.svg"
 }
 
