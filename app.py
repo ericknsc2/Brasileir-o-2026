@@ -68,7 +68,7 @@ ESCUDOS_TIMES = {
     "Santos": "https://s.sde.globo.com/media/organizations/2018/03/12/santos.svg",
     "Botafogo": "https://s.sde.globo.com/media/organizations/2019/02/04/botafogo-svg.svg",
     "Grêmio": "https://s.sde.globo.com/media/organizations/2018/03/12/gremio.svg",
-    "Mirassol": "[https://upload.wikimedia.org/wikipedia/commons/f/f1/Mirassol_FC_logo.png](https://upload.wikimedia.org/wikipedia/commons/f/f1/Mirassol_FC_logo.png)",
+    "Mirassol": "[https://mirassolfc.com.br/cdn/shop/files/LOGO_MIRASSOL_FLAT.png?v=1771880070](https://mirassolfc.com.br/cdn/shop/files/LOGO_MIRASSOL_FLAT.png?v=1771880070)",
     "Vasco": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png",
     "Internacional": "https://s.sde.globo.com/media/organizations/2018/03/11/internacional.svg",
     "Remo": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Clube_do_Remo.svg",
