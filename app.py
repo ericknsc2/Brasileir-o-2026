@@ -43,7 +43,7 @@ st.title("⚽ Brasileirão 2026")
 if "palpites_confirmados" not in st.session_state:
     st.session_state.palpites_confirmados = {}
 
-# Inserção do jogo já encerrado (Coritiba 3 x 3 Athletico-PR)
+# Jogo já encerrado: Coritiba 3 x 3 Athletico-PR
 if "jogos_encerrados" not in st.session_state:
     st.session_state.jogos_encerrados = {
         "CoritibaXAthletico-PR": (3, 3)
@@ -51,7 +51,7 @@ if "jogos_encerrados" not in st.session_state:
 else:
     st.session_state.jogos_encerrados["CoritibaXAthletico-PR"] = (3, 3)
 
-# Mapeamento com URLs diretas e estáveis (Wikimedia CDN com CORS aberto)
+# Dicionário de Escudos dos Clubes
 ESCUDOS_TIMES = {
     "Flamengo": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Flamengo_braz_logo.svg",
     "Palmeiras": "https://upload.wikimedia.org/wikipedia/commons/1/10/Palmeiras_logo.svg",
@@ -101,7 +101,7 @@ def obter_escudo(nome):
     nome_padrao = normalizar_nome(nome)
     return ESCUDOS_TIMES.get(nome_padrao, "https://upload.wikimedia.org/wikipedia/commons/5/5f/Red_Ball.svg")
 
-# --- 1. DADOS DA TABELA BASE OFICIAL ---
+# --- DADOS DA TABELA BASE OFICIAL ---
 @st.cache_data(ttl=1)
 def carregar_tabela_oficial():
     dados_tabela = [
@@ -199,7 +199,7 @@ with c_ctrl2:
     lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist())
     time_favorito = st.selectbox("⭐ Destaque o Time do Coração:", lista_times)
 
-# --- 3. CÁLCULO REATIVO DA TABELA ---
+# --- CÁLCULO REATIVO DA TABELA ---
 df_simulado = df_base.copy()
 
 for r_num, lista_jogos in CALENDARIO_RODADAS.items():
@@ -297,16 +297,19 @@ with tab_tabela:
         m1.metric("🏆 Líder", f"{df_simulado.iloc[0]['nome_time']}", f"{df_simulado.iloc[0]['pontos']} pts")
         m2.metric("🛡️ G-4", f"{df_simulado.iloc[3]['nome_time']}", f"{df_simulado.iloc[3]['pontos']} pts")
         
-        cols_exibir = ['escudo', 'var', 'nome_time', 'pontos', 'jogos', 'vitorias', 'empates', 'derrotas', 'gols_pro', 'gols_contra', 'saldo_gols', 'aproveitamento']
+        # Coluna 'var' removida da lista de colunas exibidas
+        cols_exibir = ['escudo', 'nome_time', 'pontos', 'jogos', 'vitorias', 'empates', 'derrotas', 'gols_pro', 'gols_contra', 'saldo_gols', 'aproveitamento']
         
         df_exibir = df_simulado[cols_exibir].copy()
+        
+        # Setas concatenadas diretamente ao lado direito do nome do time
+        df_exibir['nome_time'] = df_simulado['nome_time'] + " " + df_simulado['var']
         df_exibir.index = df_simulado['pos_atual']
         
         st.dataframe(
             df_exibir.style.apply(colorir_zonas, axis=0).format({"aproveitamento": "{:.1f}%"}),
             column_config={
                 "escudo": st.column_config.ImageColumn("Escudo", help="Escudo do clube", width="small"),
-                "var": st.column_config.TextColumn("Var", help="Variação de Posição"),
                 "nome_time": st.column_config.TextColumn("Clube"),
             },
             use_container_width=True,
@@ -442,7 +445,7 @@ with tab_aovivo:
             
             c_nm, c_im, c_pm, c_x, c_pv, c_iv, c_nv = st.columns([2, 0.4, 0.8, 0.3, 0.8, 0.4, 2])
             with c_nm:
-                st.markdown(f"<div style='text-align: right; font-weight: bold;'><small style='color:#777;'>({var_m})</small> {mandante}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='text-align: right; font-weight: bold;'>{mandante} <small style='color:#777;'>({var_m})</small></div>", unsafe_allow_html=True)
             with c_im:
                 st.image(obter_escudo(mandante), width=24)
             with c_pm:
