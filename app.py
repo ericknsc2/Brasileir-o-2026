@@ -26,8 +26,24 @@ st.markdown("""
         font-weight: bold;
     }
 
-    .time-nome-m { text-align: right; font-weight: bold; font-size: 13px; }
-    .time-nome-v { text-align: left; font-weight: bold; font-size: 13px; }
+    .time-container-m { 
+        display: flex; 
+        align-items: center; 
+        justify-content: flex-end; 
+        gap: 6px; 
+        font-weight: bold; 
+        font-size: 13px; 
+    }
+    
+    .time-container-v { 
+        display: flex; 
+        align-items: center; 
+        justify-content: flex-start; 
+        gap: 6px; 
+        font-weight: bold; 
+        font-size: 13px; 
+    }
+
     .status-badge { font-size: 11px; color: #555; margin-bottom: 2px; font-weight: 600; text-align: center; }
 
     @media (max-width: 768px) {
@@ -41,11 +57,56 @@ st.markdown("""
 
 st.title("⚽ Brasileirão 2026")
 
-# --- Inicialização da Session State para Palpites Confirmados ---
+# --- Inicialização da Session State ---
 if "palpites_confirmados" not in st.session_state:
     st.session_state.palpites_confirmados = {}
 
-# --- 1. DADOS DA TABELA BASE OFICIAL (ATUALIZADA C/ VITÓRIA 1 X 0 GRÊMIO - 26ª RODADA) ---
+if "jogos_encerrados" not in st.session_state:
+    st.session_state.jogos_encerrados = {}
+
+# Mapeamento de Escudos Oficiais dos Times (URLs CDN/Wikimedia)
+ESCUDOS_TIMES = {
+    "Flamengo": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Flamengo_braz_logo.svg",
+    "Palmeiras": "https://upload.wikimedia.org/wikipedia/commons/1/10/Palmeiras_logo.svg",
+    "Athletico-PR": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Athletico_Paranaense_2019.svg",
+    "Fluminense": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Fluminense_FC_escudo.svg",
+    "Bahia": "https://upload.wikimedia.org/wikipedia/commons/2/20/Esporte_Clube_Bahia_logo.svg",
+    "Cruzeiro": "https://upload.wikimedia.org/wikipedia/commons/9/90/Cruzeiro_Esporte_Clube_%28logo_2021%29.svg",
+    "Coritiba": "https://upload.wikimedia.org/wikipedia/commons/4/46/Coritiba_FC_logo.svg",
+    "Atlético-MG": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Atletico_Mineiro_logo.svg",
+    "Red Bull Bragantino": "https://upload.wikimedia.org/wikipedia/commons/9/9e/Red_Bull_Bragantino_logo.svg",
+    "São Paulo": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Brasao_do_Sao_Paulo_Futebol_Clube.svg",
+    "Vitória": "https://upload.wikimedia.org/wikipedia/commons/0/04/Esporte_Clube_Vit%C3%B3ria_logo.svg",
+    "Corinthians": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Sport_Club_Corinthians_Paulista_logo.svg",
+    "Santos": "https://upload.wikimedia.org/wikipedia/commons/1/15/Santos_Logo.svg",
+    "Botafogo": "https://upload.wikimedia.org/wikipedia/commons/5/52/Botafogo_de_Futebol_e_Regatas_logo.svg",
+    "Grêmio": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Gremio_logo.svg",
+    "Mirassol": "https://upload.wikimedia.org/wikipedia/commons/3/36/Mirassol_FC_logo.svg",
+    "Vasco": "https://upload.wikimedia.org/wikipedia/commons/a/ac/CR_Vasco_da_Gama_logo.svg",
+    "Internacional": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Escudo_do_Sport_Club_Internacional.svg",
+    "Remo": "https://upload.wikimedia.org/wikipedia/commons/7/77/Clube_do_Remo.svg",
+    "Chapecoense": "https://upload.wikimedia.org/wikipedia/commons/b/bd/Chapecoense_logo.svg"
+}
+
+# Mapeamento para padronizar nomes da ESPN
+MAPEAMENTO_TIMES_ESPN = {
+    "Athletico-PR": "Athletico-PR",
+    "Athletico Paranaense": "Athletico-PR",
+    "Atlético-MG": "Atlético-MG",
+    "Atletico Mineiro": "Atlético-MG",
+    "Red Bull Bragantino": "Red Bull Bragantino",
+    "Bragantino": "Red Bull Bragantino",
+    "São Paulo": "São Paulo",
+    "Sao Paulo": "São Paulo"
+}
+
+def normalizar_nome(nome):
+    return MAPEAMENTO_TIMES_ESPN.get(nome, nome)
+
+def obter_escudo(nome):
+    return ESCUDOS_TIMES.get(nome, "https://upload.wikimedia.org/wikipedia/commons/d/d2/Blank.png")
+
+# --- 1. DADOS DA TABELA BASE OFICIAL ---
 @st.cache_data(ttl=1)
 def carregar_tabela_oficial():
     dados_tabela = [
@@ -72,35 +133,43 @@ def carregar_tabela_oficial():
     ]
     df = pd.DataFrame(dados_tabela)
     df['saldo_gols'] = df['gols_pro'] - df['gols_contra']
+    df['pos_inicial'] = df.index + 1
     return df
 
-# --- 2. CONSULTA API PÚBLICA DA ESPN (AO VIVO) ---
+# --- 2. CONSULTA API PÚBLICA DA ESPN ---
 def buscar_jogos_espn():
     url = "https://site.api.espn.com/apis/site/v2/sports/soccer/bra.1/scoreboard"
     try:
-        res = requests.get(url, timeout=2)
+        res = requests.get(url, timeout=3)
         if res.status_code == 200:
             dados = res.json()
             eventos = dados.get('events', [])
             jogos = {}
             for ev in eventos:
                 comp = ev['competitions'][0]
-                m_nome = comp['competitors'][0]['team']['shortDisplayName']
-                v_nome = comp['competitors'][1]['team']['shortDisplayName']
-                m_score = int(comp['competitors'][0]['score'])
-                v_score = int(comp['competitors'][1]['score'])
+                m_nome = normalizar_nome(comp['competitors'][0]['team']['shortDisplayName'])
+                v_nome = normalizar_nome(comp['competitors'][1]['team']['shortDisplayName'])
+                
+                m_score = int(comp['competitors'][0]['score']) if 'score' in comp['competitors'][0] else 0
+                v_score = int(comp['competitors'][1]['score']) if 'score' in comp['competitors'][1] else 0
+                
                 state = ev['status']['type']['state']
                 detail = ev['status']['type']['shortDetail']
                 
-                jogos[f"{m_nome}x{v_nome}"] = {
+                chave = f"{m_nome}x{v_nome}"
+                jogos[chave] = {
                     'gm': m_score, 'gv': v_score, 'state': state, 'detail': detail
                 }
+                
+                if state == 'post':
+                    st.session_state.jogos_encerrados[chave] = (m_score, v_score)
+
             return jogos
     except Exception:
         pass
     return {}
 
-# --- CALENDÁRIO COMPLETO DA RODADA 27 ATÉ A 38 ---
+# CALENDÁRIO COMPLETO
 CALENDARIO_RODADAS = {
     27: [
         ("Coritiba", "Athletico-PR", "Sexta, 11/09 - 21:00"),
@@ -125,126 +194,6 @@ CALENDARIO_RODADAS = {
         ("Corinthians", "Fluminense", "Domingo, 20/09 - 16:00"),
         ("Red Bull Bragantino", "Flamengo", "Domingo, 20/09 - 18:30"),
         ("Athletico-PR", "Bahia", "Segunda, 21/09 - 20:00")
-    ],
-    29: [
-        ("Fluminense", "Coritiba", "Quarta, 07/10 - 19:00"),
-        ("Vasco", "Botafogo", "Quarta, 07/10 - 19:30"),
-        ("Santos", "Flamengo", "Quarta, 07/10 - 20:00"),
-        ("Cruzeiro", "São Paulo", "Quarta, 07/10 - 21:30"),
-        ("Internacional", "Corinthians", "Quarta, 07/10 - 21:30"),
-        ("Athletico-PR", "Atlético-MG", "Quinta, 08/10 - 19:00"),
-        ("Palmeiras", "Bahia", "Quinta, 08/10 - 19:30"),
-        ("Red Bull Bragantino", "Mirassol", "Quinta, 08/10 - 20:00"),
-        ("Remo", "Grêmio", "Quinta, 08/10 - 21:00"),
-        ("Vitória", "Chapecoense", "Quinta, 08/10 - 21:30")
-    ],
-    30: [
-        ("Flamengo", "Palmeiras", "Sábado, 17/10 - 16:00"),
-        ("São Paulo", "Athletico-PR", "Sábado, 17/10 - 18:30"),
-        ("Corinthians", "Vitória", "Sábado, 17/10 - 20:30"),
-        ("Botafogo", "Santos", "Domingo, 18/10 - 16:00"),
-        ("Atlético-MG", "Cruzeiro", "Domingo, 18/10 - 16:00"),
-        ("Fluminense", "Vasco", "Domingo, 18/10 - 18:30"),
-        ("Bahia", "Red Bull Bragantino", "Domingo, 18/10 - 18:30"),
-        ("Grêmio", "Internacional", "Domingo, 18/10 - 20:00"),
-        ("Coritiba", "Remo", "Segunda, 19/10 - 20:00"),
-        ("Chapecoense", "Mirassol", "Segunda, 19/10 - 20:00")
-    ],
-    31: [
-        ("Palmeiras", "Fluminense", "Quarta, 21/10 - 19:00"),
-        ("Cruzeiro", "Flamengo", "Quarta, 21/10 - 19:30"),
-        ("Vasco", "Atlético-MG", "Quarta, 21/10 - 20:00"),
-        ("Internacional", "Botafogo", "Quarta, 21/10 - 21:30"),
-        ("Athletico-PR", "Corinthians", "Quarta, 21/10 - 21:30"),
-        ("Santos", "Bahia", "Quinta, 22/10 - 19:00"),
-        ("Red Bull Bragantino", "São Paulo", "Quinta, 22/10 - 19:30"),
-        ("Vitória", "Grêmio", "Quinta, 22/10 - 20:00"),
-        ("Mirassol", "Coritiba", "Quinta, 22/10 - 21:00"),
-        ("Remo", "Chapecoense", "Quinta, 22/10 - 21:30")
-    ],
-    32: [
-        ("Flamengo", "Athletico-PR", "Sábado, 24/10 - 16:00"),
-        ("Fluminense", "Santos", "Sábado, 24/10 - 18:30"),
-        ("São Paulo", "Vitória", "Sábado, 24/10 - 21:00"),
-        ("Atlético-MG", "Palmeiras", "Domingo, 25/10 - 16:00"),
-        ("Corinthians", "Cruzeiro", "Domingo, 25/10 - 16:00"),
-        ("Bahia", "Vasco", "Domingo, 25/10 - 18:30"),
-        ("Botafogo", "Mirassol", "Domingo, 25/10 - 18:30"),
-        ("Grêmio", "Red Bull Bragantino", "Domingo, 25/10 - 20:00"),
-        ("Coritiba", "Chapecoense", "Segunda, 26/10 - 20:00"),
-        ("Remo", "Internacional", "Segunda, 26/10 - 20:00")
-    ],
-    33: [
-        ("Palmeiras", "Corinthians", "Quarta, 28/10 - 19:30"),
-        ("Cruzeiro", "Fluminense", "Quarta, 28/10 - 19:30"),
-        ("Athletico-PR", "Botafogo", "Quarta, 28/10 - 20:00"),
-        ("Vasco", "Flamengo", "Quarta, 28/10 - 21:30"),
-        ("Internacional", "Atlético-MG", "Quarta, 28/10 - 21:30"),
-        ("Santos", "São Paulo", "Quinta, 29/10 - 19:00"),
-        ("Red Bull Bragantino", "Coritiba", "Quinta, 29/10 - 19:30"),
-        ("Vitória", "Remo", "Quinta, 29/10 - 20:00"),
-        ("Mirassol", "Grêmio", "Quinta, 29/10 - 21:00"),
-        ("Chapecoense", "Bahia", "Quinta, 29/10 - 21:30")
-    ],
-    34: [
-        ("Flamengo", "Santos", "Sábado, 07/11 - 16:00"),
-        ("Fluminense", "Athletico-PR", "Sábado, 07/11 - 18:30"),
-        ("Botafogo", "Palmeiras", "Sábado, 07/11 - 21:00"),
-        ("Atlético-MG", "Vitória", "Domingo, 08/11 - 16:00"),
-        ("Corinthians", "Red Bull Bragantino", "Domingo, 08/11 - 16:00"),
-        ("São Paulo", "Vasco", "Domingo, 08/11 - 18:30"),
-        ("Bahia", "Cruzeiro", "Domingo, 08/11 - 18:30"),
-        ("Grêmio", "Chapecoense", "Domingo, 08/11 - 20:00"),
-        ("Coritiba", "Internacional", "Segunda, 09/11 - 20:00"),
-        ("Remo", "Mirassol", "Segunda, 09/11 - 20:00")
-    ],
-    35: [
-        ("Palmeiras", "Grêmio", "Quarta, 18/11 - 19:30"),
-        ("Cruzeiro", "Botafogo", "Quarta, 18/11 - 19:30"),
-        ("Athletico-PR", "Remo", "Quarta, 18/11 - 20:00"),
-        ("Vasco", "Corinthians", "Quarta, 18/11 - 21:30"),
-        ("Internacional", "Fluminense", "Quarta, 18/11 - 21:30"),
-        ("Santos", "Atlético-MG", "Quinta, 19/11 - 19:00"),
-        ("Red Bull Bragantino", "Bahia", "Quinta, 19/11 - 19:30"),
-        ("Vitória", "Flamengo", "Quinta, 19/11 - 20:00"),
-        ("Mirassol", "São Paulo", "Quinta, 19/11 - 21:00"),
-        ("Chapecoense", "Coritiba", "Quinta, 19/11 - 21:30")
-    ],
-    36: [
-        ("Flamengo", "Fluminense", "Sábado, 21/11 - 16:00"),
-        ("São Paulo", "Palmeiras", "Sábado, 21/11 - 18:30"),
-        ("Corinthians", "Santos", "Sábado, 21/11 - 21:00"),
-        ("Atlético-MG", "Red Bull Bragantino", "Domingo, 22/11 - 16:00"),
-        ("Botafogo", "Grêmio", "Domingo, 22/11 - 16:00"),
-        ("Bahia", "Mirassol", "Domingo, 22/11 - 18:30"),
-        ("Cruzeiro", "Vasco", "Domingo, 22/11 - 18:30"),
-        ("Athletico-PR", "Chapecoense", "Domingo, 22/11 - 20:00"),
-        ("Coritiba", "Vitória", "Segunda, 23/11 - 20:00"),
-        ("Remo", "Internacional", "Segunda, 23/11 - 20:00")
-    ],
-    37: [
-        ("Palmeiras", "Cruzeiro", "Quarta, 25/11 - 19:30"),
-        ("Fluminense", "Bahia", "Quarta, 25/11 - 19:30"),
-        ("Grêmio", "Flamengo", "Quarta, 25/11 - 20:00"),
-        ("Vasco", "Athletico-PR", "Quarta, 25/11 - 21:30"),
-        ("Internacional", "São Paulo", "Quarta, 25/11 - 21:30"),
-        ("Santos", "Coritiba", "Quinta, 26/11 - 19:00"),
-        ("Red Bull Bragantino", "Remo", "Quinta, 26/11 - 19:30"),
-        ("Vitória", "Botafogo", "Quinta, 26/11 - 20:00"),
-        ("Mirassol", "Atlético-MG", "Quinta, 26/11 - 21:00"),
-        ("Chapecoense", "Corinthians", "Quinta, 26/11 - 21:30")
-    ],
-    38: [
-        ("Flamengo", "Mirassol", "Domingo, 29/11 - 16:00"),
-        ("São Paulo", "Fluminense", "Domingo, 29/11 - 16:00"),
-        ("Corinthians", "Grêmio", "Domingo, 29/11 - 16:00"),
-        ("Atlético-MG", "Vasco", "Domingo, 29/11 - 16:00"),
-        ("Botafogo", "Chapecoense", "Domingo, 29/11 - 16:00"),
-        ("Bahia", "Santos", "Domingo, 29/11 - 16:00"),
-        ("Cruzeiro", "Red Bull Bragantino", "Domingo, 29/11 - 16:00"),
-        ("Athletico-PR", "Palmeiras", "Domingo, 29/11 - 16:00"),
-        ("Coritiba", "Internacional", "Domingo, 29/11 - 16:00"),
-        ("Remo", "Vitória", "Domingo, 29/11 - 16:00")
     ]
 }
 
@@ -259,55 +208,72 @@ with c_ctrl2:
     lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist())
     time_favorito = st.selectbox("⭐ Destaque o Time do Coração:", lista_times)
 
-# --- 3. CÁLCULO REATIVO DA TABELA APENAS COM PALPITES CONFIRMADOS ---
+# --- 3. CÁLCULO REATIVO E GLOBAL DA TABELA ---
 df_simulado = df_base.copy()
-confrontos = CALENDARIO_RODADAS.get(num_rodada, [])
 
-for idx, (mandante, visitante, _) in enumerate(confrontos):
-    chave_live = f"{mandante}x{visitante}"
-    chave_sim = f"sim_r{num_rodada}_{idx}"
-    
-    # 1. Se o jogo está AO VIVO ou ENCERRADO na API da ESPN
-    if chave_live in placar_live and placar_live[chave_live]['state'] in ['in', 'post']:
-        gm = placar_live[chave_live]['gm']
-        gv = placar_live[chave_live]['gv']
-        jogou = True
-    # 2. Se o palpite foi CONFIRMADO pelo botão "Calcular"
-    elif chave_sim in st.session_state.palpites_confirmados:
-        gm, gv = st.session_state.palpites_confirmados[chave_sim]
-        jogou = True
-    else:
+for r_num, lista_jogos in CALENDARIO_RODADAS.items():
+    for idx, (mandante, visitante, _) in enumerate(lista_jogos):
+        chave_live = f"{mandante}x{visitante}"
+        chave_sim = f"sim_r{r_num}_{idx}"
+        
         jogou = False
+        gm, gv = 0, 0
+        
+        if chave_live in st.session_state.jogos_encerrados:
+            gm, gv = st.session_state.jogos_encerrados[chave_live]
+            jogou = True
+        elif chave_live in placar_live and placar_live[chave_live]['state'] in ['in', 'post']:
+            gm = placar_live[chave_live]['gm']
+            gv = placar_live[chave_live]['gv']
+            jogou = True
+        elif chave_sim in st.session_state.palpites_confirmados:
+            gm, gv = st.session_state.palpites_confirmados[chave_sim]
+            jogou = True
 
-    if jogou and mandante in df_simulado['nome_time'].values and visitante in df_simulado['nome_time'].values:
-        idx_m = df_simulado[df_simulado['nome_time'] == mandante].index[0]
-        idx_v = df_simulado[df_simulado['nome_time'] == visitante].index[0]
-        
-        df_simulado.at[idx_m, 'jogos'] += 1
-        df_simulado.at[idx_v, 'jogos'] += 1
-        df_simulado.at[idx_m, 'gols_pro'] += gm
-        df_simulado.at[idx_m, 'gols_contra'] += gv
-        df_simulado.at[idx_v, 'gols_pro'] += gv
-        df_simulado.at[idx_v, 'gols_contra'] += gm
-        
-        if gm > gv:
-            df_simulado.at[idx_m, 'pontos'] += 3
-            df_simulado.at[idx_m, 'vitorias'] += 1
-            df_simulado.at[idx_v, 'derrotas'] += 1
-        elif gv > gm:
-            df_simulado.at[idx_v, 'pontos'] += 3
-            df_simulado.at[idx_v, 'vitorias'] += 1
-            df_simulado.at[idx_m, 'derrotas'] += 1
-        else:
-            df_simulado.at[idx_m, 'pontos'] += 1
-            df_simulado.at[idx_v, 'pontos'] += 1
-            df_simulado.at[idx_m, 'empates'] += 1
-            df_simulado.at[idx_v, 'empates'] += 1
+        if jogou and mandante in df_simulado['nome_time'].values and visitante in df_simulado['nome_time'].values:
+            idx_m = df_simulado[df_simulado['nome_time'] == mandante].index[0]
+            idx_v = df_simulado[df_simulado['nome_time'] == visitante].index[0]
+            
+            df_simulado.at[idx_m, 'jogos'] += 1
+            df_simulado.at[idx_v, 'jogos'] += 1
+            df_simulado.at[idx_m, 'gols_pro'] += gm
+            df_simulado.at[idx_m, 'gols_contra'] += gv
+            df_simulado.at[idx_v, 'gols_pro'] += gv
+            df_simulado.at[idx_v, 'gols_contra'] += gm
+            
+            if gm > gv:
+                df_simulado.at[idx_m, 'pontos'] += 3
+                df_simulado.at[idx_m, 'vitorias'] += 1
+                df_simulado.at[idx_v, 'derrotas'] += 1
+            elif gv > gm:
+                df_simulado.at[idx_v, 'pontos'] += 3
+                df_simulado.at[idx_v, 'vitorias'] += 1
+                df_simulado.at[idx_m, 'derrotas'] += 1
+            else:
+                df_simulado.at[idx_m, 'pontos'] += 1
+                df_simulado.at[idx_v, 'pontos'] += 1
+                df_simulado.at[idx_m, 'empates'] += 1
+                df_simulado.at[idx_v, 'empates'] += 1
 
 df_simulado['saldo_gols'] = df_simulado['gols_pro'] - df_simulado['gols_contra']
 df_simulado['aproveitamento'] = (df_simulado['pontos'] / (df_simulado['jogos'] * 3) * 100).round(1)
 df_simulado = df_simulado.sort_values(by=["pontos", "vitorias", "saldo_gols", "gols_pro"], ascending=False).reset_index(drop=True)
-df_simulado.index = df_simulado.index + 1
+df_simulado['pos_atual'] = df_simulado.index + 1
+
+# --- CÁLCULO DA VARIAÇÃO DE POSIÇÃO (SUBIU / DESCEU / MANTÉM) ---
+def calcular_variacao(row):
+    diff = row['pos_inicial'] - row['pos_atual']
+    if diff > 0:
+        return f"🟢 ⬆️ +{diff}"
+    elif diff < 0:
+        return f"🔴 ⬇️ {diff}"
+    else:
+        return "➖"
+
+df_simulado['var'] = df_simulado.apply(calcular_variacao, axis=1)
+df_simulado['escudo'] = df_simulado['nome_time'].apply(obter_escudo)
+
+mapa_variacoes = dict(zip(df_simulado['nome_time'], df_simulado['var']))
 
 def colorir_zonas(val):
     cores = []
@@ -332,6 +298,8 @@ def colorir_zonas(val):
 # --- 4. ABAS NATIVAS DE NAVEGAÇÃO ---
 tab_tabela, tab_simulador, tab_aovivo = st.tabs(["📊 Classificação", "🎮 Simulador", "🔴 Ao Vivo"])
 
+confrontos_rodada_atual = CALENDARIO_RODADAS.get(num_rodada, [])
+
 # ABA 1: CLASSIFICAÇÃO COMPLETA
 with tab_tabela:
     if not df_simulado.empty:
@@ -339,23 +307,32 @@ with tab_tabela:
         m1.metric("🏆 Líder", f"{df_simulado.iloc[0]['nome_time']}", f"{df_simulado.iloc[0]['pontos']} pts")
         m2.metric("🛡️ G-4", f"{df_simulado.iloc[3]['nome_time']}", f"{df_simulado.iloc[3]['pontos']} pts")
         
-        cols_exibir = ['nome_time', 'pontos', 'jogos', 'vitorias', 'empates', 'derrotas', 'gols_pro', 'gols_contra', 'saldo_gols', 'aproveitamento']
+        cols_exibir = ['escudo', 'var', 'nome_time', 'pontos', 'jogos', 'vitorias', 'empates', 'derrotas', 'gols_pro', 'gols_contra', 'saldo_gols', 'aproveitamento']
+        
+        df_exibir = df_simulado[cols_exibir].copy()
+        df_exibir.index = df_simulado['pos_atual']
+        
         st.dataframe(
-            df_simulado[cols_exibir].style.apply(colorir_zonas, axis=0).format({"aproveitamento": "{:.1f}%"}),
+            df_exibir.style.apply(colorir_zonas, axis=0).format({"aproveitamento": "{:.1f}%"}),
+            column_config={
+                "escudo": st.column_config.ImageColumn("Escudo", help="Escudo do clube", width="small"),
+                "var": st.column_config.TextColumn("Var", help="Variação de Posição"),
+                "nome_time": st.column_config.TextColumn("Clube"),
+            },
             use_container_width=True,
             hide_index=False,
             height=820
         )
         st.caption("🟢 G-4 | 🔵 Pré-Libertadores | 🟡 Sul-Americana | 🔴 Z-4")
 
-# ABA 2: SIMULADOR DE PALPITES COM BOTÃO DE CÁLCULO
+# ABA 2: SIMULADOR DE PALPITES
 with tab_simulador:
     st.subheader(f"🎮 Palpites para a {num_rodada}ª Rodada")
     
     col_btn1, col_btn2 = st.columns(2)
     with col_btn1:
         if st.button("🧮 Calcular Todos os Palpites"):
-            for idx in range(len(confrontos)):
+            for idx in range(len(confrontos_rodada_atual)):
                 key_m = f"input_r{num_rodada}_m_{idx}"
                 key_v = f"input_r{num_rodada}_v_{idx}"
                 if key_m in st.session_state and key_v in st.session_state:
@@ -368,87 +345,150 @@ with tab_simulador:
     with col_btn2:
         if st.button("🧹 Limpar Meus Palpites"):
             st.session_state.palpites_confirmados.clear()
-            for idx in range(len(confrontos)):
+            for idx in range(len(confrontos_rodada_atual)):
                 st.session_state[f"input_r{num_rodada}_m_{idx}"] = None
                 st.session_state[f"input_r{num_rodada}_v_{idx}"] = None
             st.rerun()
 
     st.write("")
 
-    for idx, (mandante, visitante, data_hora_str) in enumerate(confrontos):
+    for idx, (mandante, visitante, data_hora_str) in enumerate(confrontos_rodada_atual):
+        chave_live = f"{mandante}x{visitante}"
         chave_sim = f"sim_r{num_rodada}_{idx}"
-        st.markdown(f"<div class='status-badge'>📅 {data_hora_str}</div>", unsafe_allow_html=True)
         
-        c_m, c_pm, c_x, c_pv, c_v, c_btn = st.columns([2.0, 0.9, 0.2, 0.9, 2.0, 1.2])
+        jogo_bloqueado = False
+        val_m, val_v = None, None
+        
+        if chave_live in st.session_state.jogos_encerrados:
+            val_m, val_v = st.session_state.jogos_encerrados[chave_live]
+            jogo_bloqueado = True
+            badge_sim = "🔴 FIM DE JOGO (Placar Real)"
+        elif chave_live in placar_live and placar_live[chave_live]['state'] in ['in', 'post']:
+            val_m = placar_live[chave_live]['gm']
+            val_v = placar_live[chave_live]['gv']
+            jogo_bloqueado = True
+            badge_sim = f"🟢 EM ANDAMENTO / FINALIZADO ({placar_live[chave_live]['detail']})"
+        else:
+            badge_sim = f"📅 {data_hora_str}"
+            if chave_sim in st.session_state.palpites_confirmados:
+                val_m, val_v = st.session_state.palpites_confirmados[chave_sim]
+
+        st.markdown(f"<div class='status-badge'>{badge_sim}</div>", unsafe_allow_html=True)
+        
+        c_m, c_pm, c_x, c_pv, c_v, c_btn = st.columns([2.3, 0.9, 0.2, 0.9, 2.3, 1.2])
+        
+        escudo_m = obter_escudo(mandante)
+        escudo_v = obter_escudo(visitante)
         
         with c_m:
-            st.markdown(f"<div class='time-nome-m'>{mandante}</div>", unsafe_allow_html=True)
+            st.markdown(
+                f"<div class='time-container-m'>"
+                f"<span>{mandante}</span>"
+                f"<img src='{escudo_m}' width='22' height='22'/>"
+                f"</div>", 
+                unsafe_allow_html=True
+            )
         with c_pm:
             gm_val = st.number_input(
                 "", min_value=0, key=f"input_r{num_rodada}_m_{idx}", 
-                label_visibility="collapsed", value=None, placeholder="-"
+                label_visibility="collapsed", value=val_m, placeholder="-",
+                disabled=jogo_bloqueado
             )
         with c_x:
             st.write("x")
         with c_pv:
             gv_val = st.number_input(
                 "", min_value=0, key=f"input_r{num_rodada}_v_{idx}", 
-                label_visibility="collapsed", value=None, placeholder="-"
+                label_visibility="collapsed", value=val_v, placeholder="-",
+                disabled=jogo_bloqueado
             )
         with c_v:
-            st.markdown(f"<div class='time-nome-v'>{visitante}</div>", unsafe_allow_html=True)
+            st.markdown(
+                f"<div class='time-container-v'>"
+                f"<img src='{escudo_v}' width='22' height='22'/>"
+                f"<span>{visitante}</span>"
+                f"</div>", 
+                unsafe_allow_html=True
+            )
         with c_btn:
-            if st.button("🧮 Calcular", key=f"btn_calc_{idx}"):
-                if gm_val is not None and gv_val is not None:
-                    st.session_state.palpites_confirmados[chave_sim] = (gm_val, gv_val)
-                    st.rerun()
+            if not jogo_bloqueado:
+                if st.button("🧮 Calcular", key=f"btn_calc_{idx}"):
+                    if gm_val is not None and gv_val is not None:
+                        st.session_state.palpites_confirmados[chave_sim] = (gm_val, gv_val)
+                        st.rerun()
+            else:
+                st.caption("🔒 Encerrado")
             
         st.divider()
 
-# ABA 3: PAINEL AO VIVO
+# ABA 3: PAINEL AO VIVO (COM AUTO-REFRESH DE 30s)
 with tab_aovivo:
-    c_tit, c_btn = st.columns([2, 1])
-    with c_tit:
-        st.subheader(f"🔴 Central Ao Vivo - {num_rodada}ª Rodada")
-    with c_btn:
-        if st.button("🔄 Atualizar Placar Ao Vivo"):
-            st.cache_data.clear()
-            st.rerun()
+    @st.fragment(run_every=30)
+    def renderizar_painel_ao_vivo():
+        c_tit, c_btn = st.columns([2, 1])
+        with c_tit:
+            st.subheader(f"🔴 Central Ao Vivo - {num_rodada}ª Rodada")
+        with c_btn:
+            if st.button("🔄 Atualizar Agora"):
+                st.cache_data.clear()
+                st.rerun()
 
-    for idx, (mandante, visitante, data_hora_str) in enumerate(confrontos):
-        chave_live = f"{mandante}x{visitante}"
-        
-        if chave_live in placar_live:
-            st_info = placar_live[chave_live]
-            if st_info['state'] == 'in':
-                badge = f"🟢 AO VIVO ({st_info['detail']})"
-                p_m = st_info['gm']
-                p_v = st_info['gv']
-            elif st_info['state'] == 'post':
+        placar_tempo_real = buscar_jogos_espn()
+
+        for idx, (mandante, visitante, data_hora_str) in enumerate(confrontos_rodada_atual):
+            chave_live = f"{mandante}x{visitante}"
+            escudo_m = obter_escudo(mandante)
+            escudo_v = obter_escudo(visitante)
+            
+            var_m = mapa_variacoes.get(mandante, "➖")
+            var_v = mapa_variacoes.get(visitante, "➖")
+            
+            if chave_live in st.session_state.jogos_encerrados:
                 badge = "🔴 FIM DE JOGO"
-                p_m = st_info['gm']
-                p_v = st_info['gv']
+                p_m, p_v = st.session_state.jogos_encerrados[chave_live]
+            elif chave_live in placar_tempo_real:
+                st_info = placar_tempo_real[chave_live]
+                if st_info['state'] == 'in':
+                    badge = f"🟢 AO VIVO ({st_info['detail']})"
+                    p_m, p_v = st_info['gm'], st_info['gv']
+                elif st_info['state'] == 'post':
+                    badge = "🔴 FIM DE JOGO"
+                    p_m, p_v = st_info['gm'], st_info['gv']
+                else:
+                    badge = f"🕒 AGENDADO - {data_hora_str}"
+                    p_m, p_v = "-", "-"
             else:
                 badge = f"🕒 AGENDADO - {data_hora_str}"
-                p_m = "-"
-                p_v = "-"
-        else:
-            badge = f"🕒 AGENDADO - {data_hora_str}"
-            p_m = "-"
-            p_v = "-"
+                p_m, p_v = "-", "-"
 
-        st.markdown(f"<div class='status-badge'>{badge}</div>", unsafe_allow_html=True)
-        
-        c_m, c_pm, c_x, c_pv, c_v = st.columns([2.2, 1.0, 0.4, 1.0, 2.2])
-        with c_m:
-            st.markdown(f"<div class='time-nome-m'>{mandante}</div>", unsafe_allow_html=True)
-        with c_pm:
-            st.markdown(f"<h3 style='text-align: center; margin: 0;'>{p_m}</h3>", unsafe_allow_html=True)
-        with c_x:
-            st.markdown("<div style='text-align: center; font-weight: bold;'>x</div>", unsafe_allow_html=True)
-        with c_pv:
-            st.markdown(f"<h3 style='text-align: center; margin: 0;'>{p_v}</h3>", unsafe_allow_html=True)
-        with c_v:
-            st.markdown(f"<div class='time-nome-v'>{visitante}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='status-badge'>{badge}</div>", unsafe_allow_html=True)
             
-        st.divider()
+            c_m, c_pm, c_x, c_pv, c_v = st.columns([2.5, 0.8, 0.4, 0.8, 2.5])
+            with c_m:
+                st.markdown(
+                    f"<div class='time-container-m'>"
+                    f"<small style='color:#777;'>({var_m})</small> "
+                    f"<span>{mandante}</span>"
+                    f"<img src='{escudo_m}' width='22' height='22'/>"
+                    f"</div>", 
+                    unsafe_allow_html=True
+                )
+            with c_pm:
+                st.markdown(f"<h3 style='text-align: center; margin: 0;'>{p_m}</h3>", unsafe_allow_html=True)
+            with c_x:
+                st.markdown("<div style='text-align: center; font-weight: bold;'>x</div>", unsafe_allow_html=True)
+            with c_pv:
+                st.markdown(f"<h3 style='text-align: center; margin: 0;'>{p_v}</h3>", unsafe_allow_html=True)
+            with c_v:
+                st.markdown(
+                    f"<div class='time-container-v'>"
+                    f"<img src='{escudo_v}' width='22' height='22'/>"
+                    f"<span>{visitante}</span> "
+                    f"<small style='color:#777;'>({var_v})</small>"
+                    f"</div>", 
+                    unsafe_allow_html=True
+                )
+                
+            st.divider()
+
+    renderizar_painel_ao_vivo()
