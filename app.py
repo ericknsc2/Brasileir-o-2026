@@ -757,8 +757,9 @@ with tab_simulador:
     jogo_bloqueado = False
     val_m, val_v = None, None
 
-    # Lógica de Travamento automático 5 minutos antes da partida
+    # Lógica corrigida de travamento automático 5 minutos antes da partida
     try:
+      # Exemplo de string: "Sábado, 12/09 - 16:00" -> Pega a parte "12/09 - 16:00"
       partes_data = data_hora_str.split(", ")[1]
       dt_jogo = datetime.strptime(
           partes_data, "%d/%m - %H:%M"
