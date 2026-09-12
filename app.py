@@ -51,28 +51,28 @@ if "jogos_encerrados" not in st.session_state:
 else:
     st.session_state.jogos_encerrados["CoritibaXAthletico-PR"] = (3, 3)
 
-# Escudos diretos e estáveis do Wikimedia / GloboEsporte (Com SVG/PNG garantidos)
+# ESCUDOS GARANTIDOS (URLs de CDN direta de arquivos estáticos sem hotlinking)
 ESCUDOS_TIMES = {
-    "Flamengo": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Flamengo_braz_logo.svg",
-    "Palmeiras": "https://upload.wikimedia.org/wikipedia/commons/1/10/Palmeiras_logo.svg",
-    "Athletico-PR": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Athletico_Paranaense.svg",
-    "Fluminense": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Fluminense_FC_escudo.svg",
-    "Bahia": "https://upload.wikimedia.org/wikipedia/commons/2/20/Esporte_Clube_Bahia_logo.svg",
-    "Cruzeiro": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Cruzeiro_Esporte_Clube_%28logo_2021%29.svg",
-    "Coritiba": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Coritiba_FCD_2024.png",
-    "Atlético-MG": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Atletico_mineiro_galo.png",
-    "Red Bull Bragantino": "https://upload.wikimedia.org/wikipedia/commons/9/9e/Red_Bull_Bragantino_logo.svg",
-    "São Paulo": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Brasao_do_Sao_Paulo_Futebol_Clube.svg",
-    "Vitória": "https://upload.wikimedia.org/wikipedia/commons/4/40/Esporte_Clube_Vit%C3%B3ria_logo.svg",
-    "Corinthians": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Sport_Club_Corinthians_Paulista_logo.svg",
-    "Santos": "https://upload.wikimedia.org/wikipedia/commons/1/15/Santos_Logo.png",
-    "Botafogo": "https://upload.wikimedia.org/wikipedia/commons/5/52/Botafogo_de_Futebol_e_Regatas_logo.svg",
-    "Grêmio": "https://upload.wikimedia.org/wikipedia/commons/b/bf/Gremio_logo.svg",
-    "Mirassol": "https://upload.wikimedia.org/wikipedia/commons/3/36/Mirassol_FC_logo.png",
-    "Vasco": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Vasco_da_Gama_image_logo.png",
-    "Internacional": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Escudo_do_Sport_Club_Internacional.svg",
-    "Remo": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Clube_do_Remo.svg",
-    "Chapecoense": "https://upload.wikimedia.org/wikipedia/commons/9/92/Associacao_Chapecoense_de_Futebol.svg"
+    "Flamengo": "https://s.sde.globo.com/media/organizations/2018/04/10/Flamengo.svg",
+    "Palmeiras": "https://s.sde.globo.com/media/organizations/2019/07/06/Palmeiras.svg",
+    "Athletico-PR": "https://s.sde.globo.com/media/organizations/2019/09/09/Athletico-PR.svg",
+    "Fluminense": "https://s.sde.globo.com/media/organizations/2018/03/11/fluminense.svg",
+    "Bahia": "https://s.sde.globo.com/media/organizations/2018/03/11/bahia.svg",
+    "Cruzeiro": "https://s.sde.globo.com/media/organizations/2021/02/13/cruzeiro_2021.svg",
+    "Coritiba": "https://s.sde.globo.com/media/organizations/2018/03/11/coritiba.svg",
+    "Atlético-MG": "https://s.sde.globo.com/media/organizations/2018/03/10/atletico-mg.svg",
+    "Red Bull Bragantino": "https://s.sde.globo.com/media/organizations/2020/01/01/bragantino.svg",
+    "São Paulo": "https://s.sde.globo.com/media/organizations/2018/03/11/sao-paulo.svg",
+    "Vitória": "https://s.sde.globo.com/media/organizations/2024/04/09/vitoria-2024.svg",
+    "Corinthians": "https://s.sde.globo.com/media/organizations/2019/09/30/Corinthians.svg",
+    "Santos": "https://s.sde.globo.com/media/organizations/2018/03/12/santos.svg",
+    "Botafogo": "https://s.sde.globo.com/media/organizations/2019/02/04/botafogo-svg.svg",
+    "Grêmio": "https://s.sde.globo.com/media/organizations/2018/03/12/gremio.svg",
+    "Mirassol": "https://s.sde.globo.com/media/organizations/2020/01/18/Mirassol.svg",
+    "Vasco": "https://s.sde.globo.com/media/organizations/2021/09/04/Vasco_2021.svg",
+    "Internacional": "https://s.sde.globo.com/media/organizations/2018/03/11/internacional.svg",
+    "Remo": "https://s.sde.globo.com/media/organizations/2018/03/12/remo.svg",
+    "Chapecoense": "https://s.sde.globo.com/media/organizations/2021/06/21/chapecoense-2021.svg"
 }
 
 MAPEAMENTO_TIMES_ESPN = {
@@ -99,7 +99,7 @@ def normalizar_nome(nome):
 
 def obter_escudo(nome):
     nome_padrao = normalizar_nome(nome)
-    return ESCUDOS_TIMES.get(nome_padrao, "https://upload.wikimedia.org/wikipedia/commons/2/2e/Flamengo_braz_logo.svg")
+    return ESCUDOS_TIMES.get(nome_padrao, "https://s.sde.globo.com/media/organizations/2018/03/11/fluminense.svg")
 
 # --- DADOS DA TABELA BASE OFICIAL ---
 @st.cache_data(ttl=1)
