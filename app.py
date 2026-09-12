@@ -53,8 +53,6 @@ else:
 
 # ESCUDOS GARANTIDOS (URLs de CDN direta de arquivos estáticos sem hotlinking)
 ESCUDOS_TIMES = {
-    # ESCUDOS GARANTIDOS (13 mantidos do GloboEsporte + 7 atualizados via CDN ESPN)
-ESCUDOS_TIMES = {
     "Flamengo": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
     "Palmeiras": "https://s.sde.globo.com/media/organizations/2019/07/06/Palmeiras.svg",
     "Athletico-PR": "https://s.sde.globo.com/media/organizations/2019/09/09/Athletico-PR.svg",
