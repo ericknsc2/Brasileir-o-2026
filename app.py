@@ -51,7 +51,7 @@ if "jogos_encerrados" not in st.session_state:
 else:
     st.session_state.jogos_encerrados["CoritibaXAthletico-PR"] = (3, 3)
 
-# ESCUDOS GARANTIDOS (Todos os 20 times com URLs funcionais)
+# ESCUDOS GARANTIDOS COM TODAS AS URLS ATUALIZADAS
 ESCUDOS_TIMES = {
     "Flamengo": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
     "Palmeiras": "https://s.sde.globo.com/media/organizations/2019/07/06/Palmeiras.svg",
@@ -68,10 +68,10 @@ ESCUDOS_TIMES = {
     "Santos": "https://s.sde.globo.com/media/organizations/2018/03/12/santos.svg",
     "Botafogo": "https://s.sde.globo.com/media/organizations/2019/02/04/botafogo-svg.svg",
     "Grêmio": "https://s.sde.globo.com/media/organizations/2018/03/12/gremio.svg",
-    "Mirassol": "https://upload.wikimedia.org/wikipedia/commons/3/36/Mirassol_FC_logo.png",
+    "Mirassol": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/9883.png",
     "Vasco": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png",
     "Internacional": "https://s.sde.globo.com/media/organizations/2018/03/11/internacional.svg",
-    "Remo": "https://s.sde.globo.com/media/organizations/2018/03/11/remo.svg",
+    "Remo": "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/9873.png",
     "Chapecoense": "https://s.sde.globo.com/media/organizations/2018/03/11/chapecoense.svg"
 }
 
