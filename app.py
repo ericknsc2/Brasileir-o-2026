@@ -68,7 +68,7 @@ ESCUDOS_TIMES = {
     "Santos": "https://s.sde.globo.com/media/organizations/2018/03/12/santos.svg",
     "Botafogo": "https://s.sde.globo.com/media/organizations/2019/02/04/botafogo-svg.svg",
     "Grêmio": "https://s.sde.globo.com/media/organizations/2018/03/12/gremio.svg",
-    "Mirassol": "https://logodetimes.com/wp-content/uploads/mirassol-futebol-clube.png",
+    "Mirassol": "https://icon2.cleanpng.com/20180623/lzg/aazulkonx.webp",
     "Vasco": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png",
     "Internacional": "https://s.sde.globo.com/media/organizations/2018/03/11/internacional.svg",
     "Remo": "https://logodetimes.com/wp-content/uploads/remo-brasao.png",
