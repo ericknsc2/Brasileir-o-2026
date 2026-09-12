@@ -26,25 +26,7 @@ st.markdown("""
         font-weight: bold;
     }
 
-    .time-container-m { 
-        display: flex; 
-        align-items: center; 
-        justify-content: flex-end; 
-        gap: 6px; 
-        font-weight: bold; 
-        font-size: 13px; 
-    }
-    
-    .time-container-v { 
-        display: flex; 
-        align-items: center; 
-        justify-content: flex-start; 
-        gap: 6px; 
-        font-weight: bold; 
-        font-size: 13px; 
-    }
-
-    .status-badge { font-size: 11px; color: #555; margin-bottom: 2px; font-weight: 600; text-align: center; }
+    .status-badge { font-size: 11px; color: #555; margin-bottom: 4px; font-weight: 600; text-align: center; }
 
     @media (max-width: 768px) {
         .block-container {
@@ -61,50 +43,63 @@ st.title("⚽ Brasileirão 2026")
 if "palpites_confirmados" not in st.session_state:
     st.session_state.palpites_confirmados = {}
 
+# Inserção do jogo já encerrado (Coritiba 3 x 3 Athletico-PR)
 if "jogos_encerrados" not in st.session_state:
-    st.session_state.jogos_encerrados = {}
+    st.session_state.jogos_encerrados = {
+        "CoritibaXAthletico-PR": (3, 3)
+    }
+else:
+    st.session_state.jogos_encerrados["CoritibaXAthletico-PR"] = (3, 3)
 
-# Mapeamento de Escudos Oficiais dos Times (URLs CDN/Wikimedia)
+# Mapeamento com URLs diretas e estáveis (Wikimedia CDN com CORS aberto)
 ESCUDOS_TIMES = {
     "Flamengo": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Flamengo_braz_logo.svg",
     "Palmeiras": "https://upload.wikimedia.org/wikipedia/commons/1/10/Palmeiras_logo.svg",
     "Athletico-PR": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Athletico_Paranaense_2019.svg",
-    "Fluminense": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Fluminense_FC_escudo.svg",
-    "Bahia": "https://upload.wikimedia.org/wikipedia/commons/2/20/Esporte_Clube_Bahia_logo.svg",
-    "Cruzeiro": "https://upload.wikimedia.org/wikipedia/commons/9/90/Cruzeiro_Esporte_Clube_%28logo_2021%29.svg",
-    "Coritiba": "https://upload.wikimedia.org/wikipedia/commons/4/46/Coritiba_FC_logo.svg",
-    "Atlético-MG": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Atletico_Mineiro_logo.svg",
+    "Fluminense": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Fluminense_fc_logo.svg",
+    "Bahia": "https://upload.wikimedia.org/wikipedia/pt/2/2c/ECBahia.png",
+    "Cruzeiro": "https://upload.wikimedia.org/wikipedia/commons/9/90/Cruzeiro_Esporte_Clube_%28logo%29.svg",
+    "Coritiba": "https://upload.wikimedia.org/wikipedia/commons/b/b0/Coritiba_F%C3%Batbol_Clube.svg",
+    "Atlético-MG": "https://upload.wikimedia.org/wikipedia/commons/2/22/Clube_Atl%C3%A9tico_Mineiro_logo.svg",
     "Red Bull Bragantino": "https://upload.wikimedia.org/wikipedia/commons/9/9e/Red_Bull_Bragantino_logo.svg",
     "São Paulo": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Brasao_do_Sao_Paulo_Futebol_Clube.svg",
-    "Vitória": "https://upload.wikimedia.org/wikipedia/commons/0/04/Esporte_Clube_Vit%C3%B3ria_logo.svg",
-    "Corinthians": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Sport_Club_Corinthians_Paulista_logo.svg",
-    "Santos": "https://upload.wikimedia.org/wikipedia/commons/1/15/Santos_Logo.svg",
+    "Vitória": "https://upload.wikimedia.org/wikipedia/pt/7/77/Esporte_Clube_Vit%C3%B3ria_logo.png",
+    "Corinthians": "https://upload.wikimedia.org/wikipedia/pt/b/b4/Corinthians_simbolo.png",
+    "Santos": "https://upload.wikimedia.org/wikipedia/commons/3/35/Santos_logo.svg",
     "Botafogo": "https://upload.wikimedia.org/wikipedia/commons/5/52/Botafogo_de_Futebol_e_Regatas_logo.svg",
-    "Grêmio": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Gremio_logo.svg",
-    "Mirassol": "https://upload.wikimedia.org/wikipedia/commons/3/36/Mirassol_FC_logo.svg",
-    "Vasco": "https://upload.wikimedia.org/wikipedia/commons/a/ac/CR_Vasco_da_Gama_logo.svg",
+    "Grêmio": "https://upload.wikimedia.org/wikipedia/commons/3/38/Gremio_logo.svg",
+    "Mirassol": "https://upload.wikimedia.org/wikipedia/pt/b/bd/Mirassol_FC.png",
+    "Vasco": "https://upload.wikimedia.org/wikipedia/pt/a/ac/CRVascodaGama.png",
     "Internacional": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Escudo_do_Sport_Club_Internacional.svg",
-    "Remo": "https://upload.wikimedia.org/wikipedia/commons/7/77/Clube_do_Remo.svg",
-    "Chapecoense": "https://upload.wikimedia.org/wikipedia/commons/b/bd/Chapecoense_logo.svg"
+    "Remo": "https://upload.wikimedia.org/wikipedia/commons/9/95/Clube_do_Remo.svg",
+    "Chapecoense": "https://upload.wikimedia.org/wikipedia/commons/9/98/Chapecoense_logo.svg"
 }
 
-# Mapeamento para padronizar nomes da ESPN
 MAPEAMENTO_TIMES_ESPN = {
     "Athletico-PR": "Athletico-PR",
     "Athletico Paranaense": "Athletico-PR",
+    "CAP": "Athletico-PR",
     "Atlético-MG": "Atlético-MG",
     "Atletico Mineiro": "Atlético-MG",
+    "CAM": "Atlético-MG",
     "Red Bull Bragantino": "Red Bull Bragantino",
     "Bragantino": "Red Bull Bragantino",
+    "RBB": "Red Bull Bragantino",
     "São Paulo": "São Paulo",
-    "Sao Paulo": "São Paulo"
+    "Sao Paulo": "São Paulo",
+    "SPFC": "São Paulo",
+    "Vasco da Gama": "Vasco",
+    "Botafogo-RJ": "Botafogo",
+    "Grêmio RS": "Grêmio",
+    "Gremio": "Grêmio"
 }
 
 def normalizar_nome(nome):
     return MAPEAMENTO_TIMES_ESPN.get(nome, nome)
 
 def obter_escudo(nome):
-    return ESCUDOS_TIMES.get(nome, "https://upload.wikimedia.org/wikipedia/commons/d/d2/Blank.png")
+    nome_padrao = normalizar_nome(nome)
+    return ESCUDOS_TIMES.get(nome_padrao, "https://upload.wikimedia.org/wikipedia/commons/5/5f/Red_Ball.svg")
 
 # --- 1. DADOS DA TABELA BASE OFICIAL ---
 @st.cache_data(ttl=1)
@@ -136,7 +131,7 @@ def carregar_tabela_oficial():
     df['pos_inicial'] = df.index + 1
     return df
 
-# --- 2. CONSULTA API PÚBLICA DA ESPN ---
+# API ESPN
 def buscar_jogos_espn():
     url = "https://site.api.espn.com/apis/site/v2/sports/soccer/bra.1/scoreboard"
     try:
@@ -156,20 +151,16 @@ def buscar_jogos_espn():
                 state = ev['status']['type']['state']
                 detail = ev['status']['type']['shortDetail']
                 
-                chave = f"{m_nome}x{v_nome}"
-                jogos[chave] = {
-                    'gm': m_score, 'gv': v_score, 'state': state, 'detail': detail
-                }
+                chave = f"{m_nome}X{v_nome}"
+                jogos[chave] = {'gm': m_score, 'gv': v_score, 'state': state, 'detail': detail}
                 
                 if state == 'post':
                     st.session_state.jogos_encerrados[chave] = (m_score, v_score)
-
             return jogos
     except Exception:
         pass
     return {}
 
-# CALENDÁRIO COMPLETO
 CALENDARIO_RODADAS = {
     27: [
         ("Coritiba", "Athletico-PR", "Sexta, 11/09 - 21:00"),
@@ -208,12 +199,12 @@ with c_ctrl2:
     lista_times = ["Nenhum"] + sorted(df_base['nome_time'].unique().tolist())
     time_favorito = st.selectbox("⭐ Destaque o Time do Coração:", lista_times)
 
-# --- 3. CÁLCULO REATIVO E GLOBAL DA TABELA ---
+# --- 3. CÁLCULO REATIVO DA TABELA ---
 df_simulado = df_base.copy()
 
 for r_num, lista_jogos in CALENDARIO_RODADAS.items():
     for idx, (mandante, visitante, _) in enumerate(lista_jogos):
-        chave_live = f"{mandante}x{visitante}"
+        chave_live = f"{mandante}X{visitante}"
         chave_sim = f"sim_r{r_num}_{idx}"
         
         jogou = False
@@ -260,7 +251,6 @@ df_simulado['aproveitamento'] = (df_simulado['pontos'] / (df_simulado['jogos'] *
 df_simulado = df_simulado.sort_values(by=["pontos", "vitorias", "saldo_gols", "gols_pro"], ascending=False).reset_index(drop=True)
 df_simulado['pos_atual'] = df_simulado.index + 1
 
-# --- CÁLCULO DA VARIAÇÃO DE POSIÇÃO (SUBIU / DESCEU / MANTÉM) ---
 def calcular_variacao(row):
     diff = row['pos_inicial'] - row['pos_atual']
     if diff > 0:
@@ -295,12 +285,12 @@ def colorir_zonas(val):
             cores.append('')
     return cores
 
-# --- 4. ABAS NATIVAS DE NAVEGAÇÃO ---
+# --- ABAS ---
 tab_tabela, tab_simulador, tab_aovivo = st.tabs(["📊 Classificação", "🎮 Simulador", "🔴 Ao Vivo"])
 
 confrontos_rodada_atual = CALENDARIO_RODADAS.get(num_rodada, [])
 
-# ABA 1: CLASSIFICAÇÃO COMPLETA
+# ABA 1: CLASSIFICAÇÃO
 with tab_tabela:
     if not df_simulado.empty:
         m1, m2 = st.columns(2)
@@ -325,7 +315,7 @@ with tab_tabela:
         )
         st.caption("🟢 G-4 | 🔵 Pré-Libertadores | 🟡 Sul-Americana | 🔴 Z-4")
 
-# ABA 2: SIMULADOR DE PALPITES
+# ABA 2: SIMULADOR
 with tab_simulador:
     st.subheader(f"🎮 Palpites para a {num_rodada}ª Rodada")
     
@@ -353,7 +343,7 @@ with tab_simulador:
     st.write("")
 
     for idx, (mandante, visitante, data_hora_str) in enumerate(confrontos_rodada_atual):
-        chave_live = f"{mandante}x{visitante}"
+        chave_live = f"{mandante}X{visitante}"
         chave_sim = f"sim_r{num_rodada}_{idx}"
         
         jogo_bloqueado = False
@@ -375,19 +365,12 @@ with tab_simulador:
 
         st.markdown(f"<div class='status-badge'>{badge_sim}</div>", unsafe_allow_html=True)
         
-        c_m, c_pm, c_x, c_pv, c_v, c_btn = st.columns([2.3, 0.9, 0.2, 0.9, 2.3, 1.2])
+        c_nm, c_im, c_pm, c_x, c_pv, c_iv, c_nv, c_btn = st.columns([1.8, 0.4, 0.9, 0.2, 0.9, 0.4, 1.8, 1.2])
         
-        escudo_m = obter_escudo(mandante)
-        escudo_v = obter_escudo(visitante)
-        
-        with c_m:
-            st.markdown(
-                f"<div class='time-container-m'>"
-                f"<span>{mandante}</span>"
-                f"<img src='{escudo_m}' width='22' height='22'/>"
-                f"</div>", 
-                unsafe_allow_html=True
-            )
+        with c_nm:
+            st.markdown(f"<div style='text-align: right; font-weight: bold;'>{mandante}</div>", unsafe_allow_html=True)
+        with c_im:
+            st.image(obter_escudo(mandante), width=24)
         with c_pm:
             gm_val = st.number_input(
                 "", min_value=0, key=f"input_r{num_rodada}_m_{idx}", 
@@ -395,21 +378,17 @@ with tab_simulador:
                 disabled=jogo_bloqueado
             )
         with c_x:
-            st.write("x")
+            st.markdown("<div style='text-align: center; font-weight: bold;'>x</div>", unsafe_allow_html=True)
         with c_pv:
             gv_val = st.number_input(
                 "", min_value=0, key=f"input_r{num_rodada}_v_{idx}", 
                 label_visibility="collapsed", value=val_v, placeholder="-",
                 disabled=jogo_bloqueado
             )
-        with c_v:
-            st.markdown(
-                f"<div class='time-container-v'>"
-                f"<img src='{escudo_v}' width='22' height='22'/>"
-                f"<span>{visitante}</span>"
-                f"</div>", 
-                unsafe_allow_html=True
-            )
+        with c_iv:
+            st.image(obter_escudo(visitante), width=24)
+        with c_nv:
+            st.markdown(f"<div style='text-align: left; font-weight: bold;'>{visitante}</div>", unsafe_allow_html=True)
         with c_btn:
             if not jogo_bloqueado:
                 if st.button("🧮 Calcular", key=f"btn_calc_{idx}"):
@@ -421,7 +400,7 @@ with tab_simulador:
             
         st.divider()
 
-# ABA 3: PAINEL AO VIVO (COM AUTO-REFRESH DE 30s)
+# ABA 3: AO VIVO
 with tab_aovivo:
     @st.fragment(run_every=30)
     def renderizar_painel_ao_vivo():
@@ -436,9 +415,7 @@ with tab_aovivo:
         placar_tempo_real = buscar_jogos_espn()
 
         for idx, (mandante, visitante, data_hora_str) in enumerate(confrontos_rodada_atual):
-            chave_live = f"{mandante}x{visitante}"
-            escudo_m = obter_escudo(mandante)
-            escudo_v = obter_escudo(visitante)
+            chave_live = f"{mandante}X{visitante}"
             
             var_m = mapa_variacoes.get(mandante, "➖")
             var_v = mapa_variacoes.get(visitante, "➖")
@@ -463,31 +440,21 @@ with tab_aovivo:
 
             st.markdown(f"<div class='status-badge'>{badge}</div>", unsafe_allow_html=True)
             
-            c_m, c_pm, c_x, c_pv, c_v = st.columns([2.5, 0.8, 0.4, 0.8, 2.5])
-            with c_m:
-                st.markdown(
-                    f"<div class='time-container-m'>"
-                    f"<small style='color:#777;'>({var_m})</small> "
-                    f"<span>{mandante}</span>"
-                    f"<img src='{escudo_m}' width='22' height='22'/>"
-                    f"</div>", 
-                    unsafe_allow_html=True
-                )
+            c_nm, c_im, c_pm, c_x, c_pv, c_iv, c_nv = st.columns([2, 0.4, 0.8, 0.3, 0.8, 0.4, 2])
+            with c_nm:
+                st.markdown(f"<div style='text-align: right; font-weight: bold;'><small style='color:#777;'>({var_m})</small> {mandante}</div>", unsafe_allow_html=True)
+            with c_im:
+                st.image(obter_escudo(mandante), width=24)
             with c_pm:
                 st.markdown(f"<h3 style='text-align: center; margin: 0;'>{p_m}</h3>", unsafe_allow_html=True)
             with c_x:
                 st.markdown("<div style='text-align: center; font-weight: bold;'>x</div>", unsafe_allow_html=True)
             with c_pv:
                 st.markdown(f"<h3 style='text-align: center; margin: 0;'>{p_v}</h3>", unsafe_allow_html=True)
-            with c_v:
-                st.markdown(
-                    f"<div class='time-container-v'>"
-                    f"<img src='{escudo_v}' width='22' height='22'/>"
-                    f"<span>{visitante}</span> "
-                    f"<small style='color:#777;'>({var_v})</small>"
-                    f"</div>", 
-                    unsafe_allow_html=True
-                )
+            with c_iv:
+                st.image(obter_escudo(visitante), width=24)
+            with c_nv:
+                st.markdown(f"<div style='text-align: left; font-weight: bold;'>{visitante} <small style='color:#777;'>({var_v})</small></div>", unsafe_allow_html=True)
                 
             st.divider()
 
