@@ -76,7 +76,6 @@ ESCUDOS_TIMES = {
     "Remo": "https://a.espncdn.com/i/teamlogos/soccer/500/9873.png",
     "Chapecoense": "https://a.espncdn.com/i/teamlogos/soccer/500/10362.png"
 }
-}
 
 MAPEAMENTO_TIMES_ESPN = {
     "Athletico-PR": "Athletico-PR",
