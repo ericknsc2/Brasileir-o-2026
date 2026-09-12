@@ -51,28 +51,28 @@ if "jogos_encerrados" not in st.session_state:
 else:
     st.session_state.jogos_encerrados["CoritibaXAthletico-PR"] = (3, 3)
 
-# Dicionário de Escudos Oficiais (Google Sports CDN - 100% Estáveis e Confiáveis)
+# Dicionário de Escudos (CDN FotMob - PNGs Transparentes e Universais)
 ESCUDOS_TIMES = {
-    "Flamengo": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/vstFj69qC80mZ6z1dK5mXw_500x500.png",
-    "Palmeiras": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7625_500x500.png",
-    "Athletico-PR": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/k89kZ9l2V0e1k1a_500x500.png",
-    "Fluminense": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/F_M5s5s9M5k4_500x500.png",
-    "Bahia": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7627_500x500.png",
-    "Cruzeiro": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7628_500x500.png",
-    "Coritiba": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7631_500x500.png",
-    "Atlético-MG": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/q9fhEsgpuyRq58OgmSndcQ_500x500.png",
-    "Red Bull Bragantino": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/L9388_500x500.png",
-    "São Paulo": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7623_500x500.png",
-    "Vitória": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7633_500x500.png",
-    "Corinthians": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7624_500x500.png",
-    "Santos": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7629_500x500.png",
-    "Botafogo": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7626_500x500.png",
-    "Grêmio": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7630_500x500.png",
-    "Mirassol": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/Nf0V1d_500x500.png",
-    "Vasco": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7632_500x500.png",
-    "Internacional": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7622_500x500.png",
-    "Remo": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/bENrK5iSMF6sXrEkDNNxng_500x500.png",
-    "Chapecoense": "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/7634_500x500.png"
+    "Flamengo": "https://images.fotmob.com/image_resources/logo/teamlogo/5976.png",
+    "Palmeiras": "https://images.fotmob.com/image_resources/logo/teamlogo/10273.png",
+    "Athletico-PR": "https://images.fotmob.com/image_resources/logo/teamlogo/10269.png",
+    "Fluminense": "https://images.fotmob.com/image_resources/logo/teamlogo/10275.png",
+    "Bahia": "https://images.fotmob.com/image_resources/logo/teamlogo/10270.png",
+    "Cruzeiro": "https://images.fotmob.com/image_resources/logo/teamlogo/9784.png",
+    "Coritiba": "https://images.fotmob.com/image_resources/logo/teamlogo/9783.png",
+    "Atlético-MG": "https://images.fotmob.com/image_resources/logo/teamlogo/10271.png",
+    "Red Bull Bragantino": "https://images.fotmob.com/image_resources/logo/teamlogo/8527.png",
+    "São Paulo": "https://images.fotmob.com/image_resources/logo/teamlogo/10276.png",
+    "Vitória": "https://images.fotmob.com/image_resources/logo/teamlogo/10278.png",
+    "Corinthians": "https://images.fotmob.com/image_resources/logo/teamlogo/8582.png",
+    "Santos": "https://images.fotmob.com/image_resources/logo/teamlogo/10274.png",
+    "Botafogo": "https://images.fotmob.com/image_resources/logo/teamlogo/8517.png",
+    "Grêmio": "https://images.fotmob.com/image_resources/logo/teamlogo/10272.png",
+    "Mirassol": "https://images.fotmob.com/image_resources/logo/teamlogo/308940.png",
+    "Vasco": "https://images.fotmob.com/image_resources/logo/teamlogo/10277.png",
+    "Internacional": "https://images.fotmob.com/image_resources/logo/teamlogo/8668.png",
+    "Remo": "https://images.fotmob.com/image_resources/logo/teamlogo/9789.png",
+    "Chapecoense": "https://images.fotmob.com/image_resources/logo/teamlogo/10287.png"
 }
 
 MAPEAMENTO_TIMES_ESPN = {
@@ -99,7 +99,7 @@ def normalizar_nome(nome):
 
 def obter_escudo(nome):
     nome_padrao = normalizar_nome(nome)
-    return ESCUDOS_TIMES.get(nome_padrao, "https://ssl.gstatic.com/onebox/media/sports/logos/optimized/default.png")
+    return ESCUDOS_TIMES.get(nome_padrao, "https://images.fotmob.com/image_resources/logo/teamlogo/5976.png")
 
 # --- DADOS DA TABELA BASE OFICIAL ---
 @st.cache_data(ttl=1)
