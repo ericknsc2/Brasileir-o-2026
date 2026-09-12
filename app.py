@@ -51,28 +51,28 @@ if "jogos_encerrados" not in st.session_state:
 else:
     st.session_state.jogos_encerrados["CoritibaXAthletico-PR"] = (3, 3)
 
-# Dicionário de Escudos (CDN FotMob - PNGs Transparentes e Universais)
+# Escudos diretos e estáveis do Wikimedia / GloboEsporte (Com SVG/PNG garantidos)
 ESCUDOS_TIMES = {
-    "Flamengo": "https://images.fotmob.com/image_resources/logo/teamlogo/5976.png",
-    "Palmeiras": "https://images.fotmob.com/image_resources/logo/teamlogo/10273.png",
-    "Athletico-PR": "https://images.fotmob.com/image_resources/logo/teamlogo/10269.png",
-    "Fluminense": "https://images.fotmob.com/image_resources/logo/teamlogo/10275.png",
-    "Bahia": "https://images.fotmob.com/image_resources/logo/teamlogo/10270.png",
-    "Cruzeiro": "https://images.fotmob.com/image_resources/logo/teamlogo/9784.png",
-    "Coritiba": "https://images.fotmob.com/image_resources/logo/teamlogo/9783.png",
-    "Atlético-MG": "https://images.fotmob.com/image_resources/logo/teamlogo/10271.png",
-    "Red Bull Bragantino": "https://images.fotmob.com/image_resources/logo/teamlogo/8527.png",
-    "São Paulo": "https://images.fotmob.com/image_resources/logo/teamlogo/10276.png",
-    "Vitória": "https://images.fotmob.com/image_resources/logo/teamlogo/10278.png",
-    "Corinthians": "https://images.fotmob.com/image_resources/logo/teamlogo/8582.png",
-    "Santos": "https://images.fotmob.com/image_resources/logo/teamlogo/10274.png",
-    "Botafogo": "https://images.fotmob.com/image_resources/logo/teamlogo/8517.png",
-    "Grêmio": "https://images.fotmob.com/image_resources/logo/teamlogo/10272.png",
-    "Mirassol": "https://images.fotmob.com/image_resources/logo/teamlogo/308940.png",
-    "Vasco": "https://images.fotmob.com/image_resources/logo/teamlogo/10277.png",
-    "Internacional": "https://images.fotmob.com/image_resources/logo/teamlogo/8668.png",
-    "Remo": "https://images.fotmob.com/image_resources/logo/teamlogo/9789.png",
-    "Chapecoense": "https://images.fotmob.com/image_resources/logo/teamlogo/10287.png"
+    "Flamengo": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Flamengo_braz_logo.svg",
+    "Palmeiras": "https://upload.wikimedia.org/wikipedia/commons/1/10/Palmeiras_logo.svg",
+    "Athletico-PR": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Athletico_Paranaense.svg",
+    "Fluminense": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Fluminense_FC_escudo.svg",
+    "Bahia": "https://upload.wikimedia.org/wikipedia/commons/2/20/Esporte_Clube_Bahia_logo.svg",
+    "Cruzeiro": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Cruzeiro_Esporte_Clube_%28logo_2021%29.svg",
+    "Coritiba": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Coritiba_FCD_2024.png",
+    "Atlético-MG": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Atletico_mineiro_galo.png",
+    "Red Bull Bragantino": "https://upload.wikimedia.org/wikipedia/commons/9/9e/Red_Bull_Bragantino_logo.svg",
+    "São Paulo": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Brasao_do_Sao_Paulo_Futebol_Clube.svg",
+    "Vitória": "https://upload.wikimedia.org/wikipedia/commons/4/40/Esporte_Clube_Vit%C3%B3ria_logo.svg",
+    "Corinthians": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Sport_Club_Corinthians_Paulista_logo.svg",
+    "Santos": "https://upload.wikimedia.org/wikipedia/commons/1/15/Santos_Logo.png",
+    "Botafogo": "https://upload.wikimedia.org/wikipedia/commons/5/52/Botafogo_de_Futebol_e_Regatas_logo.svg",
+    "Grêmio": "https://upload.wikimedia.org/wikipedia/commons/b/bf/Gremio_logo.svg",
+    "Mirassol": "https://upload.wikimedia.org/wikipedia/commons/3/36/Mirassol_FC_logo.png",
+    "Vasco": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Vasco_da_Gama_image_logo.png",
+    "Internacional": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Escudo_do_Sport_Club_Internacional.svg",
+    "Remo": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Clube_do_Remo.svg",
+    "Chapecoense": "https://upload.wikimedia.org/wikipedia/commons/9/92/Associacao_Chapecoense_de_Futebol.svg"
 }
 
 MAPEAMENTO_TIMES_ESPN = {
@@ -99,7 +99,7 @@ def normalizar_nome(nome):
 
 def obter_escudo(nome):
     nome_padrao = normalizar_nome(nome)
-    return ESCUDOS_TIMES.get(nome_padrao, "https://images.fotmob.com/image_resources/logo/teamlogo/5976.png")
+    return ESCUDOS_TIMES.get(nome_padrao, "https://upload.wikimedia.org/wikipedia/commons/2/2e/Flamengo_braz_logo.svg")
 
 # --- DADOS DA TABELA BASE OFICIAL ---
 @st.cache_data(ttl=1)
