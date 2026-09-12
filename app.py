@@ -71,7 +71,7 @@ ESCUDOS_TIMES = {
     "Mirassol": "[https://mirassolfc.com.br/cdn/shop/files/LOGO_MIRASSOL_FLAT.png?v=1771880070](https://mirassolfc.com.br/cdn/shop/files/LOGO_MIRASSOL_FLAT.png?v=1771880070)",
     "Vasco": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png",
     "Internacional": "https://s.sde.globo.com/media/organizations/2018/03/11/internacional.svg",
-    "Remo": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Clube_do_Remo.svg",
+    "Remo": "[https://logodownload.org/wp-content/uploads/2021/05/remo-logo-3-1.png](https://logodownload.org/wp-content/uploads/2021/05/remo-logo-3-1.png)",
     "Chapecoense": "https://s.sde.globo.com/media/organizations/2018/03/11/chapecoense.svg"
 }
 
