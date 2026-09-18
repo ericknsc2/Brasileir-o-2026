@@ -97,7 +97,7 @@ ESCUDOS_TIMES = {
         "https://s.sde.globo.com/media/organizations/2018/03/11/internacional.svg"
     ),
     "Remo": (
-        "data:image/jpeg;base64,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"
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJQAAACUCAMAAABC4vDmAAAAilBMVEX///8PFB/+/v4AAAAMEh4AAAf19fUAABD7+/sIDxwAABMAAA0AAAqzs7XKysv4+Pjr6+wACRjY2Nne3t+pqapJSk3R0dLk5OXCwsOioqO7u7sqKiyamptAQUNWVleTk5QfICIvMDRxcXKJiYqBgYFlZmgRExpdXl83ODsjJS15en0XGiMODxIXGBvlh72wAAATvklEQVR4nL1c63qqOhCNDERAgXC/o4AItfb9X+9MuAkKant2Oz/2111tWJnMZc0kgZD/I8z2gvBUubEJKPuPtL4kkW4x+X+N+n9EP1TpFfLioAWeZ6F4XhSW9R4gzwqN/Tke2XNSiKuDTgn1PT0Kk7IsD6EW6DaCYVFZHQEukf2XmPQM4OAxQqNT7cZbmMhnkxWJLgjMO3zBsf47TAIUNmHB6RNAUk1lMxVRMVXE1hx0RvwDOH8GyoqZVzQA5mZV0PCbyiOn6s9AnS4C7BVxHVKHawdUP/6VWVE38uAFolZAI3+2fjqQy/4dUGpNLsc/AlVUNL2Zk6LuJDT47Xbb/rDfTj6KbQ+8P8FEwQra1VPQagA+sqJMHC0KgiDSwuRuowfAtrM4COXsb0y9rIVsi3a8jZsq0X1GDeH2oSBTyrywbo4ct/lJtD9RLQ+6jw80G80fwFDm8yxj+7TDhb83rAQ6U5eyePwJVpKTYbUSI8GeD2VqZNU0cH7++jsc4b9xLqPvU4NhKCaG7hgb6r2OywPLO4gYKIuhh8cHtx1RQRJH/20ZzaIokwByUq6gqR3BT+suYaFoSfJjqUivdwW6eYnoR0QG2x5pa+LEChg3lL4O6fBE0FgVs4u6fhnQFoTiAKr2QrespcX0JH8CERxH5HTy5iObncBvoCliols/fqa1gJCY79R7S8R9O8G5331q7Zq+qJ1Wd89S2r6z1q/8P10f3N7eHndN+O3dO7u0OvdZ9O20Tf/L5e67yZ3kLq3b/7z/u9r5Z/j+/nN661vvff878d/n9u6v6c7d46c+7vX/6z//z11bN9V//wbf3+z/d4/82f+92pX//W6r+/q+r/6x013/3evf/5f22L6/1q/3q36n+s391q3/bLff/LffrffrZvv/8t7b+b3v7p/3b/uf6n++7sH//3Xf3v/6X//v//7//P+/v///y/91v7w/r8W/v9//2N3b38sT67/7f/y9vff4t6b1e3X7f3n//O9l//8t//vv+/f/f7v/99v0H9H9/d7/+z8/+/e///x/9+3X345//x/+v3//+/x/9xL4D7f7/f/7D+/P/vXff17+/3991/n/39/3v9/v+Pv7+X8AAgC0Y973P0gA6AAAAG50OgAAAAA="
     ),
     "Chapecoense": (
         "https://s.sde.globo.com/media/organizations/2018/03/11/chapecoense.svg"
@@ -562,21 +562,22 @@ with c_ctrl2:
   lista_times = ["Nenhum"] + sorted(df_base["nome_time"].unique().tolist())
   time_favorito = st.selectbox("⭐ Destaque o Time do Coração:", lista_times)
 
-# POPULAR PLACARES REAIS DA RODADA 27 JÁ FINALIZADA
+# PLACARES REAIS OFICIAIS DA RODADA 27
 PLACARES_RODADA_27_REAIS = {
     ("Coritiba", "Athletico-PR"): (1, 2),
-    ("Atlético-MG", "Fluminense"): (1, 1),
-    ("Grêmio", "Vasco"): (2, 0),
-    ("Chapecoense", "Internacional"): (0, 0),
-    ("Palmeiras", "São Paulo"): (2, 1),
-    ("Botafogo", "Red Bull Bragantino"): (1, 0),
-    ("Santos", "Cruzeiro"): (2, 2),
-    ("Mirassol", "Vitória"): (1, 0),
-    ("Flamengo", "Corinthians"): (2, 0),
+    ("Atlético-MG", "Fluminense"): (3, 1),
+    ("Grêmio", "Vasco"): (1, 2),
+    ("Chapecoense", "Internacional"): (1, 2),
+    ("Palmeiras", "São Paulo"): (2, 0),
+    ("Botafogo", "Red Bull Bragantino"): (1, 1),
+    ("Santos", "Cruzeiro"): (2, 1),
+    ("Mirassol", "Vitória"): (2, 2),
+    ("Flamengo", "Corinthians"): (2, 1),
     ("Bahia", "Remo"): (2, 1),
 }
+
 if num_rodada == 27:
-  for idx, (m, v, _) in enumerate(CALENDARIO_RODADAS[27]):
+  for m, v in CALENDARIO_RODADAS[27]:
     if (m, v) in PLACARES_RODADA_27_REAIS:
       st.session_state.jogos_encerrados[f"{m}X{v}"] = PLACARES_RODADA_27_REAIS[
           (m, v)
@@ -593,16 +594,10 @@ for r_num, lista_jogos in CALENDARIO_RODADAS.items():
     jogou = False
     gm, gv = 0, 0
 
-    if (
-        r_num == 27
-        and (mandante, visitante) in PLACARES_RODADA_27_REAIS
-        and f"{mandante}X{visitante}" not in st.session_state.jogos_encerrados
-    ):
-      st.session_state.jogos_encerrados[f"{mandante}X{visitante}"] = (
-          PLACARES_RODADA_27_REAIS[(mandante, visitante)]
-      )
-
-    if chave_live in st.session_state.jogos_encerrados:
+    if r_num == 27 and (mandante, visitante) in PLACARES_RODADA_27_REAIS:
+      gm, gv = PLACARES_RODADA_27_REAIS[(mandante, visitante)]
+      jogou = True
+    elif chave_live in st.session_state.jogos_encerrados:
       gm, gv = st.session_state.jogos_encerrados[chave_live]
       jogou = True
     elif (
@@ -788,30 +783,33 @@ with tab_simulador:
     jogo_bloqueado = False
     val_m, val_v = 0, 0
 
-    try:
-      partes_data = data_hora_str.split(", ")[1]
-      dt_jogo = datetime.strptime(
-          partes_data, "%d/%m - %H:%M"
-      ).replace(year=datetime.now().year)
-      limite_bloqueio = dt_jogo - timedelta(minutes=5)
-      if num_rodada == 27 and datetime.now() >= limite_bloqueio:
-        jogo_bloqueado = True
-    except Exception:
-      pass
+    if num_rodada == 27 and (mandante, visitante) in PLACARES_RODADA_27_REAIS:
+      val_m, val_v = PLACARES_RODADA_27_REAIS[(mandante, visitante)]
+      jogo_bloqueado = True
+    else:
+      try:
+        partes_data = data_hora_str.split(", ")[1]
+        dt_jogo = datetime.strptime(
+            partes_data, "%d/%m - %H:%M"
+        ).replace(year=datetime.now().year)
+        limite_bloqueio = dt_jogo - timedelta(minutes=5)
+        if datetime.now() >= limite_bloqueio:
+          jogo_bloqueado = True
+      except Exception:
+        pass
 
-    if num_rodada == 27 and chave_live in st.session_state.jogos_encerrados:
-      val_m, val_v = st.session_state.jogos_encerrados[chave_live]
-      jogo_bloqueado = True
-    elif (
-        num_rodada == 27
-        and chave_live in placar_live
-        and placar_live[chave_live]["state"] in ["in", "post"]
-    ):
-      val_m = placar_live[chave_live]["gm"]
-      val_v = placar_live[chave_live]["gv"]
-      jogo_bloqueado = True
-    elif chave_sim in st.session_state.palpites_confirmados:
-      val_m, val_v = st.session_state.palpites_confirmados[chave_sim]
+      if chave_live in st.session_state.jogos_encerrados:
+        val_m, val_v = st.session_state.jogos_encerrados[chave_live]
+        jogo_bloqueado = True
+      elif (
+          chave_live in placar_live
+          and placar_live[chave_live]["state"] in ["in", "post"]
+      ):
+        val_m = placar_live[chave_live]["gm"]
+        val_v = placar_live[chave_live]["gv"]
+        jogo_bloqueado = True
+      elif chave_sim in st.session_state.palpites_confirmados:
+        val_m, val_v = st.session_state.palpites_confirmados[chave_sim]
 
     col_m, col_img_m, col_txt, col_img_v, col_v = st.columns(
         [1.2, 0.6, 2.2, 0.6, 1.2]
@@ -854,12 +852,31 @@ with tab_simulador:
 
     st.markdown("---")
 
-# ABA 3: AO VIVO / PARTIDAS DA RODADA
+# ABA 3: AO VIVO / PLACARES DA RODADA SELECIONADA
 with tab_aovivo:
-  st.subheader(f"🔴 Partidas ao Vivo / Jogos da {num_rodada}ª Rodada")
+  st.subheader(f"🔴 Placar / Jogos da {num_rodada}ª Rodada")
 
-  # Exibe os jogos ao vivo da API caso existam, senão exibe a agenda da rodada selecionada
-  if placar_live:
+  if num_rodada == 27:
+    st.success(
+        "Resultados oficiais da **Rodada 27** já encerrada:"
+    )
+    for mandante, visitante, data_hora_str in confrontos_rodada_atual:
+      gm, gv = PLACARES_RODADA_27_REAIS.get((mandante, visitante), (0, 0))
+      col_img_m, col_txt, col_img_v = st.columns([0.6, 3.8, 0.6])
+      with col_img_m:
+        st.image(obter_escudo(mandante), width=28)
+      with col_txt:
+        st.markdown(
+            f"<div style='text-align: center;'><b>{mandante}</b> &nbsp;&nbsp;<span"
+            f" style='font-size: 1.1em; color: #d9534f;'><b>{gm} x"
+            f" {gv}</b></span>&nbsp;&nbsp; <b>{visitante}</b><br><span"
+            f" style='font-size: 0.85em; color: #666;'>{data_hora_str} (Encerrado)</span></div>",
+            unsafe_allow_html=True,
+        )
+      with col_img_v:
+        st.image(obter_escudo(visitante), width=28)
+      st.markdown("---")
+  elif placar_live:
     for chave, info in placar_live.items():
       times = chave.split("X")
       if len(times) == 2:
