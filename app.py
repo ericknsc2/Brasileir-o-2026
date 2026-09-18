@@ -569,6 +569,8 @@ with c_ctrl2:
 
 # PLACARES REAIS OFICIAIS DA RODADA 27
 PLACARES_RODADA_27_REAIS = {
+    # PLACARES REAIS OFICIAIS DA RODADA 27
+PLACARES_RODADA_27_REAIS = {
     ("Coritiba", "Athletico-PR"): (1, 2),
     ("Atlético-MG", "Fluminense"): (3, 1),
     ("Grêmio", "Vasco"): (1, 2),
@@ -581,9 +583,11 @@ PLACARES_RODADA_27_REAIS = {
     ("Bahia", "Remo"): (2, 1),
 }
 
-# Verificação totalmente segura usando .get() para evitar qualquer erro de chave
-if 27 in CALENDARIO_RODADAS:
-  for m, v in CALENDARIO_RODADAS.get(27, []):
+# --- BLINDAGEM DE SEGURANÇA PARA A RODADA 27 ---
+# Garante que CALENDARIO_RODADAS é um dicionário antes de chamar .get()
+if isinstance(CALENDARIO_RODADAS, dict):
+  jogos_r27 = CALENDARIO_RODADAS.get(27, [])
+  for m, v in jogos_r27:
     if (m, v) in PLACARES_RODADA_27_REAIS:
       st.session_state.jogos_encerrados[f"{m}X{v}"] = PLACARES_RODADA_27_REAIS[
           (m, v)
