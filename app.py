@@ -100,7 +100,7 @@ ESCUDOS_TIMES = {
         "https://s.sde.globo.com/media/organizations/2018/03/11/internacional.svg"
     ),
     "Remo": (
-        "data:image/png;base64,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"
+        "data:image/png;base64,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"
     ),
     "Chapecoense": (
         "https://s.sde.globo.com/media/organizations/2018/03/11/chapecoense.svg"
@@ -755,11 +755,10 @@ with tab_simulador:
     chave_sim = f"sim_r{num_rodada}_{idx}"
 
     jogo_bloqueado = False
-    val_m, val_v = None, None
+    val_m, val_v = 0, 0
 
     # Lógica corrigida de travamento automático 5 minutos antes da partida
     try:
-      # Exemplo de string: "Sábado, 12/09 - 16:00" -> Pega a parte "12/09 - 16:00"
       partes_data = data_hora_str.split(", ")[1]
       dt_jogo = datetime.strptime(
           partes_data, "%d/%m - %H:%M"
@@ -773,164 +772,64 @@ with tab_simulador:
     if chave_live in st.session_state.jogos_encerrados:
       val_m, val_v = st.session_state.jogos_encerrados[chave_live]
       jogo_bloqueado = True
-      badge_sim = "🔴 FIM DE JOGO (Placar Real)"
-    elif (
-        chave_live in placar_live
-        and placar_live[chave_live]["state"] in ["in", "post"]
-    ):
-      val_m = placar_live[chave_live]["gm"]
-      val_v = placar_live[chave_live]["gv"]
-      jogo_bloqueado = True
-      badge_sim = (
-          f"🟢 EM ANDAMENTO / FINALIZADO ({placar_live[chave_live]['detail']})"
-      )
-    elif jogo_bloqueado:
-      badge_sim = f"🔒 BLOQUEADO (Menos de 5 min para o jogo) - {data_hora_str}"
-    else:
-      badge_sim = f"📅 {data_hora_str}"
-      if chave_sim in st.session_state.palpites_confirmados:
-        val_m, val_v = st.session_state.palpites_confirmados[chave_sim]
+    elif chave_sim in st.session_state.palpites_confirmados:
+      val_m, val_v = st.session_state.palpites_confirmados[chave_sim]
 
-    st.markdown(
-        f"<div class='status-badge'>{badge_sim}</div>", unsafe_allow_html=True
+    col_m, col_img_m, col_txt, col_img_v, col_v = st.columns(
+        [1.2, 0.6, 2.2, 0.6, 1.2]
     )
 
-    c_nm, c_im, c_pm, c_x, c_pv, c_iv, c_nv, c_btn = st.columns(
-        [1.8, 0.4, 0.9, 0.2, 0.9, 0.4, 1.8, 1.2]
-    )
-
-    with c_nm:
-      st.markdown(
-          f"<div style='text-align: right; font-weight:"
-          f" bold;'>{mandante}</div>",
-          unsafe_allow_html=True,
-      )
-    with c_im:
-      st.image(obter_escudo(mandante), width=24)
-    with c_pm:
-      gm_val = st.number_input(
-          "",
+    with col_m:
+      val_m = st.number_input(
+          f"Gols {mandante}",
           min_value=0,
+          max_value=20,
+          value=int(val_m),
           key=f"input_r{num_rodada}_m_{idx}",
-          label_visibility="collapsed",
-          value=val_m,
-          placeholder="-",
           disabled=jogo_bloqueado,
+          label_visibility="collapsed",
       )
-    with c_x:
+    with col_img_m:
+      st.image(obter_escudo(mandante), width=30)
+    with col_txt:
       st.markdown(
-          "<div style='text-align: center; font-weight: bold;'>x</div>",
+          f"<div class='status-badge'>{data_hora_str}</div><p"
+          f" style='text-align:center; font-weight:bold; margin:0;'>{mandante}"
+          f" x {visitante}</p>",
           unsafe_allow_html=True,
       )
-    with c_pv:
-      gv_val = st.number_input(
-          "",
+    with col_img_v:
+      st.image(obter_escudo(visitante), width=30)
+    with col_v:
+      val_v = st.number_input(
+          f"Gols {visitante}",
           min_value=0,
+          max_value=20,
+          value=int(val_v),
           key=f"input_r{num_rodada}_v_{idx}",
-          label_visibility="collapsed",
-          value=val_v,
-          placeholder="-",
           disabled=jogo_bloqueado,
+          label_visibility="collapsed",
       )
-    with c_iv:
-      st.image(obter_escudo(visitante), width=24)
-    with c_nv:
-      st.markdown(
-          f"<div style='text-align: left; font-weight:"
-          f" bold;'>{visitante}</div>",
-          unsafe_allow_html=True,
-      )
-    with c_btn:
-      if not jogo_bloqueado:
-        if st.button("🧮 Calcular", key=f"btn_calc_{idx}"):
-          if gm_val is not None and gv_val is not None:
-            st.session_state.palpites_confirmados[chave_sim] = (gm_val, gv_val)
-            st.rerun()
-      else:
-        st.caption("🔒 Encerrado")
 
-    st.divider()
+    if not jogo_bloqueado:
+      st.session_state.palpites_confirmados[chave_sim] = (val_m, val_v)
+
+    st.markdown("---")
 
 # ABA 3: AO VIVO
 with tab_aovivo:
-
-  @st.fragment(run_every=30)
-  def renderizar_painel_ao_vivo():
-    c_tit, c_btn = st.columns([2, 1])
-    with c_tit:
-      st.subheader(f"🔴 Central Ao Vivo - {num_rodada}ª Rodada")
-    with c_btn:
-      if st.button("🔄 Atualizar Agora"):
-        st.cache_data.clear()
-        st.rerun()
-
-    placar_tempo_real = buscar_jogos_espn()
-
-    for idx, (mandante, visitante, data_hora_str) in enumerate(
-        confrontos_rodada_atual
-    ):
-      chave_live = f"{mandante}X{visitante}"
-
-      var_m = mapa_variacoes.get(mandante, "➖")
-      var_v = mapa_variacoes.get(visitante, "➖")
-
-      if chave_live in st.session_state.jogos_encerrados:
-        badge = "🔴 FIM DE JOGO"
-        p_m, p_v = st.session_state.jogos_encerrados[chave_live]
-      elif chave_live in placar_tempo_real:
-        st_info = placar_tempo_real[chave_live]
-        if st_info["state"] == "in":
-          badge = f"🟢 AO VIVO ({st_info['detail']})"
-          p_m, p_v = st_info["gm"], st_info["gv"]
-        elif st_info["state"] == "post":
-          badge = "🔴 FIM DE JOGO"
-          p_m, p_v = st_info["gm"], st_info["gv"]
-        else:
-          badge = f"🕒 AGENDADO - {data_hora_str}"
-          p_m, p_v = "-", "-"
-      else:
-        badge = f"🕒 AGENDADO - {data_hora_str}"
-        p_m, p_v = "-", "-"
-
-      st.markdown(
-          f"<div class='status-badge'>{badge}</div>", unsafe_allow_html=True
-      )
-
-      c_nm, c_im, c_pm, c_x, c_pv, c_iv, c_nv = st.columns(
-          [2, 0.4, 0.8, 0.3, 0.8, 0.4, 2]
-      )
-      with c_nm:
-        st.markdown(
-            f"<div style='text-align: right; font-weight: bold;'>{mandante}"
-            f" <small style='color:#777;'>({var_m})</small></div>",
-            unsafe_allow_html=True,
+  st.subheader("🔴 Partidas ao Vivo / Placar da Rodada (ESPN)")
+  if not placar_live:
+    st.info(
+        "Nenhum jogo ao vivo no momento ou a API da ESPN está indisponível."
+        " Utilizando dados simulados e salvos."
+    )
+  else:
+    for chave, info in placar_live.items():
+      times = chave.split("X")
+      if len(times) == 2:
+        m_nome, v_nome = times[0], times[1]
+        st.write(
+            f"**{m_nome}** {info['gm']} x {info['gv']} **{v_nome}** —"
+            f" *Status: {info['detail']}*"
         )
-      with c_im:
-        st.image(obter_escudo(mandante), width=24)
-      with c_pm:
-        st.markdown(
-            f"<h3 style='text-align: center; margin: 0;'>{p_m}</h3>",
-            unsafe_allow_html=True,
-        )
-      with c_x:
-        st.markdown(
-            "<div style='text-align: center; font-weight: bold;'>x</div>",
-            unsafe_allow_html=True,
-        )
-      with c_pv:
-        st.markdown(
-            f"<h3 style='text-align: center; margin: 0;'>{p_v}</h3>",
-            unsafe_allow_html=True,
-        )
-      with c_iv:
-        st.image(obter_escudo(visitante), width=24)
-      with c_nv:
-        st.markdown(
-            f"<div style='text-align: left; font-weight: bold;'>{visitante}"
-            f" <small style='color:#777;'>({var_v})</small></div>",
-            unsafe_allow_html=True,
-        )
-
-      st.divider()
-
-  renderizar_painel_ao_vivo()
