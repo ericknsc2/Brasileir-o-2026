@@ -567,8 +567,6 @@ with c_ctrl2:
   lista_times = ["Nenhum"] + sorted(df_base["nome_time"].unique().tolist())
   time_favorito = st.selectbox("⭐ Destaque o Time do Coração:", lista_times)
 
-# PLACARES REAIS OFICIAIS DA RODADA 27
-PLACARES_RODADA_27_REAIS = {
     # PLACARES REAIS OFICIAIS DA RODADA 27
 PLACARES_RODADA_27_REAIS = {
     ("Coritiba", "Athletico-PR"): (1, 2),
