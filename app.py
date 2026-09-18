@@ -563,6 +563,7 @@ with c_ctrl2:
   time_favorito = st.selectbox("⭐ Destaque o Time do Coração:", lista_times)
 
 # PLACARES REAIS OFICIAIS DA RODADA 27
+# PLACARES REAIS OFICIAIS DA RODADA 27
 PLACARES_RODADA_27_REAIS = {
     ("Coritiba", "Athletico-PR"): (1, 2),
     ("Atlético-MG", "Fluminense"): (3, 1),
@@ -575,6 +576,13 @@ PLACARES_RODADA_27_REAIS = {
     ("Flamengo", "Corinthians"): (2, 1),
     ("Bahia", "Remo"): (2, 1),
 }
+
+if num_rodada == 27 and 27 in CALENDARIO_RODADAS:
+  for m, v in CALENDARIO_RODADAS[27]:
+    if (m, v) in PLACARES_RODADA_27_REAIS:
+      st.session_state.jogos_encerrados[f"{m}X{v}"] = PLACARES_RODADA_27_REAIS[
+          (m, v)
+      ]
 
 if num_rodada == 27:
   for m, v in CALENDARIO_RODADAS[27]:
