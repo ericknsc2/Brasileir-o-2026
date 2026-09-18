@@ -585,12 +585,11 @@ PLACARES_RODADA_27_REAIS = {
 # Garante que CALENDARIO_RODADAS é um dicionário antes de chamar .get()
 if isinstance(CALENDARIO_RODADAS, dict):
   jogos_r27 = CALENDARIO_RODADAS.get(27, [])
-  for m, v in jogos_r27:
+  for m, v, _ in jogos_r27:  # Adicionado o '_' para capturar a data/hora
     if (m, v) in PLACARES_RODADA_27_REAIS:
       st.session_state.jogos_encerrados[f"{m}X{v}"] = PLACARES_RODADA_27_REAIS[
           (m, v)
       ]
-
 # --- CÁLCULO REATIVO DA TABELA ---
 df_simulado = df_base.copy()
 
