@@ -97,7 +97,7 @@ ESCUDOS_TIMES = {
         "https://s.sde.globo.com/media/organizations/2018/03/11/internacional.svg"
     ),
     "Remo": (
-        "data:image/png;base64,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"
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJQAAACUCAMAAABC4vDmAAAAilBMVEX///8PFB/+/v4AAAAMEh4AAAf19fUAABD7+/sIDxwAABMAAA0AAAqzs7XKysv4+Pjr6+wACRjY2Nne3t+pqapJSk3R0dLk5OXCwsOioqO7u7sqKiyamptAQUNWVleTk5QfICIvMDRxcXKJiYqBgYFlZmgRExpdXl83ODsjJS15en0XGiMODxIXGBvlh72wAAATvklEQVR4nL1c63qqOhCNDERAgXC/o4AItfb9X+9MuAkKant2Oz/2111tWJnMZc0kgZD/I8z2gvBUubEJKPuPtL4kkW4x+X+N+n9EP1TpFfLioAWeZ6F4XhSW9R4gzwqN/Tke2XNSiKuDTgn1PT0Kk7IsD6EW6DaCYVFZHQEukf2XmPQM4OAxQqNT7cZbmMhnkxWJLgjMO3zBsf47TAIUNmHB6RNAUk1lMxVRMVXE1hx0RvwDOH8GyoqZVzQA5mZV0PCbyiOn6s9AnS4C7BVxHVKHawdUP/6VWVE38uAFolZAI3+2fjqQy/4dUGpNLsc/AlVUNL2Zk6LuJDT47Xbb/rDfTj6KbQ+8P8FEwQra1VPQagA+sqJMHC0KgiDSwuRuowfAtrM4COXsb0y9rIVsi3a8jZsq0X1GDeH2oSBTyrywbo4ct/lJtD9RLQ+6jw80G80fwFDm8yxj+7TDhb83rAQ6U5eyePwJVpKTYbUSI8GeD2VqZNU0cH7++jsc4b9xLqPvU4NhKCaG7hgb6r2OywPLO4gYKIuhh8cHtx1RQRJH/20ZzaIokwByUq6gqR3BT+suYaFoSfJjqUivdwW6eYnoR0QG2x5pa+LEChg3lL4O6fBE0FgVs4u6fhnQFoTiAKr2QrespcX0JH8CERxH5HTy5iObncBvoCliols/fqa1gJCY79R7S8R9O8G5331q7Zq+qJ1Wd89S2r6z1q/8P10f3N7eHndN+O3dO7u0OvdZ9O20Tf/L5e67yZ3kLq3b/7z/u9r5Z/j+/nN661vvff878d/n9u6v6c7d46c+7vX/6z//z11bN9V//wbf3+z/d4/82f+92pX//W6r+/q+r/6x013/3evf/5f22L6/1q/3q36n+s391q3/bLff/LffrffrZvv/8t7b+b3v7p/3b/uf6n++7sH//3Xf3v/6X//v//7//P+/v///y/91v7w/r8W/v9//2N3b38sT67/7f/y9vff4t6b1e3X7f3n//O9l//8t//vv+/f/f7v/99v0H9H9/d7/+z8/+/e///x/9+3X345//x/+v3//+/x/9xL4D7f7/f/7D+/P/vXff17+/3991/n/39/3v9/v+Pv7+X8AAgC0Y973P0gA6AAAAG50OgAAAAA="
     ),
     "Chapecoense": (
         "https://s.sde.globo.com/media/organizations/2018/03/11/chapecoense.svg"
@@ -788,7 +788,6 @@ with tab_simulador:
     jogo_bloqueado = False
     val_m, val_v = 0, 0
 
-    # Lógica de travamento automático apenas se for rodada 27 e jogo já ocorrido
     try:
       partes_data = data_hora_str.split(", ")[1]
       dt_jogo = datetime.strptime(
@@ -800,7 +799,6 @@ with tab_simulador:
     except Exception:
       pass
 
-    # Resgata placar real ou palpite anterior salvo
     if num_rodada == 27 and chave_live in st.session_state.jogos_encerrados:
       val_m, val_v = st.session_state.jogos_encerrados[chave_live]
       jogo_bloqueado = True
@@ -856,15 +854,12 @@ with tab_simulador:
 
     st.markdown("---")
 
-# ABA 3: AO VIVO
+# ABA 3: AO VIVO / PARTIDAS DA RODADA
 with tab_aovivo:
-  st.subheader("🔴 Partidas ao Vivo / Placar da Rodada (ESPN)")
-  if not placar_live:
-    st.info(
-        "Nenhum jogo ao vivo no momento ou a API da ESPN está indisponível."
-        " Utilizando dados simulados e salvos."
-    )
-  else:
+  st.subheader(f"🔴 Partidas ao Vivo / Jogos da {num_rodada}ª Rodada")
+
+  # Exibe os jogos ao vivo da API caso existam, senão exibe a agenda da rodada selecionada
+  if placar_live:
     for chave, info in placar_live.items():
       times = chave.split("X")
       if len(times) == 2:
@@ -873,3 +868,19 @@ with tab_aovivo:
             f"**{m_nome}** {info['gm']} x {info['gv']} **{v_nome}** —"
             f" *Status: {info['detail']}*"
         )
+  else:
+    st.info(
+        f"Nenhum jogo ao vivo no momento pela API da ESPN. Exibindo os"
+        f" confrontos programados para a **Rodada {num_rodada}**:"
+    )
+    for mandante, visitante, data_hora_str in confrontos_rodada_atual:
+      col_img_m, col_txt, col_img_v = st.columns([0.6, 3.8, 0.6])
+      with col_img_m:
+        st.image(obter_escudo(mandante), width=28)
+      with col_txt:
+        st.markdown(
+            f"**{mandante} x {visitante}** &nbsp;&nbsp;|&nbsp;&nbsp; *{data_hora_str}*"
+        )
+      with col_img_v:
+        st.image(obter_escudo(visitante), width=28)
+      st.markdown("---")
