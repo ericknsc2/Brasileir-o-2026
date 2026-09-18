@@ -9,18 +9,17 @@ st.set_page_config(
 # Título principal
 st.title("⚽ Simulador e Painel do Brasileirão 2026")
 st.markdown(
-    "Acompanhe e simule os resultados dos jogos do Campeonato Brasileiro de 2026!"
+    "Acompanhe e simule os resultados oficiais dos jogos do Campeonato Brasileiro de 2026!"
 )
 
-# Dados iniciais simulados para os 20 clubes do Brasileirão 2026
+# Lista oficial dos 20 clubes do Brasileirão Série A 2026
 @st.cache_data
 def carregar_dados():
   clubes = [
       "Flamengo",
-      "Fluminense",
-      "Botafogo",
-      "Vasco da Gama",
       "Palmeiras",
+      "Botafogo",
+      "Fluminense",
       "São Paulo",
       "Corinthians",
       "Santos",
@@ -30,17 +29,17 @@ def carregar_dados():
       "Internacional",
       "Bahia",
       "Vitória",
-      "Fortaleza",
-      "Ceará",
       "Athletico-PR",
+      "Red Bull Bragantino",
+      "Vasco da Gama",
+      "Mirassol",
+      "Chapecoense",
       "Coritiba",
-      "Sport",
-      "Juventude",
+      "Remo",
   ]
 
-  # Criando um DataFrame base para a tabela de classificação
   tabela = pd.DataFrame({
-      "Clube": clubes,
+      "Clube": sorted(clubes),  # Ordenado alfabeticamente para facilitar
       "P": [0] * 20,  # Pontos
       "J": [0] * 20,  # Jogos
       "V": [0] * 20,  # Vitórias
@@ -53,6 +52,7 @@ def carregar_dados():
   return tabela
 
 
+# Inicializa o session_state com cópia limpa
 if "tabela_classificacao" not in st.session_state:
   st.session_state.tabela_classificacao = carregar_dados()
 
@@ -62,38 +62,40 @@ opcao = st.sidebar.selectbox(
     "Escolha a seção", ["Tabela de Classificação", "Simulador de Partidas"]
 )
 
-# Ordenação da tabela (Pontos, Vitórias, Saldo de Gols, Gols Pró)
+
 def atualizar_tabela(df):
   df["SG"] = df["GP"] - df["GC"]
-  df = df.sort_values(
+  df_ordenado = df.sort_values(
       by=["P", "V", "SG", "GP"], ascending=[False, False, False, False]
   ).reset_index(drop=True)
-  return df
+  return df_ordenado
 
 
 if opcao == "Tabela de Classificação":
   st.subheader("📊 Tabela de Classificação Atualizada")
   tabela_atual = atualizar_tabela(st.session_state.tabela_classificacao)
 
-  # Adicionando formatação visual para zonas de classificação (Libertadores, Sul-Americana, Rebaixamento)
-  def colorir_tabela(val):
-    # Apenas para estilizar o index ou posições se necessário
-    return ""
+  # Exibe a tabela com o índice começando em 1 (posição na tabela)
+  tabela_exibicao = tabela_atual.copy()
+  tabela_exibicao.index = range(1, len(tabela_exibicao) + 1)
 
-  st.dataframe(tabela_atual, use_container_width=True)
+  st.dataframe(tabela_exibicao, use_container_width=True)
 
   st.markdown("### Legenda:")
-  st.markdown("🟢 **Pré-Libertadores / Grupos:** 1º ao 6º colocado")
+  st.markdown("🟢 **Libertadores (Grupos):** 1º ao 4º colocado")
+  st.markdown("🟡 **Pré-Libertadores:** 5º e 6º colocados")
   st.markdown("🔵 **Sul-Americana:** 7º ao 12º colocado")
   st.markdown("🔴 **Rebaixamento (Série B):** 17º ao 20º colocado")
 
 elif opcao == "Simulador de Partidas":
   st.subheader("⚡ Simulador de Resultados")
-  st.markdown("Insira os gols da partida para atualizar a tabela instantaneamente.")
-
-  col1, col2, col3 = st.columns([3, 1, 3])
+  st.markdown(
+      "Selecione os times mandante e visitante e informe o placar da partida."
+  )
 
   clubes_lista = list(st.session_state.tabela_classificacao["Clube"])
+
+  col1, col2, col3 = st.columns([3, 1, 3])
 
   with col1:
     mandante = st.selectbox("Mandante", clubes_lista, index=0)
@@ -105,9 +107,9 @@ elif opcao == "Simulador de Partidas":
     st.markdown("### X")
 
   with col3:
-    # Selecionar um visitante diferente do mandante por padrão se possível
-    visitante_index = 1 if len(clubes_lista) > 1 else 0
-    visitante = st.selectbox("Visitante", clubes_lista, index=visitante_index)
+    # Garante que o visitante seja diferente do mandante por padrão
+    default_visitante = 1 if len(clubes_lista) > 1 else 0
+    visitante = st.selectbox("Visitante", clubes_lista, index=default_visitante)
     gols_visitante = st.number_input(
         "Gols Visitante", min_value=0, max_value=20, value=0, step=1
     )
@@ -116,19 +118,20 @@ elif opcao == "Simulador de Partidas":
     if mandante == visitante:
       st.error("O time mandante e o visitante não podem ser os mesmos!")
     else:
-      df = st.session_state.tabela_classificacao
+      # Pega o DataFrame atual do session_state
+      df = st.session_state.tabela_classificacao.copy()
 
       # Atualiza estatísticas do Mandante
       idx_m = df.index[df["Clube"] == mandante][0]
       df.loc[idx_m, "J"] += 1
-      df.loc[idx_m, "GP"] += gols_mandante
-      df.loc[idx_m, "GC"] += gols_visitante
+      df.loc[idx_m, "GP"] += int(gols_mandante)
+      df.loc[idx_m, "GC"] += int(gols_visitante)
 
       # Atualiza estatísticas do Visitante
       idx_v = df.index[df["Clube"] == visitante][0]
       df.loc[idx_v, "J"] += 1
-      df.loc[idx_v, "GP"] += gols_visitante
-      df.loc[idx_v, "GC"] += gols_mandante
+      df.loc[idx_v, "GP"] += int(gols_visitante)
+      df.loc[idx_v, "GC"] += int(gols_mandante)
 
       # Atribuição de pontos, vitórias, empates e derrotas
       if gols_mandante > gols_visitante:
@@ -145,11 +148,15 @@ elif opcao == "Simulador de Partidas":
         df.loc[idx_v, "P"] += 1
         df.loc[idx_v, "E"] += 1
 
+      # Salva de volta no session_state
       st.session_state.tabela_classificacao = df
       st.success(
           f"Partida registrada com sucesso! {mandante} {gols_mandante} x"
           f" {gols_visitante} {visitante}"
       )
 
-      # Mostra a tabela prévia atualizada logo abaixo
-      st.dataframe(atualizar_tabela(df), use_container_width=True)
+      # Exibe a prévia da tabela atualizada logo abaixo
+      st.markdown("### Tabela Parcial Atualizada:")
+      tabela_preview = atualizar_tabela(df)
+      tabela_preview.index = range(1, len(tabela_preview) + 1)
+      st.dataframe(tabela_preview, use_container_width=True)
