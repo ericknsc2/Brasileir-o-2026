@@ -1,3 +1,4 @@
+
 from datetime import datetime, timedelta
 import requests
 import streamlit as st
@@ -551,11 +552,10 @@ CALENDARIO_RODADAS = {
 
 placar_live = buscar_jogos_espn()
 
-# CONTROLES SUPERIORES (Definem a variável num_rodada de forma segura)
+# CONTROLES SUPERIORES (Definem a variável num_rodada de forma dinâmica e segura)
 c_ctrl1, c_ctrl2 = st.columns([1, 2])
 with c_ctrl1:
   rodadas_disponiveis = sorted(list(CALENDARIO_RODADAS.keys()))
-  # Garante que o índice padrão selecionado exista na lista (ex: 27 ou o primeiro disponível)
   default_idx = (
       rodadas_disponiveis.index(27) if 27 in rodadas_disponiveis else 0
   )
@@ -581,9 +581,9 @@ PLACARES_RODADA_27_REAIS = {
     ("Bahia", "Remo"): (2, 1),
 }
 
-# Verificação segura para a Rodada 27
+# Verificação totalmente segura usando .get() para evitar qualquer erro de chave
 if 27 in CALENDARIO_RODADAS:
-  for m, v in CALENDARIO_RODADAS[27]:
+  for m, v in CALENDARIO_RODADAS.get(27, []):
     if (m, v) in PLACARES_RODADA_27_REAIS:
       st.session_state.jogos_encerrados[f"{m}X{v}"] = PLACARES_RODADA_27_REAIS[
           (m, v)
@@ -699,7 +699,7 @@ tab_tabela, tab_simulador, tab_aovivo = st.tabs(
     ["📊 Classificação", "🎮 Simulador", "🔴 Ao Vivo"]
 )
 
-# Proteção adicional: garante que num_rodada existe no dicionário antes de buscar
+# Proteção absoluta com .get()
 confrontos_rodada_atual = CALENDARIO_RODADAS.get(num_rodada, [])
 
 # ABA 1: CLASSIFICAÇÃO
@@ -757,7 +757,7 @@ with tab_simulador:
 
   col_btn1, col_btn2 = st.columns(2)
   with col_btn1:
-    if st.button("🧮 Calcular Todos o Palpites"):
+    if st.button("🧮 Calcular Todos os Palpites"):
       for idx in range(len(confrontos_rodada_atual)):
         key_m = f"input_r{num_rodada}_m_{idx}"
         key_v = f"input_r{num_rodada}_v_{idx}"
