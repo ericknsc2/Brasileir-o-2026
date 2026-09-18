@@ -97,7 +97,7 @@ ESCUDOS_TIMES = {
         "https://s.sde.globo.com/media/organizations/2018/03/11/internacional.svg"
     ),
     "Remo": (
-        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJQAAACUCAMAAABC4vDmAAAAilBMVEX///8PFB/+/v4AAAAMEh4AAAf19fUAABD7+/sIDxwAABMAAA0AAAqzs7XKysv4+Pjr6+wACRjY2Nne3t+pqapJSk3R0dLk5OXCwsOioqO7u7sqKiyamptAQUNWVleTk5QfICIvMDRxcXKJiYqBgYFlZmgRExpdXl83ODsjJS15en0XGiMODxIXGBvlh72wAAATvklEQVR4nL1c63qqOhCNDERAgXC/o4AItfb9X+9MuAkKant2Oz/2111tWJnMZc0kgZD/I8z2gvBUubEJKPuPtL4kkW4x+X+N+n9EP1TpFfLioAWeZ6F4XhSW9R4gzwqN/Tke2XNSiKuDTgn1PT0Kk7IsD6EW6DaCYVFZHQEukf2XmPQM4OAxQqNT7cZbmMhnkxWJLgjMO3zBsf47TAIUNmHB6RNAUk1lMxVRMVXE1hx0RvwDOH8GyoqZVzQA5mZV0PCbyiOn6s9AnS4C7BVxHVKHawdUP/6VWVE38uAFolZAI3+2fjqQy/4dUGpNLsc/AlVUNL2Zk6LuJDT47Xbb/rDfTj6KbQ+8P8FEwQra1VPQagA+sqJMHC0KgiDSwuRuowfAtrM4COXsb0y9rIVsi3a8jZsq0X1GDeH2oSBTyrywbo4ct/lJtD9RLQ+6jw80G80fwFDm8yxj+7TDhb83rAQ6U5eyePwJVpKTYbUSI8GeD2VqZNU0cH7++jsc4b9xLqPvU4NhKCaG7hgb6r2OywPLO4gYKIuhh8cHtx1RQRJH/20ZzaIokwByUq6gqR3BT+suYaFoSfJjqUivdwW6eYnoR0QG2x5pa+LEChg3lL4O6fBE0FgVs4u6fhnQFoTiAKr2QrespcX0JH8CERxH5HTy5iObncBvoCliols/fqa1gJCY79R7S8R9O8G5331q7Zq+qJ1Wd89S2r6z1q/8P10f3N7eHndN+O3dO7u0OvdZ9O20Tf/L5e67yZ3kLq3b/7z/u9r5Z/j+/nN661vvff878d/n9u6v6c7d46c+7vX/6z//z11bN9V//wbf3+z/d4/82f+92pX//W6r+/q+r/6x013/3evf/5f22L6/1q/3q36n+s391q3/bLff/LffrffrZvv/8t7b+b3v7p/3b/uf6n++7sH//3Xf3v/6X//v//7//P+/v///y/91v7w/r8W/v9//2N3b38sT67/7f/y9vff4t6b1e3X7f3n//O9l//8t//vv+/f/f7v/99v0H9H9/d7/+z8/+/e///x/9+3X345//x/+v3//+/x/9xL4D7f7/f/7D+/P/vXff17+/3991/n/39/3v9/v+Pv7+X8AAgC0Y973P0gA6AAAAG50OgAAAAA="
+        "https://logodetimes.com/times/remo/logo-remo-1024.png"
     ),
     "Chapecoense": (
         "https://s.sde.globo.com/media/organizations/2018/03/11/chapecoense.svg"
