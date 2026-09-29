@@ -134,69 +134,69 @@ def obter_escudo(nome):
   )
 
 
-# --- DADOS DA TABELA BASE OFICIAL (ATUALIZADA) ---
+# --- DADOS DA TABELA BASE OFICIAL (Ponto de partida limpo - ex: Fim da Rodada 26) ---
 @st.cache_data(ttl=1)
 def carregar_tabela_oficial():
   dados_tabela = [
       {
           "nome_time": "Flamengo",
-          "pontos": 57,
-          "jogos": 27,
-          "vitorias": 17,
+          "pontos": 54,
+          "jogos": 26,
+          "vitorias": 16,
           "empates": 6,
           "derrotas": 4,
-          "gols_pro": 53,
-          "gols_contra": 22,
+          "gols_pro": 51,
+          "gols_contra": 21,
       },
       {
           "nome_time": "Palmeiras",
-          "pontos": 56,
-          "jogos": 27,
-          "vitorias": 16,
+          "pontos": 53,
+          "jogos": 26,
+          "vitorias": 15,
           "empates": 8,
           "derrotas": 3,
-          "gols_pro": 47,
+          "gols_pro": 45,
           "gols_contra": 21,
       },
       {
           "nome_time": "Athletico-PR",
-          "pontos": 46,
-          "jogos": 27,
-          "vitorias": 13,
+          "pontos": 43,
+          "jogos": 26,
+          "vitorias": 12,
           "empates": 7,
           "derrotas": 7,
-          "gols_pro": 41,
-          "gols_contra": 31,
+          "gols_pro": 39,
+          "gols_contra": 30,
       },
       {
           "nome_time": "Bahia",
-          "pontos": 46,
-          "jogos": 27,
-          "vitorias": 12,
+          "pontos": 43,
+          "jogos": 26,
+          "vitorias": 11,
           "empates": 10,
           "derrotas": 5,
-          "gols_pro": 42,
-          "gols_contra": 33,
+          "gols_pro": 40,
+          "gols_contra": 32,
       },
       {
           "nome_time": "Fluminense",
-          "pontos": 45,
-          "jogos": 27,
+          "pontos": 42,
+          "jogos": 26,
           "vitorias": 12,
-          "empates": 9,
-          "derrotas": 6,
-          "gols_pro": 41,
-          "gols_contra": 35,
+          "empates": 6,
+          "derrotas": 8,
+          "gols_pro": 40,
+          "gols_contra": 32,
       },
       {
           "nome_time": "Cruzeiro",
           "pontos": 42,
-          "jogos": 27,
+          "jogos": 26,
           "vitorias": 12,
           "empates": 6,
-          "derrotas": 9,
-          "gols_pro": 39,
-          "gols_contra": 39,
+          "derrotas": 8,
+          "gols_pro": 38,
+          "gols_contra": 37,
       },
       {
           "nome_time": "Atlético-MG",
@@ -210,13 +210,13 @@ def carregar_tabela_oficial():
       },
       {
           "nome_time": "Coritiba",
-          "pontos": 38,
-          "jogos": 27,
-          "vitorias": 10,
+          "pontos": 35,
+          "jogos": 26,
+          "vitorias": 9,
           "empates": 8,
           "derrotas": 9,
-          "gols_pro": 37,
-          "gols_contra": 38,
+          "gols_pro": 36,
+          "gols_contra": 36,
       },
       {
           "nome_time": "Red Bull Bragantino",
@@ -240,13 +240,13 @@ def carregar_tabela_oficial():
       },
       {
           "nome_time": "Botafogo",
-          "pontos": 35,
-          "jogos": 27,
+          "pontos": 34,
+          "jogos": 26,
           "vitorias": 9,
-          "empates": 8,
+          "empates": 7,
           "derrotas": 10,
-          "gols_pro": 41,
-          "gols_contra": 43,
+          "gols_pro": 40,
+          "gols_contra": 42,
       },
       {
           "nome_time": "São Paulo",
@@ -261,42 +261,42 @@ def carregar_tabela_oficial():
       {
           "nome_time": "Vitória",
           "pontos": 33,
-          "jogos": 27,
+          "jogos": 26,
           "vitorias": 9,
           "empates": 6,
-          "derrotas": 12,
-          "gols_pro": 27,
-          "gols_contra": 39,
+          "derrotas": 11,
+          "gols_pro": 25,
+          "gols_contra": 37,
       },
       {
           "nome_time": "Corinthians",
           "pontos": 32,
-          "jogos": 27,
+          "jogos": 26,
           "vitorias": 8,
           "empates": 8,
-          "derrotas": 11,
-          "gols_pro": 28,
-          "gols_contra": 29,
+          "derrotas": 10,
+          "gols_pro": 27,
+          "gols_contra": 27,
       },
       {
           "nome_time": "Mirassol",
-          "pontos": 29,
-          "jogos": 27,
+          "pontos": 28,
+          "jogos": 26,
           "vitorias": 7,
-          "empates": 8,
+          "empates": 7,
           "derrotas": 12,
-          "gols_pro": 31,
-          "gols_contra": 42,
+          "gols_pro": 29,
+          "gols_contra": 40,
       },
       {
           "nome_time": "Grêmio",
           "pontos": 28,
-          "jogos": 27,
+          "jogos": 26,
           "vitorias": 7,
           "empates": 7,
-          "derrotas": 13,
-          "gols_pro": 30,
-          "gols_contra": 38,
+          "derrotas": 12,
+          "gols_pro": 29,
+          "gols_contra": 36,
       },
       {
           "nome_time": "Vasco",
@@ -310,23 +310,23 @@ def carregar_tabela_oficial():
       },
       {
           "nome_time": "Internacional",
-          "pontos": 28,
-          "jogos": 27,
-          "vitorias": 6,
+          "pontos": 25,
+          "jogos": 26,
+          "vitorias": 5,
           "empates": 10,
           "derrotas": 11,
-          "gols_pro": 30,
-          "gols_contra": 35,
+          "gols_pro": 28,
+          "gols_contra": 34,
       },
       {
           "nome_time": "Remo",
           "pontos": 23,
-          "jogos": 27,
+          "jogos": 26,
           "vitorias": 5,
           "empates": 8,
-          "derrotas": 14,
-          "gols_pro": 31,
-          "gols_contra": 45,
+          "derrotas": 13,
+          "gols_pro": 30,
+          "gols_contra": 43,
       },
       {
           "nome_time": "Chapecoense",
@@ -345,7 +345,7 @@ def carregar_tabela_oficial():
   return df
 
 
-# API ESPN (Com User-Agent para evitar bloqueios)
+# API ESPN
 def buscar_jogos_espn():
   url = "https://site.api.espn.com/apis/site/v2/sports/soccer/bra.1/scoreboard"
   headers = {
@@ -399,7 +399,7 @@ def buscar_jogos_espn():
   return {}
 
 
-# --- CALENDÁRIO COMPLETO ATÉ A RODADA 38 ---
+# --- CALENDÁRIO COMPLETO ---
 CALENDARIO_RODADAS = {
     27: [
         ("Coritiba", "Athletico-PR", "Sexta, 11/09 - 21:00"),
@@ -549,12 +549,12 @@ CALENDARIO_RODADAS = {
 
 placar_live = buscar_jogos_espn()
 
-# CONTROLES SUPERIORES (Definem a variável num_rodada)
+# CONTROLES SUPERIORES
 c_ctrl1, c_ctrl2 = st.columns([1, 2])
 with c_ctrl1:
   rodadas_disponiveis = sorted(list(CALENDARIO_RODADAS.keys()))
   default_idx = (
-      rodadas_disponiveis.index(27) if 27 in rodadas_disponiveis else 0
+      rodadas_disponiveis.index(29) if 29 in rodadas_disponiveis else 0
   )
   num_rodada = st.selectbox(
       "Rodada:", rodadas_disponiveis, index=default_idx
@@ -564,7 +564,7 @@ with c_ctrl2:
   lista_times = ["Nenhum"] + sorted(df_base["nome_time"].unique().tolist())
   time_favorito = st.selectbox("⭐ Destaque o Time do Coração:", lista_times)
 
-# PLACARES REAIS OFICIAIS DA RODADA 27 (Aplicados de forma segura)
+# PLACARES REAIS DA RODADA 27
 PLACARES_RODADA_27_REAIS = {
     ("Coritiba", "Athletico-PR"): (1, 2),
     ("Atlético-MG", "Fluminense"): (3, 1),
@@ -578,21 +578,32 @@ PLACARES_RODADA_27_REAIS = {
     ("Bahia", "Remo"): (2, 1),
 }
 
-if isinstance(CALENDARIO_RODADAS, dict):
-  jogos_r27 = CALENDARIO_RODADAS.get(27, [])
-  for m, v, _ in jogos_r27:
-    if (m, v) in PLACARES_RODADA_27_REAIS:
-      st.session_state.jogos_encerrados[f"{m}X{v}"] = PLACARES_RODADA_27_REAIS[
-          (m, v)
-      ]
+# PLACARES REAIS DA RODADA 28
+PLACARES_RODADA_28_REAIS = {
+    ("Atlético-MG", "Chapecoense"): (2, 0),
+    ("Mirassol", "Botafogo"): (1, 0),
+    ("Remo", "Santos"): (0, 1),
+    ("Vasco", "Coritiba"): (1, 1),
+    ("São Paulo", "Internacional"): (2, 1),
+    ("Grêmio", "Palmeiras"): (0, 1),
+    ("Corinthians", "Fluminense"): (1, 1),
+    ("Vitória", "Cruzeiro"): (0, 0),
+    ("Red Bull Bragantino", "Flamengo"): (0, 2),
+    ("Athletico-PR", "Bahia"): (1, 1),
+}
+
+# Injeta os resultados reais no session_state para cálculo automático
+for m, v in PLACARES_RODADA_27_REAIS:
+  st.session_state.jogos_encerrados[f"{m}X{v}"] = PLACARES_RODADA_27_REAIS[(m, v)]
+
+for m, v in PLACARES_RODADA_28_REAIS:
+  st.session_state.jogos_encerrados[f"{m}X{v}"] = PLACARES_RODADA_28_REAIS[(m, v)]
+
 
 # --- CÁLCULO REATIVO DA TABELA ---
 df_simulado = df_base.copy()
 
 for r_num, lista_jogos in CALENDARIO_RODADAS.items():
-  # Se a rodada for menor ou igual a 27 e já estiver inclusa na tabela base, evitamos somar em dobro.
-  # Como a base padrão cobre a rodada 27, processamos a partir da rodada 28 em diante para jogos simulados/ao vivo,
-  # exceto se houver sobrescrita ativa por palpites/live.
   for idx, (mandante, visitante, _) in enumerate(lista_jogos):
     chave_live = f"{mandante}X{visitante}"
     chave_sim = f"sim_r{r_num}_{idx}"
@@ -600,23 +611,17 @@ for r_num, lista_jogos in CALENDARIO_RODADAS.items():
     jogou = False
     gm, gv = 0, 0
 
-    # Prioridade 1: Jogos encerrados salvos no session_state
     if chave_live in st.session_state.jogos_encerrados:
-      # Se for rodada 27, a base já contempla. Não somamos de novo para evitar duplicidade.
-      if r_num != 27:
-        gm, gv = st.session_state.jogos_encerrados[chave_live]
-        jogou = True
-    # Prioridade 2: Jogos ao vivo ou encerrados vindos da API da ESPN (para QUALQUER rodada)
+      gm, gv = st.session_state.jogos_encerrados[chave_live]
+      jogou = True
     elif chave_live in placar_live and placar_live[chave_live]["state"] in [
         "in",
         "post",
     ]:
-      if r_num != 27:
-        gm = placar_live[chave_live]["gm"]
-        gv = placar_live[chave_live]["gv"]
-        jogou = True
-    # Prioridade 3: Palpites manuais do simulador do usuário (para rodadas > 27 ou personalizadas)
-    elif r_num > 27 and chave_sim in st.session_state.palpites_confirmados:
+      gm = placar_live[chave_live]["gm"]
+      gv = placar_live[chave_live]["gv"]
+      jogou = True
+    elif chave_sim in st.session_state.palpites_confirmados:
       gm, gv = st.session_state.palpites_confirmados[chave_sim]
       jogou = True
 
@@ -791,33 +796,29 @@ with tab_simulador:
     jogo_bloqueado = False
     val_m, val_v = 0, 0
 
-    if num_rodada == 27 and (mandante, visitante) in PLACARES_RODADA_27_REAIS:
-      val_m, val_v = PLACARES_RODADA_27_REAIS[(mandante, visitante)]
-      jogo_bloqueado = True
-    else:
-      try:
-        partes_data = data_hora_str.split(", ")[1]
-        dt_jogo = datetime.strptime(
-            partes_data, "%d/%m - %H:%M"
-        ).replace(year=datetime.now().year)
-        limite_bloqueio = dt_jogo - timedelta(minutes=5)
-        if datetime.now() >= limite_bloqueio:
-          jogo_bloqueado = True
-      except Exception:
-        pass
+    try:
+      partes_data = data_hora_str.split(", ")[1]
+      dt_jogo = datetime.strptime(partes_data, "%d/%m - %H:%M").replace(
+          year=datetime.now().year
+      )
+      limite_bloqueio = dt_jogo - timedelta(minutes=5)
+      if datetime.now() >= limite_bloqueio:
+        jogo_bloqueado = True
+    except Exception:
+      pass
 
-      if chave_live in st.session_state.jogos_encerrados:
-        val_m, val_v = st.session_state.jogos_encerrados[chave_live]
-        jogo_bloqueado = True
-      elif (
-          chave_live in placar_live
-          and placar_live[chave_live]["state"] in ["in", "post"]
-      ):
-        val_m = placar_live[chave_live]["gm"]
-        val_v = placar_live[chave_live]["gv"]
-        jogo_bloqueado = True
-      elif chave_sim in st.session_state.palpites_confirmados:
-        val_m, val_v = st.session_state.palpites_confirmados[chave_sim]
+    if chave_live in st.session_state.jogos_encerrados:
+      val_m, val_v = st.session_state.jogos_encerrados[chave_live]
+      jogo_bloqueado = True
+    elif (
+        chave_live in placar_live
+        and placar_live[chave_live]["state"] in ["in", "post"]
+    ):
+      val_m = placar_live[chave_live]["gm"]
+      val_v = placar_live[chave_live]["gv"]
+      jogo_bloqueado = True
+    elif chave_sim in st.session_state.palpites_confirmados:
+      val_m, val_v = st.session_state.palpites_confirmados[chave_sim]
 
     col_m, col_img_m, col_txt, col_img_v, col_v, col_calc = st.columns(
         [1.1, 0.5, 2.0, 0.5, 1.1, 0.8]
@@ -868,7 +869,7 @@ with tab_simulador:
 
     st.markdown("---")
 
-# ABA 3: AO VIVO / PLACARES DA RODADA SELECIONADA (Com Auto-Refresh via @st.fragment)
+# ABA 3: AO VIVO / PLACARES DA RODADA SELECIONADA
 with tab_aovivo:
   st.subheader(f"🔴 Placar / Jogos da {num_rodada}ª Rodada")
 
@@ -878,26 +879,7 @@ with tab_aovivo:
     placar_live_atualizado = buscar_jogos_espn()
     confrontos = CALENDARIO_RODADAS.get(num_rodada, [])
 
-    if num_rodada == 27:
-      st.success("Resultados oficiais da **Rodada 27** já encerrada:")
-      for mandante, visitante, data_hora_str in confrontos:
-        gm, gv = PLACARES_RODADA_27_REAIS.get((mandante, visitante), (0, 0))
-        col_img_m, col_txt, col_img_v = st.columns([0.6, 3.8, 0.6])
-        with col_img_m:
-          st.image(obter_escudo(mandante), width=28)
-        with col_txt:
-          st.markdown(
-              f"<div style='text-align: center;'><b>{mandante}</b>"
-              f" &nbsp;&nbsp;<span style='font-size: 1.1em; color:"
-              f" #d9534f;'><b>{gm} x {gv}</b></span>&nbsp;&nbsp;"
-              f" <b>{visitante}</b><br><span style='font-size: 0.85em; color:"
-              f" #666;'>{data_hora_str} (Encerrado)</span></div>",
-              unsafe_allow_html=True,
-          )
-        with col_img_v:
-          st.image(obter_escudo(visitante), width=28)
-        st.markdown("---")
-    elif placar_live_atualizado:
+    if placar_live_atualizado:
       st.caption("🔄 Atualizado automaticamente em tempo real (API ESPN)")
       for chave, info in placar_live_atualizado.items():
         times = chave.split("X")
