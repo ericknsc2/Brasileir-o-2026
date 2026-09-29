@@ -567,13 +567,13 @@ PLACARES_RODADA_28_REAIS = {
     ("Atlético-MG", "Chapecoense"): (2, 0),
     ("Mirassol", "Botafogo"): (1, 0),
     ("Remo", "Santos"): (0, 1),
-    ("Vasco", "Coritiba"): (1, 1),
+    ("Vasco", "Coritiba"): (5, 0),
     ("São Paulo", "Internacional"): (2, 1),
     ("Grêmio", "Palmeiras"): (0, 1),
-    ("Corinthians", "Fluminense"): (1, 1),
-    ("Vitória", "Cruzeiro"): (0, 0),
-    ("Red Bull Bragantino", "Flamengo"): (0, 2),
-    ("Athletico-PR", "Bahia"): (1, 1),
+    ("Corinthians", "Fluminense"): (1, 3),
+    ("Vitória", "Cruzeiro"): (0, 3),
+    ("Red Bull Bragantino", "Flamengo"): (1, 2),
+    ("Athletico-PR", "Bahia"): (2, 1),
 }
 
 # Alimenta o session_state com as chaves corretas para o simulador ler
@@ -798,20 +798,30 @@ with tab_simulador:
     jogo_bloqueado = False
     val_m, val_v = 0, 0
 
-    # Puxa diretamente dos jogos encerrados salvos no session_state (que contêm as rodadas 27 e 28 oficiais)
-    if chave_live in st.session_state.jogos_encerrados:
-      val_m, val_v = st.session_state.jogos_encerrados[chave_live]
+    if num_rodada in [27, 28]:
       jogo_bloqueado = True
-    elif chave_live in placar_live and placar_live[chave_live]["state"] in [
-        "in",
-        "post",
-    ]:
-      val_m = placar_live[chave_live]["gm"]
-      val_v = placar_live[chave_live]["gv"]
-      if placar_live[chave_live]["state"] == "post":
+      if num_rodada == 27:
+        val_m, val_v = PLACARES_RODADA_27_REAIS.get(
+            (mandante, visitante), (0, 0)
+        )
+      elif num_rodada == 28:
+        val_m, val_v = PLACARES_RODADA_28_REAIS.get(
+            (mandante, visitante), (0, 0)
+        )
+    else:
+      if chave_live in st.session_state.jogos_encerrados:
+        val_m, val_v = st.session_state.jogos_encerrados[chave_live]
         jogo_bloqueado = True
-    elif chave_sim in st.session_state.palpites_confirmados:
-      val_m, val_v = st.session_state.palpites_confirmados[chave_sim]
+      elif chave_live in placar_live and placar_live[chave_live]["state"] in [
+          "in",
+          "post",
+      ]:
+        val_m = placar_live[chave_live]["gm"]
+        val_v = placar_live[chave_live]["gv"]
+        if placar_live[chave_live]["state"] == "post":
+          jogo_bloqueado = True
+      elif chave_sim in st.session_state.palpites_confirmados:
+        val_m, val_v = st.session_state.palpites_confirmados[chave_sim]
 
     col_m, col_img_m, col_txt, col_img_v, col_v, col_calc = st.columns(
         [1.1, 0.5, 2.0, 0.5, 1.1, 0.8]
