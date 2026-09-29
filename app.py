@@ -564,16 +564,16 @@ PLACARES_RODADA_27_REAIS = {
 }
 
 PLACARES_RODADA_28_REAIS = {
-    ("Atlético-MG", "Chapecoense"): (2, 0),
-    ("Mirassol", "Botafogo"): (1, 0),
-    ("Remo", "Santos"): (0, 1),
-    ("Vasco", "Coritiba"): (5, 0),
-    ("São Paulo", "Internacional"): (2, 1),
-    ("Grêmio", "Palmeiras"): (0, 1),
-    ("Corinthians", "Fluminense"): (1, 3),
-    ("Vitória", "Cruzeiro"): (0, 3),
-    ("Red Bull Bragantino", "Flamengo"): (1, 2),
-    ("Athletico-PR", "Bahia"): (2, 1),
+    ("Atlético-MG", "Chapecoense"): (1, 1),  #
+    ("Mirassol", "Botafogo"): (2, 0),  #
+    ("Remo", "Santos"): (0, 1),  #
+    ("Vasco", "Coritiba"): (5, 0),  #
+    ("São Paulo", "Internacional"): (2, 1),  #
+    ("Grêmio", "Palmeiras"): (0, 1),  #
+    ("Corinthians", "Fluminense"): (1, 1),  #
+    ("Vitória", "Cruzeiro"): (0, 0),  #
+    ("Red Bull Bragantino", "Flamengo"): (1, 2),  #
+    ("Athletico-PR", "Bahia"): (1, 1),  #
 }
 
 # Alimenta o session_state com as chaves corretas para o simulador ler
