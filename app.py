@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
+import pandas as pd
 import requests
 import streamlit as st
-import pandas as pd
 
 # Configuração da página - Layout Wide
 st.set_page_config(
@@ -96,9 +96,7 @@ ESCUDOS_TIMES = {
     "Internacional": (
         "https://s.sde.globo.com/media/organizations/2018/03/11/internacional.svg"
     ),
-    "Remo": (
-        "https://logodetimes.com/times/remo/logo-remo-1024.png"
-    ),
+    "Remo": "https://logodetimes.com/times/remo/logo-remo-1024.png",
     "Chapecoense": (
         "https://s.sde.globo.com/media/organizations/2018/03/11/chapecoense.svg"
     ),
@@ -566,7 +564,7 @@ with c_ctrl2:
   lista_times = ["Nenhum"] + sorted(df_base["nome_time"].unique().tolist())
   time_favorito = st.selectbox("⭐ Destaque o Time do Coração:", lista_times)
 
-# PLACARES REAIS OFICIAIS DA RODADA 27
+# PLACARES REAIS OFICIAIS DA RODADA 27 (Aplicados de forma segura)
 PLACARES_RODADA_27_REAIS = {
     ("Coritiba", "Athletico-PR"): (1, 2),
     ("Atlético-MG", "Fluminense"): (3, 1),
@@ -592,6 +590,9 @@ if isinstance(CALENDARIO_RODADAS, dict):
 df_simulado = df_base.copy()
 
 for r_num, lista_jogos in CALENDARIO_RODADAS.items():
+  # Se a rodada for menor ou igual a 27 e já estiver inclusa na tabela base, evitamos somar em dobro.
+  # Como a base padrão cobre a rodada 27, processamos a partir da rodada 28 em diante para jogos simulados/ao vivo,
+  # exceto se houver sobrescrita ativa por palpites/live.
   for idx, (mandante, visitante, _) in enumerate(lista_jogos):
     chave_live = f"{mandante}X{visitante}"
     chave_sim = f"sim_r{r_num}_{idx}"
@@ -599,21 +600,23 @@ for r_num, lista_jogos in CALENDARIO_RODADAS.items():
     jogou = False
     gm, gv = 0, 0
 
-    if r_num == 27 and (mandante, visitante) in PLACARES_RODADA_27_REAIS:
-      gm, gv = PLACARES_RODADA_27_REAIS[(mandante, visitante)]
-      jogou = True
-    elif chave_live in st.session_state.jogos_encerrados:
-      gm, gv = st.session_state.jogos_encerrados[chave_live]
-      jogou = True
-    elif (
-        r_num == 27
-        and chave_live in placar_live
-        and placar_live[chave_live]["state"] in ["in", "post"]
-    ):
-      gm = placar_live[chave_live]["gm"]
-      gv = placar_live[chave_live]["gv"]
-      jogou = True
-    elif chave_sim in st.session_state.palpites_confirmados:
+    # Prioridade 1: Jogos encerrados salvos no session_state
+    if chave_live in st.session_state.jogos_encerrados:
+      # Se for rodada 27, a base já contempla. Não somamos de novo para evitar duplicidade.
+      if r_num != 27:
+        gm, gv = st.session_state.jogos_encerrados[chave_live]
+        jogou = True
+    # Prioridade 2: Jogos ao vivo ou encerrados vindos da API da ESPN (para QUALQUER rodada)
+    elif chave_live in placar_live and placar_live[chave_live]["state"] in [
+        "in",
+        "post",
+    ]:
+      if r_num != 27:
+        gm = placar_live[chave_live]["gm"]
+        gv = placar_live[chave_live]["gv"]
+        jogou = True
+    # Prioridade 3: Palpites manuais do simulador do usuário (para rodadas > 27 ou personalizadas)
+    elif r_num > 27 and chave_sim in st.session_state.palpites_confirmados:
       gm, gv = st.session_state.palpites_confirmados[chave_sim]
       jogou = True
 
@@ -816,7 +819,6 @@ with tab_simulador:
       elif chave_sim in st.session_state.palpites_confirmados:
         val_m, val_v = st.session_state.palpites_confirmados[chave_sim]
 
-    # Layout com a nova coluna para o botão individual de cálculo
     col_m, col_img_m, col_txt, col_img_v, col_v, col_calc = st.columns(
         [1.1, 0.5, 2.0, 0.5, 1.1, 0.8]
     )
@@ -864,56 +866,78 @@ with tab_simulador:
             unsafe_allow_html=True,
         )
 
-    if not jogo_bloqueado and chave_sim not in st.session_state.palpites_confirmados:
-      # Mantém sincronizado se o usuário estiver digitando (opcional, mas garante suporte ao cálculo global)
-      pass
-
     st.markdown("---")
 
-# ABA 3: AO VIVO / PLACARES DA RODADA SELECIONADA
+# ABA 3: AO VIVO / PLACARES DA RODADA SELECIONADA (Com Auto-Refresh via @st.fragment)
 with tab_aovivo:
   st.subheader(f"🔴 Placar / Jogos da {num_rodada}ª Rodada")
 
-  if num_rodada == 27:
-    st.success("Resultados oficiais da **Rodada 27** já encerrada:")
-    for mandante, visitante, data_hora_str in confrontos_rodada_atual:
-      gm, gv = PLACARES_RODADA_27_REAIS.get((mandante, visitante), (0, 0))
-      col_img_m, col_txt, col_img_v = st.columns([0.6, 3.8, 0.6])
-      with col_img_m:
-        st.image(obter_escudo(mandante), width=28)
-      with col_txt:
-        st.markdown(
-            f"<div style='text-align: center;'><b>{mandante}</b> &nbsp;&nbsp;<span"
-            f" style='font-size: 1.1em; color: #d9534f;'><b>{gm} x"
-            f" {gv}</b></span>&nbsp;&nbsp; <b>{visitante}</b><br><span"
-            f" style='font-size: 0.85em; color: #666;'>{data_hora_str} (Encerrado)</span></div>",
-            unsafe_allow_html=True,
-        )
-      with col_img_v:
-        st.image(obter_escudo(visitante), width=28)
-      st.markdown("---")
-  elif placar_live:
-    for chave, info in placar_live.items():
-      times = chave.split("X")
-      if len(times) == 2:
-        m_nome, v_nome = times[0], times[1]
-        st.write(
-            f"**{m_nome}** {info['gm']} x {info['gv']} **{v_nome}** —"
-            f" *Status: {info['detail']}*"
-        )
-  else:
-    st.info(
-        f"Nenhum jogo ao vivo no momento pela API da ESPN. Exibindo os"
-        f" confrontos programados para a **Rodada {num_rodada}**:"
-    )
-    for mandante, visitante, data_hora_str in confrontos_rodada_atual:
-      col_img_m, col_txt, col_img_v = st.columns([0.6, 3.8, 0.6])
-      with col_img_m:
-        st.image(obter_escudo(mandante), width=28)
-      with col_txt:
-        st.markdown(
-            f"**{mandante} x {visitante}** &nbsp;&nbsp;|&nbsp;&nbsp; *{data_hora_str}*"
-        )
-      with col_img_v:
-        st.image(obter_escudo(visitante), width=28)
-      st.markdown("---")
+
+  @st.fragment(run_every=30)
+  def renderizar_ao_vivo():
+    placar_live_atualizado = buscar_jogos_espn()
+    confrontos = CALENDARIO_RODADAS.get(num_rodada, [])
+
+    if num_rodada == 27:
+      st.success("Resultados oficiais da **Rodada 27** já encerrada:")
+      for mandante, visitante, data_hora_str in confrontos:
+        gm, gv = PLACARES_RODADA_27_REAIS.get((mandante, visitante), (0, 0))
+        col_img_m, col_txt, col_img_v = st.columns([0.6, 3.8, 0.6])
+        with col_img_m:
+          st.image(obter_escudo(mandante), width=28)
+        with col_txt:
+          st.markdown(
+              f"<div style='text-align: center;'><b>{mandante}</b>"
+              f" &nbsp;&nbsp;<span style='font-size: 1.1em; color:"
+              f" #d9534f;'><b>{gm} x {gv}</b></span>&nbsp;&nbsp;"
+              f" <b>{visitante}</b><br><span style='font-size: 0.85em; color:"
+              f" #666;'>{data_hora_str} (Encerrado)</span></div>",
+              unsafe_allow_html=True,
+          )
+        with col_img_v:
+          st.image(obter_escudo(visitante), width=28)
+        st.markdown("---")
+    elif placar_live_atualizado:
+      st.caption("🔄 Atualizado automaticamente em tempo real (API ESPN)")
+      for chave, info in placar_live_atualizado.items():
+        times = chave.split("X")
+        if len(times) == 2:
+          m_nome, v_nome = times[0], times[1]
+          col_img_m, col_txt, col_img_v = st.columns([0.6, 3.8, 0.6])
+          with col_img_m:
+            st.image(obter_escudo(m_nome), width=28)
+          with col_txt:
+            st.markdown(
+                f"<div style='text-align: center;'><b>{m_nome}</b>"
+                f" &nbsp;&nbsp;<span style='font-size: 1.1em; color:"
+                f" #d9534f;'><b>{info['gm']} x"
+                f" {info['gv']}</b></span>&nbsp;&nbsp; <b>{v_nome}</b><br><span"
+                f" style='font-size: 0.85em; color: #666;'>Status:"
+                f" {info['detail']}</span></div>",
+                unsafe_allow_html=True,
+            )
+          with col_img_v:
+            st.image(obter_escudo(v_nome), width=28)
+          st.markdown("---")
+    else:
+      st.info(
+          f"Nenhum jogo rolando ao vivo no momento. Exibindo os confrontos"
+          f" programados para a **Rodada {num_rodada}**:"
+      )
+      for mandante, visitante, data_hora_str in confrontos:
+        col_img_m, col_txt, col_img_v = st.columns([0.6, 3.8, 0.6])
+        with col_img_m:
+          st.image(obter_escudo(mandante), width=28)
+        with col_txt:
+          st.markdown(
+              f"<div style='text-align: center;'><b>{mandante} x"
+              f" {visitante}</b><br><span style='font-size: 0.85em; color:"
+              f" #666;'>{data_hora_str}</span></div>",
+              unsafe_allow_html=True,
+          )
+        with col_img_v:
+          st.image(obter_escudo(visitante), width=28)
+        st.markdown("---")
+
+
+  renderizar_ao_vivo()
