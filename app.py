@@ -134,7 +134,7 @@ def obter_escudo(nome):
   )
 
 
-# --- DADOS DA TABELA BASE OFICIAL (Ponto de partida limpo - ex: Fim da Rodada 26) ---
+# --- DADOS DA TABELA BASE OFICIAL (Fim da Rodada 26) ---
 @st.cache_data(ttl=1)
 def carregar_tabela_oficial():
   dados_tabela = [
@@ -420,8 +420,8 @@ CALENDARIO_RODADAS = {
         ("Vasco", "Coritiba", "Sábado, 19/09 - 20:30"),
         ("São Paulo", "Internacional", "Sábado, 19/09 - 21:00"),
         ("Grêmio", "Palmeiras", "Domingo, 20/09 - 11:00"),
-        ("Vitória", "Cruzeiro", "Domingo, 20/09 - 16:00"),
         ("Corinthians", "Fluminense", "Domingo, 20/09 - 16:00"),
+        ("Vitória", "Cruzeiro", "Domingo, 20/09 - 16:00"),
         ("Red Bull Bragantino", "Flamengo", "Domingo, 20/09 - 18:30"),
         ("Athletico-PR", "Bahia", "Segunda, 21/09 - 20:00"),
     ],
@@ -796,17 +796,7 @@ with tab_simulador:
     jogo_bloqueado = False
     val_m, val_v = 0, 0
 
-    try:
-      partes_data = data_hora_str.split(", ")[1]
-      dt_jogo = datetime.strptime(partes_data, "%d/%m - %H:%M").replace(
-          year=datetime.now().year
-      )
-      limite_bloqueio = dt_jogo - timedelta(minutes=5)
-      if datetime.now() >= limite_bloqueio:
-        jogo_bloqueado = True
-    except Exception:
-      pass
-
+    # O jogo só fica bloqueado se realmente já terminou (está nos encerrados ou na API com state post)
     if chave_live in st.session_state.jogos_encerrados:
       val_m, val_v = st.session_state.jogos_encerrados[chave_live]
       jogo_bloqueado = True
@@ -816,7 +806,8 @@ with tab_simulador:
     ):
       val_m = placar_live[chave_live]["gm"]
       val_v = placar_live[chave_live]["gv"]
-      jogo_bloqueado = True
+      if placar_live[chave_live]["state"] == "post":
+        jogo_bloqueado = True
     elif chave_sim in st.session_state.palpites_confirmados:
       val_m, val_v = st.session_state.palpites_confirmados[chave_sim]
 
@@ -863,7 +854,7 @@ with tab_simulador:
       else:
         st.markdown(
             "<div style='text-align:center; font-size:12px; color:gray;'>"
-            "Bloqueado</div>",
+            "Encerrado</div>",
             unsafe_allow_html=True,
         )
 
