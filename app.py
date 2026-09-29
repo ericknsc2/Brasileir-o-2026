@@ -116,7 +116,9 @@ MAPEAMENTO_TIMES_ESPN = {
     "Sao Paulo": "São Paulo",
     "SPFC": "São Paulo",
     "Vasco da Gama": "Vasco",
+    "Vasco": "Vasco",
     "Botafogo-RJ": "Botafogo",
+    "Botafogo": "Botafogo",
     "Grêmio RS": "Grêmio",
     "Gremio": "Grêmio",
 }
@@ -134,209 +136,209 @@ def obter_escudo(nome):
   )
 
 
-# --- DADOS DA TABELA BASE OFICIAL (Fim da Rodada 26) ---
+# --- DADOS DA TABELA BASE OFICIAL (Atualizada até o Fim da Rodada 28) ---
 @st.cache_data(ttl=1)
 def carregar_tabela_oficial():
   dados_tabela = [
       {
           "nome_time": "Flamengo",
-          "pontos": 54,
-          "jogos": 26,
-          "vitorias": 16,
+          "pontos": 60,
+          "jogos": 28,
+          "vitorias": 18,
           "empates": 6,
           "derrotas": 4,
-          "gols_pro": 51,
-          "gols_contra": 21,
+          "gols_pro": 55,
+          "gols_contra": 23,
       },
       {
           "nome_time": "Palmeiras",
-          "pontos": 53,
-          "jogos": 26,
-          "vitorias": 15,
-          "empates": 8,
+          "pontos": 57,
+          "jogos": 28,
+          "vitorias": 16,
+          "empates": 9,
           "derrotas": 3,
-          "gols_pro": 45,
+          "gols_pro": 47,
           "gols_contra": 21,
       },
       {
           "nome_time": "Athletico-PR",
-          "pontos": 43,
-          "jogos": 26,
-          "vitorias": 12,
+          "pontos": 49,
+          "jogos": 28,
+          "vitorias": 14,
           "empates": 7,
           "derrotas": 7,
-          "gols_pro": 39,
-          "gols_contra": 30,
-      },
-      {
-          "nome_time": "Bahia",
-          "pontos": 43,
-          "jogos": 26,
-          "vitorias": 11,
-          "empates": 10,
-          "derrotas": 5,
-          "gols_pro": 40,
+          "gols_pro": 43,
           "gols_contra": 32,
       },
       {
           "nome_time": "Fluminense",
-          "pontos": 42,
-          "jogos": 26,
+          "pontos": 48,
+          "jogos": 28,
+          "vitorias": 13,
+          "empates": 9,
+          "derrotas": 6,
+          "gols_pro": 44,
+          "gols_contra": 36,
+      },
+      {
+          "nome_time": "Bahia",
+          "pontos": 46,
+          "jogos": 28,
           "vitorias": 12,
-          "empates": 6,
-          "derrotas": 8,
-          "gols_pro": 40,
-          "gols_contra": 32,
+          "empates": 10,
+          "derrotas": 6,
+          "gols_pro": 43,
+          "gols_contra": 35,
       },
       {
           "nome_time": "Cruzeiro",
-          "pontos": 42,
-          "jogos": 26,
-          "vitorias": 12,
+          "pontos": 45,
+          "jogos": 28,
+          "vitorias": 13,
           "empates": 6,
-          "derrotas": 8,
-          "gols_pro": 38,
-          "gols_contra": 37,
+          "derrotas": 9,
+          "gols_pro": 42,
+          "gols_contra": 40,
       },
       {
           "nome_time": "Atlético-MG",
-          "pontos": 39,
-          "jogos": 26,
+          "pontos": 40,
+          "jogos": 27,
           "vitorias": 11,
-          "empates": 6,
+          "empates": 7,
           "derrotas": 9,
-          "gols_pro": 35,
-          "gols_contra": 31,
+          "gols_pro": 36,
+          "gols_contra": 32,
+      },
+      {
+          "nome_time": "Santos",
+          "pontos": 38,
+          "jogos": 27,
+          "vitorias": 10,
+          "empates": 8,
+          "derrotas": 9,
+          "gols_pro": 41,
+          "gols_contra": 40,
       },
       {
           "nome_time": "Coritiba",
-          "pontos": 35,
-          "jogos": 26,
-          "vitorias": 9,
+          "pontos": 38,
+          "jogos": 28,
+          "vitorias": 10,
           "empates": 8,
-          "derrotas": 9,
-          "gols_pro": 36,
-          "gols_contra": 36,
+          "derrotas": 10,
+          "gols_pro": 37,
+          "gols_contra": 43,
       },
       {
           "nome_time": "Red Bull Bragantino",
           "pontos": 36,
-          "jogos": 26,
+          "jogos": 27,
           "vitorias": 10,
           "empates": 6,
-          "derrotas": 10,
-          "gols_pro": 32,
-          "gols_contra": 29,
-      },
-      {
-          "nome_time": "Santos",
-          "pontos": 35,
-          "jogos": 26,
-          "vitorias": 9,
-          "empates": 8,
-          "derrotas": 9,
-          "gols_pro": 39,
-          "gols_contra": 39,
-      },
-      {
-          "nome_time": "Botafogo",
-          "pontos": 34,
-          "jogos": 26,
-          "vitorias": 9,
-          "empates": 7,
-          "derrotas": 10,
-          "gols_pro": 40,
-          "gols_contra": 42,
+          "derrotas": 11,
+          "gols_pro": 33,
+          "gols_contra": 31,
       },
       {
           "nome_time": "São Paulo",
-          "pontos": 33,
-          "jogos": 26,
-          "vitorias": 9,
+          "pontos": 36,
+          "jogos": 27,
+          "vitorias": 10,
           "empates": 6,
           "derrotas": 11,
-          "gols_pro": 31,
+          "gols_pro": 32,
           "gols_contra": 30,
+      },
+      {
+          "nome_time": "Botafogo",
+          "pontos": 35,
+          "jogos": 28,
+          "vitorias": 9,
+          "empates": 8,
+          "derrotas": 11,
+          "gols_pro": 41,
+          "gols_contra": 45,
       },
       {
           "nome_time": "Vitória",
           "pontos": 33,
-          "jogos": 26,
+          "jogos": 28,
           "vitorias": 9,
           "empates": 6,
-          "derrotas": 11,
-          "gols_pro": 25,
-          "gols_contra": 37,
+          "derrotas": 13,
+          "gols_pro": 28,
+          "gols_contra": 42,
       },
       {
           "nome_time": "Corinthians",
           "pontos": 32,
-          "jogos": 26,
+          "jogos": 28,
           "vitorias": 8,
           "empates": 8,
-          "derrotas": 10,
-          "gols_pro": 27,
-          "gols_contra": 27,
+          "derrotas": 12,
+          "gols_pro": 29,
+          "gols_contra": 32,
       },
       {
           "nome_time": "Mirassol",
-          "pontos": 28,
-          "jogos": 26,
-          "vitorias": 7,
-          "empates": 7,
+          "pontos": 32,
+          "jogos": 28,
+          "vitorias": 8,
+          "empates": 8,
           "derrotas": 12,
-          "gols_pro": 29,
-          "gols_contra": 40,
-      },
-      {
-          "nome_time": "Grêmio",
-          "pontos": 28,
-          "jogos": 26,
-          "vitorias": 7,
-          "empates": 7,
-          "derrotas": 12,
-          "gols_pro": 29,
-          "gols_contra": 36,
+          "gols_pro": 33,
+          "gols_contra": 42,
       },
       {
           "nome_time": "Vasco",
-          "pontos": 28,
-          "jogos": 26,
-          "vitorias": 7,
+          "pontos": 31,
+          "jogos": 27,
+          "vitorias": 8,
           "empates": 7,
           "derrotas": 12,
-          "gols_pro": 29,
+          "gols_pro": 34,
           "gols_contra": 41,
       },
       {
+          "nome_time": "Grêmio",
+          "pontos": 29,
+          "jogos": 28,
+          "vitorias": 7,
+          "empates": 8,
+          "derrotas": 13,
+          "gols_pro": 30,
+          "gols_contra": 38,
+      },
+      {
           "nome_time": "Internacional",
-          "pontos": 25,
-          "jogos": 26,
-          "vitorias": 5,
+          "pontos": 28,
+          "jogos": 28,
+          "vitorias": 6,
           "empates": 10,
-          "derrotas": 11,
-          "gols_pro": 28,
-          "gols_contra": 34,
+          "derrotas": 12,
+          "gols_pro": 30,
+          "gols_contra": 36,
       },
       {
           "nome_time": "Remo",
           "pontos": 23,
-          "jogos": 26,
+          "jogos": 28,
           "vitorias": 5,
           "empates": 8,
-          "derrotas": 13,
-          "gols_pro": 30,
-          "gols_contra": 43,
+          "derrotas": 15,
+          "gols_pro": 32,
+          "gols_contra": 47,
       },
       {
           "nome_time": "Chapecoense",
-          "pontos": 17,
-          "jogos": 26,
+          "pontos": 18,
+          "jogos": 27,
           "vitorias": 3,
-          "empates": 8,
+          "empates": 9,
           "derrotas": 15,
-          "gols_pro": 28,
-          "gols_contra": 52,
+          "gols_pro": 29,
+          "gols_contra": 53,
       },
   ]
   df = pd.DataFrame(dados_tabela)
@@ -564,95 +566,61 @@ with c_ctrl2:
   lista_times = ["Nenhum"] + sorted(df_base["nome_time"].unique().tolist())
   time_favorito = st.selectbox("⭐ Destaque o Time do Coração:", lista_times)
 
-# PLACARES REAIS DA RODADA 27
-PLACARES_RODADA_27_REAIS = {
-    ("Coritiba", "Athletico-PR"): (1, 2),
-    ("Atlético-MG", "Fluminense"): (3, 1),
-    ("Grêmio", "Vasco"): (1, 2),
-    ("Chapecoense", "Internacional"): (1, 2),
-    ("Palmeiras", "São Paulo"): (2, 0),
-    ("Botafogo", "Red Bull Bragantino"): (1, 1),
-    ("Santos", "Cruzeiro"): (2, 1),
-    ("Mirassol", "Vitória"): (2, 2),
-    ("Flamengo", "Corinthians"): (2, 1),
-    ("Bahia", "Remo"): (2, 1),
-}
-
-# PLACARES REAIS DA RODADA 28
-PLACARES_RODADA_28_REAIS = {
-    ("Atlético-MG", "Chapecoense"): (2, 0),
-    ("Mirassol", "Botafogo"): (1, 0),
-    ("Remo", "Santos"): (0, 1),
-    ("Vasco", "Coritiba"): (1, 1),
-    ("São Paulo", "Internacional"): (2, 1),
-    ("Grêmio", "Palmeiras"): (0, 1),
-    ("Corinthians", "Fluminense"): (1, 1),
-    ("Vitória", "Cruzeiro"): (0, 0),
-    ("Red Bull Bragantino", "Flamengo"): (0, 2),
-    ("Athletico-PR", "Bahia"): (1, 1),
-}
-
-# Injeta os resultados reais no session_state para cálculo automático
-for m, v in PLACARES_RODADA_27_REAIS:
-  st.session_state.jogos_encerrados[f"{m}X{v}"] = PLACARES_RODADA_27_REAIS[(m, v)]
-
-for m, v in PLACARES_RODADA_28_REAIS:
-  st.session_state.jogos_encerrados[f"{m}X{v}"] = PLACARES_RODADA_28_REAIS[(m, v)]
-
-
-# --- CÁLCULO REATIVO DA TABELA ---
+# --- CÁLCULO REATIVO DA TABELA (A partir da Rodada 29 em diante) ---
 df_simulado = df_base.copy()
 
 for r_num, lista_jogos in CALENDARIO_RODADAS.items():
-  for idx, (mandante, visitante, _) in enumerate(lista_jogos):
-    chave_live = f"{mandante}X{visitante}"
-    chave_sim = f"sim_r{r_num}_{idx}"
+  # Processa apenas rodadas a partir da 29 (já que 27 e 28 estão na base oficial)
+  if r_num >= 29:
+    for idx, (mandante, visitante, _) in enumerate(lista_jogos):
+      chave_live = f"{mandante}X{visitante}"
+      chave_sim = f"sim_r{r_num}_{idx}"
 
-    jogou = False
-    gm, gv = 0, 0
+      jogou = False
+      gm, gv = 0, 0
 
-    if chave_live in st.session_state.jogos_encerrados:
-      gm, gv = st.session_state.jogos_encerrados[chave_live]
-      jogou = True
-    elif chave_live in placar_live and placar_live[chave_live]["state"] in [
-        "in",
-        "post",
-    ]:
-      gm = placar_live[chave_live]["gm"]
-      gv = placar_live[chave_live]["gv"]
-      jogou = True
-    elif chave_sim in st.session_state.palpites_confirmados:
-      gm, gv = st.session_state.palpites_confirmados[chave_sim]
-      jogou = True
+      if chave_live in st.session_state.jogos_encerrados:
+        gm, gv = st.session_state.jogos_encerrados[chave_live]
+        jogou = True
+      elif chave_live in placar_live and placar_live[chave_live]["state"] in [
+          "in",
+          "post",
+      ]:
+        gm = placar_live[chave_live]["gm"]
+        gv = placar_live[chave_live]["gv"]
+        jogou = True
+      elif chave_sim in st.session_state.palpites_confirmados:
+        gm, gv = st.session_state.palpites_confirmados[chave_sim]
+        jogou = True
 
-    if (
-        jogou
-        and mandante in df_simulado["nome_time"].values
-        and visitante in df_simulado["nome_time"].values
-    ):
-      idx_m = df_simulado[df_simulado["nome_time"] == mandante].index[0]
-      idx_v = df_simulado[df_simulado["nome_time"] == visitante].index[0]
+      if (
+          jogou
+          and mandante in df_simulado["nome_time"].values
+          and visitante in df_simulado["nome_time"].values
+      ):
+        idx_m = df_simulado[df_simulado["nome_time"] == mandante].index[0]
+        idx_v = df_simulado[df_simulado["nome_time"] == visitante].index[0]
 
-      df_simulado.at[idx_m, "jogos"] += 1
-      df_simulado.at[idx_v, "jogos"] += 1
-      df_simulado.at[idx_m, "gols_pro"] += gm
-      df_simulado.at[idx_m, "gols_contra"] += gv
-      df_simulado.at[idx_v, "gols_pro"] += gv
-      df_simulado.at[idx_v, "gols_contra"] += gm
+        df_simulado.at[idx_m, "jogos"] += 1
+        df_simulado.at[idx_v, "jogos"] += 1
+        df_simulado.at[idx_m, "gols_pro"] += gm
+        df_simulado.at[idx_m, "gols_contra"] += gv
+        df_simulado.at[idx_v, "gols_pro"] += gv
+        df_simulado.at[idx_v, "gols_contra"] += gm
 
-      if gm > gv:
-        df_simulado.at[idx_m, "pontos"] += 3
-        df_simulado.at[idx_m, "vitorias"] += 1
-        df_simulado.at[idx_v, "derrotas"] += 1
-      elif gv > gm:
-        df_simulado.at[idx_v, "pontos"] += 3
-        df_simulado.at[idx_v, "vitorias"] += 1
-        df_simulado.at[idx_m, "derrotas"] += 1
-      else:
-        df_simulado.at[idx_m, "pontos"] += 1
-        df_simulado.at[idx_v, "pontos"] += 1
-        df_simulado.at[idx_m, "empates"] += 1
-        df_simulado.at[idx_v, "empates"] += 1
+        if gm > gv:
+          df_simulado.at[idx_m, "pontos"] += 3
+          df_simulado.at[idx_m, "vitorias"] += 1
+          df_simulado.at[idx_v, "derrotas"] += 1
+        elif gv > gm:
+          df_simulado.at[idx_v, "pontos"] += 3
+          df_simulado.at[idx_v, "vitorias"] += 1
+          df_simulado.at[idx_m, "derrotas"] += 1
+        else:
+          df_simulado.at[idx_m, "pontos"] += 1
+          df_simulado.at[idx_v, "pontos"] += 1
+          df_simulado.at[idx_m, "empates"] += 1
+          df_simulado.at[idx_v, "empates"] += 1
 
 df_simulado["saldo_gols"] = df_simulado["gols_pro"] - df_simulado["gols_contra"]
 df_simulado["aproveitamento"] = (
@@ -796,7 +764,6 @@ with tab_simulador:
     jogo_bloqueado = False
     val_m, val_v = 0, 0
 
-    # O jogo só fica bloqueado se realmente já terminou (está nos encerrados ou na API com state post)
     if chave_live in st.session_state.jogos_encerrados:
       val_m, val_v = st.session_state.jogos_encerrados[chave_live]
       jogo_bloqueado = True
