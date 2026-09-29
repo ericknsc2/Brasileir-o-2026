@@ -54,7 +54,7 @@ if "palpites_confirmados" not in st.session_state:
 if "jogos_encerrados" not in st.session_state:
   st.session_state.jogos_encerrados = {}
 
-# ESCUDOS DOS TIMES
+# ESCUDOS DOS TIMES (COM CORREÇÃO DO VITÓRIA)
 ESCUDOS_TIMES = {
     "Flamengo": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
     "Palmeiras": (
@@ -82,7 +82,7 @@ ESCUDOS_TIMES = {
     "São Paulo": (
         "https://s.sde.globo.com/media/organizations/2018/03/11/sao-paulo.svg"
     ),
-    "Vitória": "https://a.espncdn.com/i/teamlogos/soccer/500/3456.png",
+    "Vitória": "https://s.sde.globo.com/media/organizations/2018/03/12/vitoria.svg",
     "Corinthians": (
         "https://s.sde.globo.com/media/organizations/2019/09/30/Corinthians.svg"
     ),
@@ -91,12 +91,14 @@ ESCUDOS_TIMES = {
         "https://s.sde.globo.com/media/organizations/2019/02/04/botafogo-svg.svg"
     ),
     "Grêmio": "https://s.sde.globo.com/media/organizations/2018/03/12/gremio.svg",
-    "Mirassol": "https://icon2.cleanpng.com/20180623/lzg/aazulkonx.webp",
+    "Mirassol": (
+        "https://s.sde.globo.com/media/organizations/2021/03/31/mirassol.svg"
+    ),
     "Vasco": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png",
     "Internacional": (
         "https://s.sde.globo.com/media/organizations/2018/03/11/internacional.svg"
     ),
-    "Remo": "https://www.amazon.com.br/Escudo-Remo-Decorativo-Metal-Futpin/dp/B0D1HZSCL5",
+    "Remo": "https://s.sde.globo.com/media/organizations/2021/03/31/remo.svg",
     "Chapecoense": (
         "https://s.sde.globo.com/media/organizations/2018/03/11/chapecoense.svg"
     ),
@@ -121,6 +123,8 @@ MAPEAMENTO_TIMES_ESPN = {
     "Botafogo": "Botafogo",
     "Grêmio RS": "Grêmio",
     "Gremio": "Grêmio",
+    "Clube do Remo": "Remo",
+    "Remo": "Remo",
 }
 
 
@@ -429,7 +433,7 @@ CALENDARIO_RODADAS = {
         ("Athletico-PR", "Bahia", "Segunda, 21/09 - 20:00"),
     ],
     29: [
-        ("Clube do Remo", "Grêmio", "Quarta, 07/10 - 19:30"),
+        ("Remo", "Grêmio", "Quarta, 07/10 - 19:30"),
         ("Red Bull Bragantino", "Mirassol", "Quarta, 07/10 - 19:30"),
         ("Internacional", "Corinthians", "Quarta, 07/10 - 19:30"),
         ("Vitória", "Chapecoense", "Quarta, 07/10 - 20:00"),
