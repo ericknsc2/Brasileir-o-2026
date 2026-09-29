@@ -576,13 +576,6 @@ PLACARES_RODADA_28_REAIS = {
     ("Athletico-PR", "Bahia"): (1, 1),
 }
 
-# Alimenta o session_state com os resultados oficiais para travar o simulador e mostrar na aba ao vivo
-for m, v in PLACARES_RODADA_27_REAIS:
-  st.session_state.jogos_encerrados[f"{m}X{v}"] = PLACARES_RODADA_27_REAIS[(m, v)]
-
-for m, v in PLACARES_RODADA_28_REAIS:
-  st.session_state.jogos_encerrados[f"{m}X{v}"] = PLACARES_RODADA_28_REAIS[(m, v)]
-
 placar_live = buscar_jogos_espn()
 
 # CONTROLES SUPERIORES
@@ -764,52 +757,58 @@ with tab_simulador:
 
   col_btn1, col_btn2 = st.columns(2)
   with col_btn1:
-    if st.button("🧮 Calcular Todos os Palpites"):
-      for idx in range(len(confrontos_rodada_atual)):
-        key_m = f"input_r{num_rodada}_m_{idx}"
-        key_v = f"input_r{num_rodada}_v_{idx}"
-        if key_m in st.session_state and key_v in st.session_state:
-          gm = st.session_state[key_m]
-          gv = st.session_state[key_v]
-          if gm is not None and gv is not None:
-            st.session_state.palpites_confirmados[f"sim_r{num_rodada}_{idx}"] = (
-                gm,
-                gv,
-            )
-      st.rerun()
+    if num_rodada >= 29:
+      if st.button("🧮 Calcular Todos os Palpites"):
+        for idx in range(len(confrontos_rodada_atual)):
+          key_m = f"input_r{num_rodada}_m_{idx}"
+          key_v = f"input_r{num_rodada}_v_{idx}"
+          if key_m in st.session_state and key_v in st.session_state:
+            gm = st.session_state[key_m]
+            gv = st.session_state[key_v]
+            if gm is not None and gv is not None:
+              st.session_state.palpites_confirmados[
+                  f"sim_r{num_rodada}_{idx}"
+              ] = (gm, gv)
+        st.rerun()
 
   with col_btn2:
-    if st.button("🧹 Limpar Meus Palpites"):
-      st.session_state.palpites_confirmados.clear()
-      for idx in range(len(confrontos_rodada_atual)):
-        st.session_state[f"input_r{num_rodada}_m_{idx}"] = 0
-        st.session_state[f"input_r{num_rodada}_v_{idx}"] = 0
-      st.rerun()
+    if num_rodada >= 29:
+      if st.button("🧹 Limpar Meus Palpites"):
+        st.session_state.palpites_confirmados.clear()
+        for idx in range(len(confrontos_rodada_atual)):
+          st.session_state[f"input_r{num_rodada}_m_{idx}"] = 0
+          st.session_state[f"input_r{num_rodada}_v_{idx}"] = 0
+        st.rerun()
 
   st.write("")
 
   for idx, (mandante, visitante, data_hora_str) in enumerate(
       confrontos_rodada_atual
   ):
-    chave_live = f"{mandante}X{visitante}"
     chave_sim = f"sim_r{num_rodada}_{idx}"
 
     jogo_bloqueado = False
     val_m, val_v = 0, 0
 
-    if chave_live in st.session_state.jogos_encerrados:
-      val_m, val_v = st.session_state.jogos_encerrados[chave_live]
+    # Verifica se a rodada 27 ou 28 possui placar oficial fixo
+    if num_rodada == 27 and (mandante, visitante) in PLACARES_RODADA_27_REAIS:
+      val_m, val_v = PLACARES_RODADA_27_REAIS[(mandante, visitante)]
       jogo_bloqueado = True
-    elif (
-        chave_live in placar_live
-        and placar_live[chave_live]["state"] in ["in", "post"]
-    ):
-      val_m = placar_live[chave_live]["gm"]
-      val_v = placar_live[chave_live]["gv"]
-      if placar_live[chave_live]["state"] == "post":
-        jogo_bloqueado = True
-    elif chave_sim in st.session_state.palpites_confirmados:
-      val_m, val_v = st.session_state.palpites_confirmados[chave_sim]
+    elif num_rodada == 28 and (mandante, visitante) in PLACARES_RODADA_28_REAIS:
+      val_m, val_v = PLACARES_RODADA_28_REAIS[(mandante, visitante)]
+      jogo_bloqueado = True
+    else:
+      chave_live = f"{mandante}X{visitante}"
+      if chave_live in placar_live and placar_live[chave_live]["state"] in [
+          "in",
+          "post",
+      ]:
+        val_m = placar_live[chave_live]["gm"]
+        val_v = placar_live[chave_live]["gv"]
+        if placar_live[chave_live]["state"] == "post":
+          jogo_bloqueado = True
+      elif chave_sim in st.session_state.palpites_confirmados:
+        val_m, val_v = st.session_state.palpites_confirmados[chave_sim]
 
     col_m, col_img_m, col_txt, col_img_v, col_v, col_calc = st.columns(
         [1.1, 0.5, 2.0, 0.5, 1.1, 0.8]
@@ -869,7 +868,6 @@ with tab_aovivo:
   def renderizar_ao_vivo():
     confrontos = CALENDARIO_RODADAS.get(num_rodada, [])
 
-    # Se for rodada 27 ou 28, exibe os resultados oficiais encerrados
     if num_rodada == 27:
       st.success("Resultados oficiais da **Rodada 27** encerrada:")
       for mandante, visitante, data_hora_str in confrontos:
