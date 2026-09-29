@@ -571,12 +571,12 @@ PLACARES_RODADA_27_REAIS = {
 PLACARES_RODADA_28_REAIS = {
     ("Atlético-MG", "Chapecoense"): (1, 1),
     ("Mirassol", "Botafogo"): (2, 0),
-    ("Remo", "Santos"): (0, 1),
+    ("Remo", "Santos"): (1, 2),
     ("Vasco", "Coritiba"): (5, 0),
-    ("São Paulo", "Internacional"): (2, 1),
-    ("Grêmio", "Palmeiras"): (0, 1),
+    ("São Paulo", "Internacional"): (1, 0),
+    ("Grêmio", "Palmeiras"): (0, 0),
     ("Corinthians", "Fluminense"): (1, 3),
-    ("Vitória", "Cruzeiro"): (0, 3),
+    ("Vitória", "Cruzeiro"): (1, 3),
     ("Red Bull Bragantino", "Flamengo"): (1, 2),
     ("Athletico-PR", "Bahia"): (2, 1),
 }
