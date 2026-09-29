@@ -96,7 +96,7 @@ ESCUDOS_TIMES = {
     "Internacional": (
         "https://s.sde.globo.com/media/organizations/2018/03/11/internacional.svg"
     ),
-    "Remo": "https://logodetimes.com/times/remo/logo-remo-1024.png",
+    "Remo": "https://www.amazon.com.br/Escudo-Remo-Decorativo-Metal-Futpin/dp/B0D1HZSCL5",
     "Chapecoense": (
         "https://s.sde.globo.com/media/organizations/2018/03/11/chapecoense.svg"
     ),
