@@ -402,7 +402,7 @@ def buscar_jogos_espn():
   return {}
 
 
-# --- CALENDÁRIO CORRETO E ALINHADO (A PARTIR DA RODADA 27) ---
+# --- CALENDÁRIO COM DATAS E HORÁRIOS CORRIGIDOS (A PARTIR DA RODADA 27) ---
 CALENDARIO_RODADAS = {
     27: [
         ("Coritiba", "Athletico-PR", "Sexta, 11/09 - 21:00"),
@@ -429,28 +429,28 @@ CALENDARIO_RODADAS = {
         ("Athletico-PR", "Bahia", "Segunda, 21/09 - 20:00"),
     ],
     29: [
-        ("Fluminense", "Coritiba", "Quarta, 07/10 - 19:30"),
-        ("Botafogo", "Vasco", "Quarta, 07/10 - 19:30"),
-        ("Santos", "Flamengo", "Quarta, 07/10 - 20:00"),
-        ("Internacional", "Corinthians", "Quarta, 07/10 - 20:30"),
-        ("Remo", "Grêmio", "Quarta, 07/10 - 20:30"),
-        ("Vitória", "Chapecoense", "Quarta, 07/10 - 21:00"),
-        ("Palmeiras", "Cruzeiro", "Quinta, 08/10 - 19:30"),
+        ("Clube do Remo", "Grêmio", "Quarta, 07/10 - 19:30"),
+        ("Red Bull Bragantino", "Mirassol", "Quarta, 07/10 - 19:30"),
+        ("Internacional", "Corinthians", "Quarta, 07/10 - 19:30"),
+        ("Vitória", "Chapecoense", "Quarta, 07/10 - 20:00"),
+        ("Botafogo", "Vasco", "Quarta, 07/10 - 20:30"),
+        ("Cruzeiro", "São Paulo", "Quarta, 07/10 - 21:30"),
+        ("Santos", "Flamengo", "Quinta, 08/10 - 19:30"),
         ("Athletico-PR", "Atlético-MG", "Quinta, 08/10 - 20:00"),
-        ("Bahia", "Mirassol", "Quinta, 08/10 - 20:30"),
-        ("São Paulo", "Red Bull Bragantino", "Quinta, 08/10 - 21:30"),
+        ("Fluminense", "Coritiba", "Quinta, 08/10 - 21:30"),
+        ("Palmeiras", "Bahia", "Quinta, 08/10 - 21:30"),
     ],
     30: [
-        ("Flamengo", "Fluminense", "Sábado, 10/10 - 16:00"),
-        ("Palmeiras", "Athletico-PR", "Sábado, 10/10 - 18:30"),
-        ("Cruzeiro", "Botafogo", "Sábado, 10/10 - 21:00"),
-        ("Atlético-MG", "São Paulo", "Domingo, 11/10 - 16:00"),
-        ("Grêmio", "Coritiba", "Domingo, 11/10 - 16:00"),
-        ("Red Bull Bragantino", "Santos", "Domingo, 11/10 - 18:30"),
-        ("Mirassol", "Internacional", "Domingo, 11/10 - 18:30"),
-        ("Corinthians", "Bahia", "Segunda, 12/10 - 20:00"),
-        ("Chapecoense", "Vasco", "Segunda, 12/10 - 20:00"),
-        ("Remo", "Vitória", "Segunda, 12/10 - 21:00"),
+        ("Vasco", "Remo", "Sábado, 10/10 - 17:00"),
+        ("São Paulo", "Vitória", "Sábado, 10/10 - 21:00"),
+        ("Atlético-MG", "Santos", "Domingo, 11/10 - 16:00"),
+        ("Flamengo", "Fluminense", "Domingo, 11/10 - 17:30"),
+        ("Palmeiras", "Corinthians", "Domingo, 11/10 - 17:30"),
+        ("Grêmio", "Internacional", "Domingo, 11/10 - 17:30"),
+        ("Bahia", "Mirassol", "Domingo, 11/10 - 19:30"),
+        ("Coritiba", "Botafogo", "Segunda, 12/10 - 16:00"),
+        ("Chapecoense", "Athletico-PR", "Segunda, 12/10 - 19:30"),
+        ("Red Bull Bragantino", "Cruzeiro", "Segunda, 12/10 - 21:00"),
     ],
     31: [
         ("Fluminense", "Santos", "Sábado, 17/10 - 16:00"),
