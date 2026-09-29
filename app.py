@@ -549,6 +549,40 @@ CALENDARIO_RODADAS = {
     ],
 }
 
+# --- PLACARES REAIS OFICIAIS DAS RODADAS 27 E 28 ---
+PLACARES_RODADA_27_REAIS = {
+    ("Coritiba", "Athletico-PR"): (1, 2),
+    ("Atlético-MG", "Fluminense"): (3, 1),
+    ("Grêmio", "Vasco"): (1, 2),
+    ("Chapecoense", "Internacional"): (1, 2),
+    ("Palmeiras", "São Paulo"): (2, 0),
+    ("Botafogo", "Red Bull Bragantino"): (1, 1),
+    ("Santos", "Cruzeiro"): (2, 1),
+    ("Mirassol", "Vitória"): (2, 2),
+    ("Flamengo", "Corinthians"): (2, 1),
+    ("Bahia", "Remo"): (2, 1),
+}
+
+PLACARES_RODADA_28_REAIS = {
+    ("Atlético-MG", "Chapecoense"): (2, 0),
+    ("Mirassol", "Botafogo"): (1, 0),
+    ("Remo", "Santos"): (0, 1),
+    ("Vasco", "Coritiba"): (1, 1),
+    ("São Paulo", "Internacional"): (2, 1),
+    ("Grêmio", "Palmeiras"): (0, 1),
+    ("Corinthians", "Fluminense"): (1, 1),
+    ("Vitória", "Cruzeiro"): (0, 0),
+    ("Red Bull Bragantino", "Flamengo"): (0, 2),
+    ("Athletico-PR", "Bahia"): (1, 1),
+}
+
+# Alimenta o session_state com os resultados oficiais para travar o simulador e mostrar na aba ao vivo
+for m, v in PLACARES_RODADA_27_REAIS:
+  st.session_state.jogos_encerrados[f"{m}X{v}"] = PLACARES_RODADA_27_REAIS[(m, v)]
+
+for m, v in PLACARES_RODADA_28_REAIS:
+  st.session_state.jogos_encerrados[f"{m}X{v}"] = PLACARES_RODADA_28_REAIS[(m, v)]
+
 placar_live = buscar_jogos_espn()
 
 # CONTROLES SUPERIORES
@@ -570,7 +604,6 @@ with c_ctrl2:
 df_simulado = df_base.copy()
 
 for r_num, lista_jogos in CALENDARIO_RODADAS.items():
-  # Processa apenas rodadas a partir da 29 (já que 27 e 28 estão na base oficial)
   if r_num >= 29:
     for idx, (mandante, visitante, _) in enumerate(lista_jogos):
       chave_live = f"{mandante}X{visitante}"
@@ -834,50 +867,90 @@ with tab_aovivo:
 
   @st.fragment(run_every=30)
   def renderizar_ao_vivo():
-    placar_live_atualizado = buscar_jogos_espn()
     confrontos = CALENDARIO_RODADAS.get(num_rodada, [])
 
-    if placar_live_atualizado:
-      st.caption("🔄 Atualizado automaticamente em tempo real (API ESPN)")
-      for chave, info in placar_live_atualizado.items():
-        times = chave.split("X")
-        if len(times) == 2:
-          m_nome, v_nome = times[0], times[1]
-          col_img_m, col_txt, col_img_v = st.columns([0.6, 3.8, 0.6])
-          with col_img_m:
-            st.image(obter_escudo(m_nome), width=28)
-          with col_txt:
-            st.markdown(
-                f"<div style='text-align: center;'><b>{m_nome}</b>"
-                f" &nbsp;&nbsp;<span style='font-size: 1.1em; color:"
-                f" #d9534f;'><b>{info['gm']} x"
-                f" {info['gv']}</b></span>&nbsp;&nbsp; <b>{v_nome}</b><br><span"
-                f" style='font-size: 0.85em; color: #666;'>Status:"
-                f" {info['detail']}</span></div>",
-                unsafe_allow_html=True,
-            )
-          with col_img_v:
-            st.image(obter_escudo(v_nome), width=28)
-          st.markdown("---")
-    else:
-      st.info(
-          f"Nenhum jogo rolando ao vivo no momento. Exibindo os confrontos"
-          f" programados para a **Rodada {num_rodada}**:"
-      )
+    # Se for rodada 27 ou 28, exibe os resultados oficiais encerrados
+    if num_rodada == 27:
+      st.success("Resultados oficiais da **Rodada 27** encerrada:")
       for mandante, visitante, data_hora_str in confrontos:
+        gm, gv = PLACARES_RODADA_27_REAIS.get((mandante, visitante), (0, 0))
         col_img_m, col_txt, col_img_v = st.columns([0.6, 3.8, 0.6])
         with col_img_m:
           st.image(obter_escudo(mandante), width=28)
         with col_txt:
           st.markdown(
-              f"<div style='text-align: center;'><b>{mandante} x"
-              f" {visitante}</b><br><span style='font-size: 0.85em; color:"
-              f" #666;'>{data_hora_str}</span></div>",
+              f"<div style='text-align: center;'><b>{mandante}</b>"
+              f" &nbsp;&nbsp;<span style='font-size: 1.1em; color:"
+              f" #d9534f;'><b>{gm} x {gv}</b></span>&nbsp;&nbsp;"
+              f" <b>{visitante}</b><br><span style='font-size: 0.85em; color:"
+              f" #666;'>{data_hora_str} (Encerrado)</span></div>",
               unsafe_allow_html=True,
           )
         with col_img_v:
           st.image(obter_escudo(visitante), width=28)
         st.markdown("---")
+    elif num_rodada == 28:
+      st.success("Resultados oficiais da **Rodada 28** encerrada:")
+      for mandante, visitante, data_hora_str in confrontos:
+        gm, gv = PLACARES_RODADA_28_REAIS.get((mandante, visitante), (0, 0))
+        col_img_m, col_txt, col_img_v = st.columns([0.6, 3.8, 0.6])
+        with col_img_m:
+          st.image(obter_escudo(mandante), width=28)
+        with col_txt:
+          st.markdown(
+              f"<div style='text-align: center;'><b>{mandante}</b>"
+              f" &nbsp;&nbsp;<span style='font-size: 1.1em; color:"
+              f" #d9534f;'><b>{gm} x {gv}</b></span>&nbsp;&nbsp;"
+              f" <b>{visitante}</b><br><span style='font-size: 0.85em; color:"
+              f" #666;'>{data_hora_str} (Encerrado)</span></div>",
+              unsafe_allow_html=True,
+          )
+        with col_img_v:
+          st.image(obter_escudo(visitante), width=28)
+        st.markdown("---")
+    else:
+      placar_live_atualizado = buscar_jogos_espn()
+      if placar_live_atualizado:
+        st.caption("🔄 Atualizado automaticamente em tempo real (API ESPN)")
+        for chave, info in placar_live_atualizado.items():
+          times = chave.split("X")
+          if len(times) == 2:
+            m_nome, v_nome = times[0], times[1]
+            col_img_m, col_txt, col_img_v = st.columns([0.6, 3.8, 0.6])
+            with col_img_m:
+              st.image(obter_escudo(m_nome), width=28)
+            with col_txt:
+              st.markdown(
+                  f"<div style='text-align: center;'><b>{m_nome}</b>"
+                  f" &nbsp;&nbsp;<span style='font-size: 1.1em; color:"
+                  f" #d9534f;'><b>{info['gm']} x"
+                  f" {info['gv']}</b></span>&nbsp;&nbsp; <b>{v_nome}</b><br><span"
+                  f" style='font-size: 0.85em; color: #666;'>Status:"
+                  f" {info['detail']}</span></div>",
+                  unsafe_allow_html=True,
+              )
+            with col_img_v:
+              st.image(obter_escudo(v_nome), width=28)
+            st.markdown("---")
+      else:
+        st.info(
+            f"Nenhum jogo rolando ao vivo no momento. Exibindo os confrontos"
+            f" programados para a **Rodada {num_rodada}**:"
+        )
+        for mandante, visitante, data_hora_str in confrontos:
+          col_img_m, col_txt, col_img_v = st.columns([0.6, 3.8, 0.6])
+          with col_img_m:
+            st.image(obter_escudo(mandante), width=28)
+          with col_txt:
+            st.markdown(
+                f"<div style='text-align: center;'><b>{mandante} x"
+                f" {visitante}</b><br><span style='font-size: 0.85em; color:"
+                f" #666;'>{data_hora_str}</span></div>",
+                unsafe_allow_html=True,
+            )
+          with col_img_v:
+            st.image(obter_escudo(visitante), width=28)
+          st.markdown("---")
 
 
   renderizar_ao_vivo()
