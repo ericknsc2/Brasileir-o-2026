@@ -146,7 +146,7 @@ def carregar_tabela_oficial():
   dados_tabela = [
       {
           "nome_time": "Flamengo",
-          "pontos": 60,
+          "pontos": 70,
           "jogos": 28,
           "vitorias": 18,
           "empates": 6,
